@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Blitz - Rider Registration</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets-blitz/img/logo/logo.jpg" rel="icon">
+  <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets-blitz/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets-blitz/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets-blitz/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets-blitz/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets-blitz/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <!-- Template Main CSS File -->
+  <link href="assets-blitz/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  
+  
+
+  <!-- Load the latest version -->
+
+<!-- Or load a specific version -->
+
+  
+  <style>
+    /* CSS khusus untuk latar belakang carousel */
+    
+    /* Ganti warna teks pada carousel */
+    
+
+    /* Mengubah tombol navigasi menjadi bulat dan berwarna biru */
+    
+    
+    /* Mengubah warna ikon pada tombol navigasi */
+    
+    
+    /* Mengubah warna titik navigasi aktif */
+    
+    
+    /* Mengubah warna titik navigasi */
+    
+    
+
+.timeline-steps {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap
+}
+
+.timeline-steps .timeline-step {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: 1rem;
+}
+
+@media (min-width:768px) {
+    .timeline-steps .timeline-step:not(:last-child):after {
+        content: "";
+        display: block;
+        border-top: .25rem dotted #3b82f6;
+        width: 3.46rem;
+        position: absolute;
+        left: 7.5rem;
+        top: .3125rem
+    }
+    .timeline-steps .timeline-step:not(:first-child):before {
+        content: "";
+        display: block;
+        border-top: .25rem dotted #3b82f6;
+        width: 3.8125rem;
+        position: absolute;
+        right: 7.5rem;
+        top: .3125rem
+    }
+}
+
+.timeline-steps .timeline-content {
+    width: 10rem;
+    text-align: center
+}
+
+.timeline-steps .timeline-content .inner-circle {
+    border-radius: 1.5rem;
+    height: 1rem;
+    width: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3b82f6
+}
+
+.timeline-steps .timeline-content .inner-circle:before {
+    content: "";
+    background-color: #3b82f6;
+    display: inline-block;
+    height: 3rem;
+    width: 3rem;
+    min-width: 3rem;
+    border-radius: 6.25rem;
+    opacity: .5
+}
+
+
+.timeline-content {
+    position: relative;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #ccc;
+    z-index: -1;
+}
+
+.timeline-step:first-child .timeline-line {
+    display: none;
+}
+
+
+    .image-upload > input
+    {
+        display: none;
+    }
+
+    .image-upload img
+    {
+        width: 80px;
+        cursor: pointer;
+    }
+       
+
+  </style>
+
+  <!-- =======================================================
+  * App Name: Rideblitz
+  * Updated: June 01 2023 with Team IT
+  * Template URL: https://bootstrapmade.com/newbiz-bootstrap-business-template/
+  * Author: Sabar and Team
+  * License: ....
+  ======================================================== -->
+</head>
+
+<body>
+
+    
+    <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top d-flex align-items-center">
+    <div class="container d-flex justify-content-between">
+
+      <div class="logo">
+        <img src="assets-blitz/img/img/blitz_logo_header.png" alt="logo" style="border-radius: 5px; width: 230px; max-height: 100%;">         
+      </div>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a   class="nav-link scrollto active"  href="index.html">Home</a></li>
+          <li class="dropdown"><a  class="nav-link scrollto"  href="#"><span>Our Company</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a  class="nav-link scrollto"  href="company.html">Who We Are</a></li>
+              <li><a  class="nav-link scrollto"  href="vehicle.html">Vehicle</a></li>
+              <li><a  class="nav-link scrollto"  href="rider.html">Rider</a></li>
+              <li><a  class="nav-link scrollto"  href="software.html">Software</a></li>
+            </ul>
+          </li>
+          <li><a class="nav-link scrollto" href="#">Services</a></li>
+          <li><a class="nav-link scrollto " href="#">Our Client</a></li>
+          <li><a class="nav-link scrollto" href="#">Contact</a></li>
+          <li><a class="nav-link scrollto" href="#contact">
+            <button type="button" class="btn btn-outline-info" height="5px;">Login</button></a></li>
+        
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header><!-- #header -->
+        
+    <main id="main">
+        
+<main id="main">
+  <section id="hero" class=""  style="background: url('assets-blitz/img/img/blitz_banner_page01.png');">
+    <div class="container" data-aos="fade-up">
+      <div class="hero-img" data-aos="zoom-out" data-aos-delay="200">
+        <h1 style="margin-left: 410px; margin-top: 200px; position: absolute; color: white;">JOIN OUR <br> RIDER</h1>  
+        <div class="img-hero">
+          <img src="assets-blitz/img/img/blitz-banner-home.png" alt="" width="460px" style=" margin: 80px 300px 0px 250px; height: 400px;"> 
+        </div>
+      </div>
+    </div>
+</section>  <section id="contact">
+    <div class="container-fluid col-lg-8" data-aos="fade-up" style="margin: 0px 20% 30px 10%;">
+      <h3 style="font-weight: bold; color: rgb(76, 75, 75);">Registration Form</h3>
+      <div class="container">  
+        <div class="row">
+            <div class="col">
+              <div class="contentRegister" style="margin: 20px 20px 20px 40px;">
+                <div class="col-lg-12">
+<div class="position-relative m-4" style="margin-bottom: 20px;">
+    <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="90" style="height: 5px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+    </div>
+    <div class="lingkar" style="float: left">
+        <button type="button" class="position-relative top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 3rem; height:3rem;" >Start</button>
+    </div>
+    <div class="lingkar" style="float: left; margin-left: 21%;">
+        <button type="button" class="position-relative top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 3rem; height:3rem;" >25%</button>
+    </div>
+    <div class="lingkar" style="float: left; margin-left: 21%;">
+        <button type="button" class="position-relative top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 3rem; height:3rem;" >50%</button>
+    </div>
+    <div class="lingkar" style="float: left; margin-left: 21%;">
+        <button type="button" class="position-relative top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 3rem; height:3rem;" >75%</button>
+    </div>
+    <div class="lingkar" style="float: left; margin-left: 21%;">
+        <button type="button" class="position-relative top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill" style="width: 3rem; height:3rem;" >end</button>
+    </div>
+</div>
+</div>
+<br>
+        
+
+        
+<div class="register">
+  <h4 style="font-weight: bold; color: rgb(76, 75, 75); margin: 20px 0px 20px 0px;">Sign up below</h4>
+  <p>Complete your personal information according to your KTP</p>
+  <div class="text-bg-secondary p-3">All your information is guaranted confidentialand will not be misused</div>
+</div>                <div class="col-lg-12">
+                    <p style="font-style: italic;">Personal detail</p>
+                    <h4 style="font-weight: bold; color: #020d11;">Term and Condition</h4>
+<p>please read carefully about this NDA to rider who wants to join with Blitz</p>
+<div class="form">
+    <form action="/riderRegistration2" method="post" role="form" enctype="multipart/form-data">
+      <input type="hidden" name="_token" value="bF4UFEQRQ7VmJQWSc3Y3w3YXr5KEwPoKdshAQA7N">
+      <div class="overflow-auto w-100 p-3">
+        <textarea name="" id="" cols="100%" rows="20">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores praesentium cum debitis quae ex similique quasi voluptate architecto quos cumque dolore eius qui quo, excepturi magni minima at fuga voluptates non facere. Dicta facilis corrupti adipisci eos officia. Quaerat soluta corporis illum hic consequuntur quos aut dolore repellat quo, sequi dolorum ad odio deleniti accusamus ratione cum sunt mollitia praesentium non dolor dignissimos repudiandae, esse, amet necessitatibus. Corrupti libero neque facere reprehenderit a perspiciatis blanditiis officia ratione possimus totam corporis repellat quas rerum quidem quae soluta molestias ab perferendis deleniti cumque explicabo distinctio, tempore ipsa. Est, dolore autem totam culpa molestias aliquid, molestiae quaerat eligendi recusandae vero ipsa in assumenda! Dolorum doloribus quaerat, in beatae, facilis voluptatibus doloremque amet pariatur itaque vitae qui laborum atque suscipit incidunt optio, ut at voluptatum consectetur culpa iusto earum assumenda non. Necessitatibus mollitia maxime quos dignissimos ex quas, officia voluptatem amet consectetur aut laboriosam voluptatum corporis maiores, pariatur reiciendis ab ullam porro magnam assumenda! Eveniet ipsum accusamus molestias aperiam excepturi quo, facere dolor provident officiis animi atque illo unde aliquid dicta corrupti illum, blanditiis quis doloremque nisi ex repellat distinctio sint vitae harum! Accusamus facere ad maxime nostrum voluptates doloribus, velit adipisci dicta commodi!
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quam quaerat, natus tempore incidunt mollitia tenetur voluptatem dolore. Explicabo eveniet obcaecati distinctio officia, omnis totam accusamus beatae doloribus quos neque commodi dignissimos, accusantium illo aut? Totam animi dolore dolor ratione, aliquam eos molestias! Vitae laudantium est modi sequi quia! Suscipit mollitia veniam ullam maxime nobis debitis qui adipisci natus, repellat expedita. Aliquid vero laudantium repellendus quos enim doloremque sed sunt doloribus fugit dicta commodi amet, rem voluptate maxime eius, maiores cupiditate pariatur asperiores voluptates distinctio nesciunt in sint? Modi eveniet ab, velit dolorem, molestiae omnis facilis molestias officia recusandae numquam optio. Magni ab sit, sed deserunt aliquam tenetur repellat aperiam perspiciatis nam esse odit commodi dolor fugiat vero omnis reiciendis pariatur quod voluptates. Culpa necessitatibus magnam unde suscipit excepturi eligendi minus quidem sit inventore sequi. Amet ut hic quos, tenetur architecto vitae eius laborum ea a rem ad fugiat autem maiores quasi quis porro accusantium. Laborum quas ea porro adipisci impedit blanditiis minus eaque tenetur, odio provident, corrupti voluptatum qui et cupiditate est dolorem quibusdam numquam magnam veritatis reprehenderit. Reprehenderit iure sunt suscipit saepe corrupti libero. Dignissimos eum ipsa facilis eligendi! Tempore totam saepe aperiam ratione quibusdam, reprehenderit architecto quidem ex consequatur. Eaque enim odit nulla quos hic quisquam laborum quod id beatae maiores. Nam, numquam? Voluptatem, sit laborum quam inventore labore ab tenetur maxime alias eos provident omnis earum adipisci cupiditate unde, debitis officia dolores laboriosam illum. Necessitatibus quaerat animi eius tempora autem sit quasi, ducimus soluta libero perferendis maxime non doloremque quibusdam culpa facilis accusamus doloribus nulla nesciunt! Rerum eius sunt quo voluptate eum quod obcaecati libero deleniti. Aliquam doloremque accusantium corporis id pariatur eos quidem et repudiandae non adipisci maiores facere quibusdam optio porro illum, cumque voluptates ex aspernatur sunt repellat distinctio officiis numquam aut. Ab, a incidunt.
+        </textarea>
+      </div>
+      <div class="form-group"> 
+
+        <input type="hidden" name="name" value="sabar" class="form-control input-drivers" id="name" placeholder="Your Name" required>
+        <input type="hidden" name="email" value="sabar@gmail.com" class="form-control input-drivers" id="email" placeholder="Your Email" required>
+        <input type="hidden" name="mobilephone" value="12345" class="form-control input-drivers" id="mobilephone" placeholder="Your Mobile Phone" maxlength="12" required>
+        <input type="hidden" name="addres" value="bojongkokosan" class="form-control input-drivers" id="addres" placeholder="Your addres" required>
+        <input type="hidden" name="province" value="jawabarat" class="form-control input-drivers" id="province" placeholder="Your province" required>
+        <input type="hidden" name="city" value="sukabumi" class="form-control input-drivers" id="city" placeholder="Your city" required>
+        <input type="hidden" name="district" value="parungkuda" class="form-control input-drivers" id="district" placeholder="Your district" required>
+        <input type="hidden" name="region" value="bojongkokosan" class="form-control input-drivers" id="region" placeholder="Your region" required>
+        <input type="hidden" name="accountname" value="sabar" class="form-control input-drivers" id="accountname" placeholder="Your Account Name" required>
+        <input type="hidden" name="bankname" value="bri" class="form-control input-drivers" id="bankname" placeholder="Your bank name" required>
+        <input type="hidden" name="accountnumber" value="99987778878" class="form-control input-drivers" id="accountnumber" placeholder="Your Account Number" required>
+
+        <input type="checkbox" name="term" class="form  input-drivers" id="check" value="Setuju" required>Please read carefully our agreement, I agree to this NDA rider
+      </div>
+
+        
+        <div class="form-group"> 
+          <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+          <a href="#"  class="btn btn-primary">Submit</a>
+        </div>
+    </form>
+</div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      <div class="back" style="margin-top: 30px; margin-left: 20px;">
+        <a href="rider.html" class="btn btn-outline-primary">Back</a>
+      </div>
+    </div>   
+  </section>
+</main>
+
+    </main><!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+<footer id="footer">
+  <div class="footer-top">
+    <div class="container">
+      <div class="row">
+
+        <div class="col-lg-4 col-md-6 footer-info">
+          
+          <p style="font-family: Bahnschrift; font-size: 30px; margin-bottom: 30px;"><img src="assets-blitz/img/img/blitz_logo_footer.png" width="150px;" alt="logo" style="border-radius: 20px;"></p>
+          <p style="text-align: justify; font-size: 16px;">Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus. Scelerisque felis imperdiet proin fermentum leo. Amet volutpat consequat mauris nunc congue.</p>
+        </div>
+
+        <div class="col-lg-2 col-md-6 footer-links">
+          <h4 style="font-size: 16px;">Useful Links</h4>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About us</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Terms of service</a></li>
+            <li><a href="#">Privacy policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-6 footer-contact">
+          <h4>Contact Us</h4>
+          <p>
+            A108 Adam Street <br>
+            New York, NY 535022<br>
+            United States <br>
+            <strong>Phone:</strong> +1 5589 55488 55<br>
+            <strong>Email:</strong> info@example.com<br>
+          </p>
+
+          <div class="social-links">
+            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6 footer-newsletter">
+          <h4>Our Newsletter</h4>
+          <p style="text-align: justify;">Tamen quem nulla quae legam multos aute sint culpa legam noster magna veniam enim veniam illum dolore legam minim quorum culpa amet magna export quem marada parida nodela caramase seza.</p>
+          <form action="" method="post">
+            <input type="email" name="email"><input type="submit" value="Subscribe">
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="copyright">
+      &copy; Copyright <strong>Pt Blitz Electric Mobility</strong>. <br> All Rights Reserved
+    </div>
+    <div class="credits">
+      <!--
+      All the links in the footer should remain intact.
+      You can delete the links only if you purchased the pro version.
+      Licensing information: https://bootstrapmade.com/license/
+      Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=NewBiz
+    -->
+      <!-- Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> -->
+    </div>
+  </div>
+</footer><!-- End Footer -->
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+    <!-- Vendor JS Files -->
+<script src="assets-blitz/vendor/purecounter/purecounter_vanilla.js"></script>
+<script src="assets-blitz/vendor/aos/aos.js"></script>
+<script src="assets-blitz/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets-blitz/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="assets-blitz/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+<script src="assets-blitz/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="assets-blitz/vendor/php-email-form/validate.js"></script>
+
+<!-- Template Main JS File -->
+<script src="assets-blitz/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+</body>
+
+</html>
