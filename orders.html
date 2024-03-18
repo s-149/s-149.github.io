@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orders</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+</head>
+<body>
+  <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
+    <div class="container-sm">
+      <div class="row align-items-start">
+        <div class="col">
+          <div class="card">
+            <div class="card-body" style="height: 600px; overflow-y: auto">
+              <h1>Data Order</h1>
+              <div id="areaDisplay"></div>
+              <h5>Silahkan lengkapi data dibawah</h5>
+              
+              <form
+                id="formData"
+                name="formData"
+                action=""
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <br />
+                <label for="email">Email</label>
+                <div class="form">
+                  <input
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    type="email"
+                    placeholder="Masukkan Email Anda"
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Masukkan alamat email yang valid"
+                    required
+                    autofocus
+                  />
+                </div>
+                <br />
+                <!-- Form input search -->
+              <input type="text" id="searchInput" placeholder="Cari berdasarkan nomor order" class="form-control mb-3">
+              <!-- Checkbox Check All -->
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="checkAll">
+                <label class="form-check-label" for="checkAll">
+                  Check All
+                </label>
+              </div>
+
+                <div id="dataContainer">
+                  <!-- Form akan dimasukkan di sini -->
+                </div>
+                <br />
+
+                <div class="form-group">
+                  <button
+                    id="submitButton"
+                    class="btn btn-primary"
+                    type="button"
+                  >
+                    Kirim
+                  </button>
+                  Atau
+                  <a href="index.html" class="btn btn-primary">Kembali</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Fungsi untuk mendapatkan nilai dari URL query parameter
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Mendapatkan nilai area dari URL query parameter
+    const areaValue = getQueryParam('area');
+
+    // Menampilkan nilai area di halaman
+    const areaDisplay = document.getElementById('areaDisplay');
+    // areaDisplay.innerHTML = `<p>Anda memilih area: ${areaValue}</p>`;
+
+    // JavaScript code for fetching and displaying data
+    const baseUrl = () => "https://apiweb.mile.app/api/v3/";
+    const token = () =>
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2NWNiNGUzMTIyMDM1MzQ3YTUwZGVkZTIiLCJqdGkiOiIxNDIyYWYxNzRiNDA5NTNhM2YyYzQxZDJjZDhlODIxOGU2ZDg3MzQzYmJhNTk5N2U1OGZjMmJlODNlZjYyYjMyZDMwN2RmMjEyYjA3NTY5NCIsImlhdCI6MTcwODM2NDUwMywibmJmIjoxNzA4MzY0NTAzLCJleHAiOjQ4NjQwMzgxMDMsInN1YiI6IjY0Yzk0NDAyOTM0NGI4NTRiYjA2NTA3NSIsInNjb3BlcyI6W119.nHSGyoQ3jfYRDNSF0BOUN-ft9vWL50zgYiPJT2UBAkAyYZ4x_dQryZunxYn1je_JDQKMk3CTh2JYatvGIsxIFj6khs45CkcCcJuMd3bJXzKYHp7HjJ2sPkbLNXZBsYMszt6TcWNIi2-_t3EFhgrvPQm-5ulF29_IdO393Iyv0x9KMPAHPawLthtuD6GIV7X6tLcDmgZTT_AxkDOl241h2Dv8xiwDIwQgiKzgjI1hv_o2HeBE7h-Hj_LkUh2emj1F6WcsHxxoSLllWdiNpcQjWOwNyuh-L1FQpGYbf_4NSUg5b7AfEegx-NUYhbtNCFpeh8IKgQMJVomhG1sWyE5VhsfSTeYySU3IIf5m90aJFJRIW75A6R0HNF_XZQaX5XLqTyluUKHA6fTuEp8IWsLiKLV3EdNs3JZl6POlcXUuEGdzR10iCRINoSubVO7YRQLroT_GHWsJ-OrM9T2NglLPe3zzEbskaVpWfOJ59ggf_No71UkqVb4Xkx5t9LY486wwz8BGKfEpqsvaEFdi-r_yuFbe_vK0hh4c1ZWZgBBP-Z_M4aw_6i8499cd21VjqttacloEun5GyHPAzxi4Ih_nEpjRGGnnO2SwFMm5Jx8JE54U1jUxuNb4Ik6HNJPY8o8SrgsOSjK6SwF_8ux5bzYm167zutB7CPH8cDdF-oJWTY0";
+
+    const getTasks = () => {
+      const endpoint = () =>
+        `tasks?hubId=${areaValue}&status=UNASSIGNED&limit=100`;
+      const url = baseUrl() + endpoint();
+      const options = {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token()}`,
+        },
+        muteHttpExceptions: true,
+      };
+
+      try {
+        fetch(url, options)
+          .then((response) => response.json())
+          .then((parsedData) => {
+            if (
+              parsedData &&
+              parsedData.tasks &&
+              parsedData.tasks.data.length > 0
+            ) {
+              let html = ""; // Variabel html didefinisikan di sini
+
+              // Generate list of order numbers
+              parsedData.tasks.data.forEach((item) => {
+                html += `<div class="form-check">
+                      <input class="form-check-input" name="id" type="checkbox" value="${item._id}" id="flexCheckDefault${item._id}">
+                      <label class="form-check-label" for="flexCheckDefault${item._id}">
+                        ${item.orderNumber}
+                      </label>
+                    </div>`;
+              });
+
+              // Place the generated HTML inside the dataContainer div
+              document.getElementById("dataContainer").innerHTML = html;
+
+              // Log the response
+              console.log(
+                "Order numbers have been successfully fetched and displayed."
+              );
+              console.log(parsedData);
+            } else {
+              console.log("No data received or data is empty.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error occurred while fetching data:", error);
+          });
+      } catch (error) {
+        console.error("Exception:", error);
+      }
+    };
+
+    let bulkAssignee = async () => {
+      const form = document.getElementById("formData");
+      const formData = new FormData(form);
+      const selectedIds = [];
+      const email = formData.get("email");
+
+      // Validasi input email dan minimal satu ID terpilih
+      if (!email.trim()) {
+        alert("Silakan isi email Anda!");
+        return;
+      }
+
+      // Validasi format email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert("Format email tidak valid!");
+        return;
+      }
+
+      let idChecked = false;
+      for (const pair of formData.entries()) {
+        if (pair[0] === "id") {
+          selectedIds.push(pair[1]);
+          idChecked = true;
+        }
+      }
+
+      if (!idChecked) {
+        alert("Minimal pilih satu tugas!");
+        return;
+      }
+
+      const postData = {
+        tasks: selectedIds.map((id) => ({
+          _id: id,
+          assignee: [email],
+        })),
+      };
+
+      console.log("Post data:", postData);
+
+      const url = "https://apiweb.mile.app/api/v3/tasks/bulk/assign";
+
+      try {
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token()}`,
+          },
+          body: JSON.stringify(postData),
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log(responseData);
+          if (responseData.success > 0) {
+            alert("Success, silahkan cek kembali di aplikasi anda");
+            window.location = "orders.html";
+          } else {
+            alert("Gagal, Periksa kembali email anda");
+          }
+        } else {
+          const errorMessage = await response.text();
+          alert(`Gagal: ${errorMessage}`);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error.message);
+        alert("Gagal, Periksa kembali email anda");
+        window.location = "orders.html";
+      }
+    };
+
+    // Panggil fungsi untuk mengambil dan menampilkan data
+    getTasks();
+
+    // Tambahkan event listener untuk tombol Kirim
+    document.getElementById("submitButton").addEventListener("click", bulkAssignee);
+
+    // Tambahkan event listener untuk checkbox Check All
+    document.getElementById("checkAll").addEventListener("change", function() {
+      const checkboxes = document.querySelectorAll('.form-check-input[name="id"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+    });
+
+    // Fungsi untuk menangani input pencarian
+    document.getElementById("searchInput").addEventListener("input", function() {
+      const searchValue = this.value.toLowerCase();
+      const checkboxes = document.querySelectorAll('.form-check-label');
+      checkboxes.forEach(checkbox => {
+        const orderNumber = checkbox.textContent.toLowerCase();
+        const checkboxParent = checkbox.parentNode;
+        if (orderNumber.includes(searchValue)) {
+          checkboxParent.style.display = "block";
+        } else {
+          checkboxParent.style.display = "none";
+        }
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
