@@ -31,79 +31,8 @@
           <div class="col">
             <div class="card">
               <div class="card-body" style="height: 600px; overflow-y: auto">
-                <h1>Selamat Datang</h1>
-                <h3>Silahkan pilih area anda</h3>
-                <br>
-                <form id="formData" name="formArea" id="formArea" action="" method="POST" enctype="multipart/form-data">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="645b1fafff068f15c637074" id="areaMalang">
-                    <label class="form-check-label" for="areaMalang">
-                      MERAPI MALANG
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="645b21958ea1f4a1c40aa6a8" id="areaSemarang">
-                    <label class="form-check-label" for="areaSemarang">
-                      MERAPI SEMARANG
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="645b2024b9dce242d55697b4" id="areaSidoarjo">
-                    <label class="form-check-label" for="areaSidoarjo">
-                      MERAPI SIDOARJO
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="
-                    645b20ef29919e4dd54ea8d3" id="areaSurabaya">
-                    <label class="form-check-label" for="areaSurabaya">
-                      MERAPI SURABAYA
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="645b2155e355136c1234ca45" id="areaSolo">
-                    <label class="form-check-label" for="areaSolo">
-                      MERAPI SOLO
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="645b21d67f68707bbc0ce0e2" id="areaYogyakarta">
-                    <label class="form-check-label" for="areaYogyakarta">
-                      MERAPI YOGYAKARTA
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="6501680be3f54d1fe501875d" id="areaAllofresh">
-                    <label class="form-check-label" for="areaAllofresh">
-                      ALLOFRESH
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="650175671ac1a2bc24030dfd" id="areaZalora">
-                    <label class="form-check-label" for="areaZalora">
-                      ZALORA
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="65100b1572b3685d24066bbc" id="areaBlCinere">
-                    <label class="form-check-label" for="areaBlCinere">
-                      BUKALAPAK CINERE
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="65100c77e114a9cdd706ac96" id="areaBlTangerang">
-                    <label class="form-check-label" for="areaBlTangerang">
-                      BUKALAPAK TANGERANG
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="area" value="64bf2201d8f71ace3407e945" id="areaBlKosambi">
-                    <label class="form-check-label" for="areaBlKosambi">
-                      BUKALAPAK KOSAMBI
-                    </label>
-                  </div><br>
-                  <button type="submit" class="btn btn-primary">Lanjut</button>
-                </form>
+                <h1>Ups....</h1>
+                <h1>Tidak ada data disini...</h1>
               </div>
             </div>
           </div>
@@ -115,27 +44,5 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        // Tangkap elemen formulir
-        const form = document.getElementById("formData");
-
-        // Tambahkan event listener untuk event submit formulir
-        form.addEventListener("submit", function(event) {
-          event.preventDefault(); // Hindari pengiriman formulir secara default
-
-          // Tangkap nilai input dari formulir
-          const selectedArea = document.querySelector('input[name="area"]:checked');
-
-          // Kirim data ke halaman orders.html menggunakan URL query parameter
-          if (selectedArea) {
-            const areaValue = selectedArea.value;
-            window.location.href = `orders.html?area=${areaValue}`;
-          } else {
-            alert("Silakan pilih area Anda terlebih dahulu.");
-          }
-        });
-      });
-    </script>
   </body>
 </html>
