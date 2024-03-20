@@ -37,7 +37,6 @@ const baseUrl = () => 'https://apiweb.mile.app/api/v3/'
 const token = () =>
   'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2NWNiNGUzMTIyMDM1MzQ3YTUwZGVkZTIiLCJqdGkiOiIxNDIyYWYxNzRiNDA5NTNhM2YyYzQxZDJjZDhlODIxOGU2ZDg3MzQzYmJhNTk5N2U1OGZjMmJlODNlZjYyYjMyZDMwN2RmMjEyYjA3NTY5NCIsImlhdCI6MTcwODM2NDUwMywibmJmIjoxNzA4MzY0NTAzLCJleHAiOjQ4NjQwMzgxMDMsInN1YiI6IjY0Yzk0NDAyOTM0NGI4NTRiYjA2NTA3NSIsInNjb3BlcyI6W119.nHSGyoQ3jfYRDNSF0BOUN-ft9vWL50zgYiPJT2UBAkAyYZ4x_dQryZunxYn1je_JDQKMk3CTh2JYatvGIsxIFj6khs45CkcCcJuMd3bJXzKYHp7HjJ2sPkbLNXZBsYMszt6TcWNIi2-_t3EFhgrvPQm-5ulF29_IdO393Iyv0x9KMPAHPawLthtuD6GIV7X6tLcDmgZTT_AxkDOl241h2Dv8xiwDIwQgiKzgjI1hv_o2HeBE7h-Hj_LkUh2emj1F6WcsHxxoSLllWdiNpcQjWOwNyuh-L1FQpGYbf_4NSUg5b7AfEegx-NUYhbtNCFpeh8IKgQMJVomhG1sWyE5VhsfSTeYySU3IIf5m90aJFJRIW75A6R0HNF_XZQaX5XLqTyluUKHA6fTuEp8IWsLiKLV3EdNs3JZl6POlcXUuEGdzR10iCRINoSubVO7YRQLroT_GHWsJ-OrM9T2NglLPe3zzEbskaVpWfOJ59ggf_No71UkqVb4Xkx5t9LY486wwz8BGKfEpqsvaEFdi-r_yuFbe_vK0hh4c1ZWZgBBP-Z_M4aw_6i8499cd21VjqttacloEun5GyHPAzxi4Ih_nEpjRGGnnO2SwFMm5Jx8JE54U1jUxuNb4Ik6HNJPY8o8SrgsOSjK6SwF_8ux5bzYm167zutB7CPH8cDdF-oJWTY0'
 
-//memanggil Hub
 const getHub = () => {
   const endpoint = () => `hubs`
   const url = baseUrl() + endpoint()
@@ -55,17 +54,25 @@ const getHub = () => {
       .then(parsedData => {
         if (parsedData && parsedData.data && parsedData.data.length > 0) {
           let html = ''
+          const searchInput = document
+            .getElementById('searchInput')
+            .value.toLowerCase() // Ambil nilai input pencarian dan ubah menjadi lowercase
+
+          // Filter data berdasarkan nilai pencarian
+          const filteredData = parsedData.data.filter(item =>
+            item.name.toLowerCase().includes(searchInput)
+          )
 
           // Generate list of order numbers
-          parsedData.data.forEach(item => {
+          filteredData.forEach(item => {
             html += `
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="area" value="${item._id}" id="area${item.name}">
-            <label class="form-check-label" for="area${item.name}">
-              ${item.name}
-            </label>
-          </div>
-        `
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="area" value="${item._id}" id="area${item.name}">
+                  <label class="form-check-label" for="area${item.name}">
+                    ${item.name}
+                  </label>
+                </div>
+              `
           })
 
           // Place the generated HTML inside the dataHub div
@@ -87,9 +94,14 @@ const getHub = () => {
     console.error('Exception:', error)
   }
 }
+
 // Panggil fungsi untuk mengambil dan menampilkan data ongoing
 getHub()
 
+// Tambahkan event listener untuk memanggil fungsi getHub setiap kali input pencarian berubah
+document.getElementById('searchInput').addEventListener('input', getHub)
+
+// get tasks
 const getTasks = () => {
   const endpoint = () => `tasks?hubId=${areaValue}&status=UNASSIGNED&limit=100`
   const url = baseUrl() + endpoint()
