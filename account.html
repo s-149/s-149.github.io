@@ -112,10 +112,7 @@
           console.error("Exception:", error);
         }
       };
-
-      // Panggil fungsi untuk mengambil dan menampilkan data ongoing
-      // getHub('645b1fafff068f15c6370742')
-
+      
       const getUser = (email) => {
         const endpoint = () => `user/email/` + email;
         const url = baseUrl() + endpoint();
@@ -167,15 +164,7 @@
         const email = document.getElementById("emailUser").value;
         getUser(email); // Call the getUser function with the email value
       };
-
-      //   let email = document.formData.emailUser.value;
-      //   console.log('hello');
-
-      //   // Panggil fungsi untuk mengambil dan menampilkan data ongoing
-      //   getUser(email);
-
-      // Tambahkan event listener untuk memanggil fungsi getUser setiap kali input pencarian berubah
-      //   document.getElementById("searchInput").addEventListener("input", getUser);
+      
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
