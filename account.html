@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account Check</title>
+    <meta content="" name="description" />
+    <meta content="" name="keywords" />
+
+    <!-- Favicons -->
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div
+      class="d-flex justify-content-center align-items-center"
+      style="height: 100vh"
+    >
+      <div class="container-sm">
+        <div class="row align-items-start">
+          <div class="col">
+            <div class="card">
+              <div class="card-body" style="height: 600px; overflow-y: auto">
+                <h1>Account Check</h1>
+                <!-- <h3>Silahkan pilih area projek anda</h3> -->
+                <br />
+                <form
+                  name="formData"
+                  id="formData"
+                  action=""
+                  method="POST"
+                  enctype="multipart/form-data"
+                  onsubmit="submitForm(event)"
+                >
+                  <div class="form-group col-lg-4">
+                    <input
+                      type="email"
+                      name="emailUser"
+                      id="emailUser"
+                      placeholder="Email User..."
+                      class="form-control"
+                      autofocus
+                    />
+                  </div>
+                  <br />
+                  <button type="submit" class="btn btn-primary">Submit</button
+                  ><br />
+                </form>
+                <br />
+                <div id="dataUser"></div>
+                <div id="dataHub"></div>
+                <br />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <script src="material.js"></script> -->
+    <script>
+      // JavaScript code for fetching and displaying data
+      const baseUrl = () => "https://apiweb.mile.app/api/v3/";
+      const token = () =>
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2NWNiNGUzMTIyMDM1MzQ3YTUwZGVkZTIiLCJqdGkiOiIxNDIyYWYxNzRiNDA5NTNhM2YyYzQxZDJjZDhlODIxOGU2ZDg3MzQzYmJhNTk5N2U1OGZjMmJlODNlZjYyYjMyZDMwN2RmMjEyYjA3NTY5NCIsImlhdCI6MTcwODM2NDUwMywibmJmIjoxNzA4MzY0NTAzLCJleHAiOjQ4NjQwMzgxMDMsInN1YiI6IjY0Yzk0NDAyOTM0NGI4NTRiYjA2NTA3NSIsInNjb3BlcyI6W119.nHSGyoQ3jfYRDNSF0BOUN-ft9vWL50zgYiPJT2UBAkAyYZ4x_dQryZunxYn1je_JDQKMk3CTh2JYatvGIsxIFj6khs45CkcCcJuMd3bJXzKYHp7HjJ2sPkbLNXZBsYMszt6TcWNIi2-_t3EFhgrvPQm-5ulF29_IdO393Iyv0x9KMPAHPawLthtuD6GIV7X6tLcDmgZTT_AxkDOl241h2Dv8xiwDIwQgiKzgjI1hv_o2HeBE7h-Hj_LkUh2emj1F6WcsHxxoSLllWdiNpcQjWOwNyuh-L1FQpGYbf_4NSUg5b7AfEegx-NUYhbtNCFpeh8IKgQMJVomhG1sWyE5VhsfSTeYySU3IIf5m90aJFJRIW75A6R0HNF_XZQaX5XLqTyluUKHA6fTuEp8IWsLiKLV3EdNs3JZl6POlcXUuEGdzR10iCRINoSubVO7YRQLroT_GHWsJ-OrM9T2NglLPe3zzEbskaVpWfOJ59ggf_No71UkqVb4Xkx5t9LY486wwz8BGKfEpqsvaEFdi-r_yuFbe_vK0hh4c1ZWZgBBP-Z_M4aw_6i8499cd21VjqttacloEun5GyHPAzxi4Ih_nEpjRGGnnO2SwFMm5Jx8JE54U1jUxuNb4Ik6HNJPY8o8SrgsOSjK6SwF_8ux5bzYm167zutB7CPH8cDdF-oJWTY0";
+
+      const getHub = (hubId) => {
+        const endpoint = () => `hub/` + hubId;
+        const url = baseUrl() + endpoint();
+        const options = {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token()}`,
+          },
+          muteHttpExceptions: true,
+        };
+
+        try {
+          fetch(url, options)
+            .then((response) => response.json())
+            .then((parsedData) => {
+              if (parsedData.status === true) {
+                let html = "";
+                html += `
+              <p>Hub : ${parsedData.data.name}</p>
+              `;
+
+                // Place the generated HTML inside the dataUser div
+                document.getElementById("dataHub").innerHTML = html;
+                // console.log(parsedData);
+              } else {
+                console.log("No data received or data is empty.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error occurred while fetching data:", error);
+            });
+        } catch (error) {
+          console.error("Exception:", error);
+        }
+      };
+
+      // Panggil fungsi untuk mengambil dan menampilkan data ongoing
+      // getHub('645b1fafff068f15c6370742')
+
+      const getUser = (email) => {
+        const endpoint = () => `user/email/` + email;
+        const url = baseUrl() + endpoint();
+        const options = {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token()}`,
+          },
+          muteHttpExceptions: true,
+        };
+
+        try {
+          fetch(url, options)
+            .then((response) => response.json())
+            .then((parsedData) => {
+              if (parsedData.status === true) {
+                getHub(parsedData.data.hubId[0]);
+                let html = "";
+                html += `
+                    <h3>Result :</h3>
+                    <p>Nama : ${parsedData.data.name}</p>
+                    <p>Email : ${parsedData.data.email}</p>
+                    <p>Hub Id : ${parsedData.data.hubId[0]}</p>
+              `;
+
+                // Place the generated HTML inside the dataUser div
+                document.getElementById("dataUser").innerHTML = html;
+              } else {
+                let html = "";
+                html += `
+              <p>Data tidak ditemukan.</p>
+              `;
+
+                // Place the generated HTML inside the dataUser div
+                document.getElementById("dataUser").innerHTML = html;
+              }
+            })
+            .catch((error) => {
+              console.error("Error occurred while fetching data:", error);
+              //   console.log(parsedData)
+            });
+        } catch (error) {
+          console.error("Exception:", error);
+        }
+      };
+
+      const submitForm = (event) => {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
+        const email = document.getElementById("emailUser").value;
+        getUser(email); // Call the getUser function with the email value
+      };
+
+      //   let email = document.formData.emailUser.value;
+      //   console.log('hello');
+
+      //   // Panggil fungsi untuk mengambil dan menampilkan data ongoing
+      //   getUser(email);
+
+      // Tambahkan event listener untuk memanggil fungsi getUser setiap kali input pencarian berubah
+      //   document.getElementById("searchInput").addEventListener("input", getUser);
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
