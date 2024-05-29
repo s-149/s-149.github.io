@@ -6,18 +6,26 @@
     <title>Absensi</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
-
     <!-- Favicons -->
     <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
     <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
-
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
   </head>
   <body>
-    <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
+    <div
+      class="d-flex justify-content-center align-items-center"
+      style="height: 100vh"
+    >
       <div class="container-sm">
         <div class="row align-items-start">
           <div class="col">
@@ -26,26 +34,26 @@
                 <h1>Absensi</h1>
                 <p id="status">Mengecek lokasi Anda...</p>
                 <p id="location"></p>
-                <button class="btn btn-success" id="absenButton" disabled onclick="showForm()">Isi Absensi</button>
-                <form id="absenForm" style="display: none" onsubmit="submitForm(event)">
-                  <div class="mb-3">
-                    <label for="nama" class="form-label">Nama:</label>
-                    <input type="text" id="nama" name="nama" class="form-control" required />
-                  </div>
-                  <div class="mb-3">
-                    <label for="kehadiran" class="form-label">Kehadiran:</label>
-                    <select class="form-select" aria-label="Default select example" id="kehadiran" name="kehadiran" required>
-                      <option value="hadir">Hadir</option>
-                      <option value="tidak_hadir">Tidak Hadir</option>
-                    </select>
-                  </div>
-                  <div class="mb-3">
-                    <label for="keterangan" class="form-label">Keterangan:</label>
-                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" required></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <button class="btn btn-primary" type="submit">SUBMIT</button>
-                  </div>
+                
+                <form id="form">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama:</label>
+                        <input type="text" id="nama" name="nama" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="kehadiran" class="form-label">Kehadiran:</label>
+                        <select class="form-select" aria-label="Default select example" id="kehadiran" name="kehadiran" required>
+                            <option value="hadir">Hadir</option>
+                            <option value="tidak_hadir">Tidak Hadir</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="keterangan" class="form-label">Keterangan:</label>
+                        <textarea class="form-control" id="keterangan" name="keterangan" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary" type="submit" id="absenButton" disabled>SUBMIT</button>
+                    </div>
                 </form>
               </div>
             </div>
@@ -54,94 +62,79 @@
       </div>
     </div>
     <script>
-      const targetLatitude = -6.2751203; // Ganti dengan latitude target
-      const targetLongitude = 106.7978354; // Ganti dengan longitude target
-      const maxDistance = 0.0010; // Maksimum jarak yang diizinkan dalam kilometer (1 meter)
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbzpPq3ez9PVfgtFaIUHCK4kAlYRpueordIiGGNz8niT7ok4_XnAnwry0QCiVlAUfvgr/exec'; // Ganti dengan URL Web App Anda
+        const targetLatitude = -6.2690009; // Ganti dengan latitude target
+        const targetLongitude = 106.8060503; // Ganti dengan longitude target
+        const maxDistance = 0.0010; // Maksimum jarak yang diizinkan dalam kilometer (1 meter)
+      
+        const form = document.querySelector("#form")
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwP3KeCJdFSIpSLKnhfAGqJsfa_edePBfFlgddzAQLnY80gdVy1zETrZrF2Ne7Q9R2O/exec'
+      
 
-      function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radius bumi dalam kilometer
-        const dLat = ((lat2 - lat1) * Math.PI) / 180;
-        const dLon = ((lon2 - lon1) * Math.PI) / 180;
-        const a = 0.5 - Math.cos(dLat) / 2 + (Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * (1 - Math.cos(dLon))) / 2;
-        return R * 2 * Math.asin(Math.sqrt(a));
-      }
-
-      function showPosition(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        const distance = calculateDistance(latitude,longitude,targetLatitude,targetLongitude);
-        const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
-
-        document.getElementById("status").innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
-        document.getElementById("location").innerText = location;
-
-        if (distance <= maxDistance) {
-          document.getElementById("absenButton").disabled = false;
-          document.getElementById("status").innerText += " Anda berada dalam jangkauan.";
-        } else {
-          document.getElementById("status").innerText += " Anda berada di luar jangkauan.";
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius bumi dalam kilometer
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLon = ((lon2 - lon1) * Math.PI) / 180;
+            const a = 0.5 - Math.cos(dLat) / 2 + (Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * (1 - Math.cos(dLon))) / 2;
+            return R * 2 * Math.asin(Math.sqrt(a));
         }
-      }
 
-      function showError(error) {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            document.getElementById("status").innerText = "Pengguna menolak permintaan Geolocation.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            document.getElementById("status").innerText = "Informasi lokasi tidak tersedia.";
-            break;
-          case error.TIMEOUT:
-            document.getElementById("status").innerText = "Permintaan untuk mendapatkan lokasi pengguna melampaui batas waktu.";
-            break;
-          case error.UNKNOWN_ERROR:
-            document.getElementById("status").innerText = "Terjadi kesalahan yang tidak diketahui.";
-            break;
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const distance = calculateDistance(latitude, longitude, targetLatitude, targetLongitude);
+            const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+            document.getElementById("status").innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
+            document.getElementById("location").innerText = location;
+
+            if (distance <= maxDistance) {
+                document.getElementById("absenButton").disabled = false;
+                document.getElementById("status").innerText += " Anda berada dalam jangkauan.";
+            } else {
+                document.getElementById("status").innerText += " Anda berada di luar jangkauan.";
+            }
         }
-      }
 
-      function getLocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-          document.getElementById("status").innerText = "Geolocation tidak didukung oleh browser ini.";
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById("status").innerText = "Pengguna menolak permintaan Geolocation.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById("status").innerText = "Informasi lokasi tidak tersedia.";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById("status").innerText = "Permintaan untuk mendapatkan lokasi pengguna melampaui batas waktu.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    document.getElementById("status").innerText = "Terjadi kesalahan yang tidak diketahui.";
+                    break;
+            }
         }
-      }
 
-      function showForm() {
-        document.getElementById("absenForm").style.display = "block";
-      }
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById("status").innerText = "Geolocation tidak didukung oleh browser ini.";
+            }
+        }
 
-      function submitForm(event) {
-        event.preventDefault();
-        const nama = document.getElementById('nama').value;
-        const kehadiran = document.getElementById('kehadiran').value;
-        const keterangan = document.getElementById('keterangan').value;
+        // Get the location when the page loads
+        window.onload = getLocation;
 
-        fetch(scriptURL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ nama, kehadiran, keterangan }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Success:', data);
-          alert('Absensi berhasil dikirim!');
-          document.getElementById('absenForm').reset();
-          document.getElementById('absenForm').style.display = 'none';
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          alert('Terjadi kesalahan saat mengirim absensi.');
+        form.addEventListener('submit', e => {
+          e.preventDefault()
+      
+          const responseBody = new FormData(form)
+          const TrendBody = responseBody.getAll("TRENDS").join(" ")
+          responseBody.set('TRENDS', TrendBody)
+          fetch(scriptURL, { method: 'POST', body: responseBody })
+            .then(response => { alert('Success!', response) })
+            .catch(error => alert('Error!', error.message))
         });
-      }
-
-      // Get the location when the page loads
-      window.onload = getLocation;
     </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
