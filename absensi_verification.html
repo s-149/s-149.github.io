@@ -33,7 +33,7 @@
               <div class="card-body" style="height: 600px; overflow-y: auto">
                 <h1>Absensi</h1>
                 <p id="status">Mengecek lokasi Anda...</p>
-                <p id="location"></p>
+                <!-- <p id="location"></p> -->
                 
                 <form id="form">
                     <div class="mb-3">
@@ -62,8 +62,11 @@
       </div>
     </div>
     <script>
+        
         const targetLatitude = -6.2751171; // Ganti dengan latitude target
         const targetLongitude = 106.7978428; // Ganti dengan longitude target
+        // const targetLatitude = -6.2690009; // Ganti dengan latitude target
+        // const targetLongitude = 106.8060503; // Ganti dengan longitude target
         const maxDistance = 0.0010; // Maksimum jarak yang diizinkan dalam kilometer (1 meter)
       
         const form = document.querySelector("#form")
@@ -82,10 +85,11 @@
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
             const distance = calculateDistance(latitude, longitude, targetLatitude, targetLongitude);
-            const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+            const location = `LatLong: ${latitude},${longitude}`;
+            console.log(location)
 
             document.getElementById("status").innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
-            document.getElementById("location").innerText = location;
+            // document.getElementById("location").innerText = location;
 
             if (distance <= maxDistance) {
                 document.getElementById("absenButton").disabled = false;
@@ -98,7 +102,7 @@
         function showError(error) {
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    document.getElementById("status").innerText = "Pengguna menolak permintaan Geolocation.";
+                    document.getElementById("status").innerText = "Hidupkan GPS anda.";
                     break;
                 case error.POSITION_UNAVAILABLE:
                     document.getElementById("status").innerText = "Informasi lokasi tidak tersedia.";
