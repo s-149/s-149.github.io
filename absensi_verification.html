@@ -88,7 +88,8 @@
             const location = `LatLong: ${latitude},${longitude}`;
             console.log(location)
 
-            document.getElementById("status").innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
+            document.getElementById("status").innerText = `Lokasi ditemukan!`;
+            // document.getElementById("status").innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
             // document.getElementById("location").innerText = location;
 
             if (distance <= maxDistance) {
