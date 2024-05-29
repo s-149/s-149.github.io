@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi dengan Geolocation</title>
+</head>
+<body>
+    <h1>Absensi</h1>
+    <p id="status">Mengecek lokasi Anda...</p>
+    <p id="location"></p>
+    <button id="absenButton" disabled>Isi Absensi</button>
+
+    <script>
+        const targetLatitude = -6.2690009;  // Ganti dengan latitude target
+        const targetLongitude = 106.8060503;  // Ganti dengan longitude target
+        const maxDistance = 0.001;  // Maksimum jarak yang diizinkan dalam kilometer (1 meter)
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius bumi dalam kilometer
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                0.5 - Math.cos(dLat)/2 + 
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                (1 - Math.cos(dLon)) / 2;
+            return R * 2 * Math.asin(Math.sqrt(a));
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const distance = calculateDistance(latitude, longitude, targetLatitude, targetLongitude);
+            const location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+            document.getElementById('status').innerText = `Lokasi ditemukan! (Jarak: ${distance.toFixed(4)} km)`;
+            document.getElementById('location').innerText = location;
+
+            if (distance <= maxDistance) {
+                document.getElementById('absenButton').disabled = false;
+                document.getElementById('status').innerText += " Anda berada dalam jangkauan.";
+            } else {
+                document.getElementById('status').innerText += " Anda berada di luar jangkauan.";
+            }
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById('status').innerText = "Pengguna menolak permintaan Geolocation.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById('status').innerText = "Informasi lokasi tidak tersedia.";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById('status').innerText = "Permintaan untuk mendapatkan lokasi pengguna melampaui batas waktu.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    document.getElementById('status').innerText = "Terjadi kesalahan yang tidak diketahui.";
+                    break;
+            }
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById('status').innerText = "Geolocation tidak didukung oleh browser ini.";
+            }
+        }
+
+        // Get the location when the page loads
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
