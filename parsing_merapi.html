@@ -7,7 +7,7 @@
     <meta content="Untuk parsing data" name="description" />
     <meta content="inv,INV,awb,AWB" name="keywords" />
     <meta name="author" content="Mr.S-149" />
-    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/logo/logo.png" rel="icon" />
     <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700"
@@ -27,6 +27,21 @@
       form {
         margin-bottom: 20px;
       }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -34,38 +49,58 @@
       <div class="container-sm">
         <div class="col">
           <h2>Input:</h2>
-          <textarea id="inputData" rows="7" cols="50" placeholder="Masukkan data di sini.....contohnya : INV-230011011700 - KIMIA FARMA PONDASI, AP., INV-230011011747 - PERTAMINA BINA MEDIKA IHC, PT., INV-230011011748 - ISLAM JAKARTA, RS" class="form-control"></textarea><br><br>
-          <button class="btn btn-success" onclick="prosesData()">Proses</button><br><br>
+          <textarea id="inputData" rows="7" cols="50" placeholder="Masukkan data di sini.....contohnya : INV-230011011700 - KIMIA FARMA PONDASI, AP., INV-230011011747 - PERTAMINA BINA MEDIKA IHC, PT., INV-230011011748 - ISLAM JAKARTA, RS" class="form-control"></textarea><br>
+          <button class="btn btn-success" style="float: right;" onclick="prosesData()">Proses</button><br><br>
           <h3>Result: <span id="resultCount"></span></h3>
           <textarea id="outputData" rows="7" cols="50" placeholder="Hasilnya akan muncul di sini.....contohnya : INV-230011011700, INV-230011011747, INV-230011011748" readonly class="form-control"></textarea>
         </div>
       </div>
     </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay">
+      <!-- Proses sedang berjalan, tunggu ya bentar... -->
+       <img src="assets-blitz/img/logo/blitz.png" alt="logo" width="200px">
+    </div>
+
     <script>
+      function showOverlay() {
+        document.getElementById("overlay").style.display = "flex";
+      }
+
+      function hideOverlay() {
+        document.getElementById("overlay").style.display = "none";
+      }
+
       function prosesData() {
-        var data = document.getElementById("inputData").value;
-        var pattern = /INV.{13}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
-        var matches = data.match(pattern); // Mencari semua kemunculan yang sesuai dengan pola
+        showOverlay();
+        setTimeout(function() {
+          var data = document.getElementById("inputData").value;
+          var pattern = /INV.{13}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
+          var matches = data.match(pattern); // Mencari semua kemunculan yang sesuai dengan pola
 
-        var hasil = [];
-        if (matches) {
-          hasil = matches.map(function(match) {
-            return match; // Tambahkan koma nanti, bukan di sini
-          });
+          var hasil = [];
+          if (matches) {
+            hasil = matches.map(function(match) {
+              return match; // Tambahkan koma nanti, bukan di sini
+            });
 
-          // Gabungkan hasil dengan koma di antara, tapi tidak di akhir
-          var hasilString = hasil.join(', ');
+            // Gabungkan hasil dengan koma di antara, tapi tidak di akhir
+            var hasilString = hasil.join(', ');
 
-          // Menampilkan jumlah "INV"
-          var jumlahINV = matches.length;
-          document.getElementById("resultCount").innerText = jumlahINV + " AWB ditemukan";
-        } else {
-          hasilString = "Hemzzzz, kok tidak ditemukan 'INV' ya, silahkan masukkan data merapinya...";
-          document.getElementById("resultCount").innerText = "0 awb ditemukan";
-        }
+            // Menampilkan jumlah "INV"
+            var jumlahINV = matches.length;
+            document.getElementById("resultCount").innerText = jumlahINV + " AWB ditemukan";
+          } else {
+            hasilString = "Hemzzzz, kok tidak ditemukan 'INV' ya, silahkan masukkan data merapinya...";
+            document.getElementById("resultCount").innerText = "0 awb ditemukan";
+          }
 
-        // Menampilkan hasil dalam textarea
-        document.getElementById("outputData").value = hasilString;
+          // Menampilkan hasil dalam textarea
+          document.getElementById("outputData").value = hasilString;
+
+          hideOverlay();
+        }, 1000); // Simulate a delay for processing
       }
     </script>
   </body>
