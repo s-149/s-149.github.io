@@ -76,7 +76,7 @@
         showOverlay();
         setTimeout(function() {
           var data = document.getElementById("inputData").value;
-          var pattern = /INV.{13}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
+          var pattern = /INV-.{12}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
           var matches = data.match(pattern); // Mencari semua kemunculan yang sesuai dengan pola
 
           var hasil = [];
