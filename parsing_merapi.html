@@ -50,7 +50,6 @@
         <div class="col">
           <h2>Input:</h2>
           <textarea id="inputData" rows="7" cols="50" placeholder="Masukkan data di sini.....contohnya : INV-230011011700 - KIMIA FARMA PONDASI, AP., INV-230011011747 - PERTAMINA BINA MEDIKA IHC, PT., INV-230011011748 - ISLAM JAKARTA, RS" class="form-control"></textarea><br>
-          <button class="btn btn-success" style="float: right;" onclick="prosesData()">Proses</button><br><br>
           <h3>Result: <span id="resultCount"></span></h3>
           <textarea id="outputData" rows="7" cols="50" placeholder="Hasilnya akan muncul di sini.....contohnya : INV-230011011700, INV-230011011747, INV-230011011748" readonly class="form-control"></textarea>
         </div>
@@ -59,8 +58,7 @@
 
     <!-- Overlay -->
     <div id="overlay" class="overlay">
-      <!-- Proses sedang berjalan, tunggu ya bentar... -->
-       <img src="assets-blitz/img/logo/blitz.png" alt="logo" width="200px">
+      <img src="assets-blitz/img/logo/blitz.png" alt="logo" width="200px">
     </div>
 
     <script>
@@ -72,11 +70,10 @@
         document.getElementById("overlay").style.display = "none";
       }
 
-      function prosesData() {
+      function prosesData(data) {
         showOverlay();
         setTimeout(function() {
-          var data = document.getElementById("inputData").value;
-          var pattern = /INV-.{12}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
+          var pattern = /INV.{13}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
           var matches = data.match(pattern); // Mencari semua kemunculan yang sesuai dengan pola
 
           var hasil = [];
@@ -102,6 +99,16 @@
           hideOverlay();
         }, 1000); // Simulate a delay for processing
       }
+
+      document.getElementById("inputData").addEventListener('input', function() {
+        var data = this.value;
+        if (data.length > 0) {
+          prosesData(data);
+        } else {
+          document.getElementById("outputData").value = "";
+          document.getElementById("resultCount").innerText = "";
+        }
+      });
     </script>
   </body>
 </html>
