@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Merge and Delimiter Data</title>
+    <title>Merge Data</title>
     <meta content="Untuk parsing data" name="description" />
     <meta content="inv,INV,awb,AWB" name="keywords" />
     <meta name="author" content="Mr.S-149" />
@@ -50,6 +50,21 @@
         border: 1px solid #ccc;
         background-color: #f9f9f9;
       }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -59,7 +74,7 @@
           <h2>Gabungkan Data dengan Pembatas</h2>
           <p>
             Masukkan data di dalam textarea di bawah ini, lalu pilih karakter
-            pembatas. Tekan tombol "Gabungkan Data" untuk melihat hasilnya.
+            pembatas. Data akan digabungkan otomatis saat Anda mengetik.
           </p>
 
           <textarea
@@ -70,10 +85,7 @@
           ><br />
           <label for="delimiter">Pilih Pembatas: </label>
           <input type="text" id="delimiter" value="," maxlength="1" />
-          <button style="float: right" onclick="mergeData()">
-            Gabungkan Data</button
-          ><br /><br />
-
+          
           <div class="output">
             <h3>Data yang Digabungkan:</h3>
             <p id="outputData"></p>
@@ -82,28 +94,56 @@
       </div>
     </div>
 
+    <!-- Overlay -->
+    <div id="overlay" class="overlay">
+      <img src="assets-blitz/img/logo/blitz.png" alt="logo" width="200px">
+    </div>
+
     <script>
-      function mergeData() {
-        // Ambil nilai dari textarea dan input pembatas
-        var inputData = document.getElementById("inputData").value.trim();
-        var delimiter = document.getElementById("delimiter").value;
-
-        // Gunakan koma jika pembatas tidak diisi atau lebih dari satu karakter
-        if (delimiter.length !== 1) {
-          delimiter = ",";
-        }
-
-        // Pisahkan berdasarkan baris baru, dan hapus spasi tambahan
-        var dataList = inputData.split(/\r?\n/).map(function (item) {
-          return item.trim();
-        });
-
-        // Gabungkan data menjadi satu baris dengan pembatas yang dipilih
-        var mergedData = dataList.join(delimiter);
-
-        // Tampilkan hasilnya
-        document.getElementById("outputData").textContent = mergedData;
+      function showOverlay() {
+        document.getElementById("overlay").style.display = "flex";
       }
+
+      function hideOverlay() {
+        document.getElementById("overlay").style.display = "none";
+      }
+
+      function mergeData() {
+        showOverlay();
+        setTimeout(function() {
+          var inputData = document.getElementById("inputData").value.trim();
+          var delimiter = document.getElementById("delimiter").value;
+
+          // Gunakan koma jika pembatas tidak diisi atau lebih dari satu karakter
+          if (delimiter.length !== 1) {
+            delimiter = ",";
+          }
+
+          // Pisahkan berdasarkan baris baru, dan hapus spasi tambahan
+          var dataList = inputData.split(/\r?\n/).map(function (item) {
+            return item.trim();
+          });
+
+          // Gabungkan data menjadi satu baris dengan pembatas yang dipilih
+          var mergedData = dataList.join(delimiter);
+
+          // Tampilkan hasilnya
+          document.getElementById("outputData").textContent = mergedData;
+
+          hideOverlay();
+        }, 1000); // Simulate a delay for processing
+      }
+
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      document.getElementById("inputData").addEventListener('input', debounce(mergeData, 500));
+      document.getElementById("delimiter").addEventListener('input', debounce(mergeData, 500));
     </script>
   </body>
 </html>
