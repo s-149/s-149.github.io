@@ -81,14 +81,14 @@
             id="inputData"
             placeholder="Masukkan data di sini..."
             class="form-control"
-          ></textarea
-          ><br />
+          ></textarea>
+          <br />
           <label for="delimiter">Pilih Pembatas: </label>
           <input type="text" id="delimiter" value="," maxlength="1" />
-          
+
           <div class="output">
-            <h3>Data yang Digabungkan:</h3>
-            <p id="outputData"></p>
+            <h3 id="headerOutput">Data yang Digabungkan:</h3>
+            <textarea id="outputData" class="form-control" readonly></textarea>
           </div>
         </div>
       </div>
@@ -120,15 +120,22 @@
           }
 
           // Pisahkan berdasarkan baris baru, dan hapus spasi tambahan
-          var dataList = inputData.split(/\r?\n/).map(function (item) {
+          var dataList = inputData.split(/\r?\n/).map(function(item) {
             return item.trim();
           });
+
+          // Hitung jumlah AWB
+          var numAWB = dataList.length;
 
           // Gabungkan data menjadi satu baris dengan pembatas yang dipilih
           var mergedData = dataList.join(delimiter);
 
-          // Tampilkan hasilnya
-          document.getElementById("outputData").textContent = mergedData;
+          // Tampilkan hasilnya dengan jumlah AWB di header
+          var headerMessage = `Data yang Digabungkan: ${numAWB} AWB ditemukan`;
+          document.getElementById("headerOutput").textContent = headerMessage;
+
+          // Tampilkan data yang digabungkan dalam textarea
+          document.getElementById("outputData").value = mergedData;
 
           hideOverlay();
         }, 1000); // Simulate a delay for processing
