@@ -28,14 +28,27 @@
             padding: 10px;
             margin-bottom: 20px;
         }
+        .search-container {
+            position: relative;
+        }
+        .clear-icon {
+            position: absolute;
+            right: 10px;
+            top: 70%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #ccc;
+        }
     </style>
 </head>
 <body class="container mt-5">
     <h1>Form Data</h1>
     <form id="dataForm">
-        <div class="mb-3">
+        <div class="mb-3 search-container">
             <label for="searchInput" class="form-label">Search Data:</label>
             <input type="text" id="searchInput" class="form-control" placeholder="Cari data...">
+            <span class="clear-icon" id="clearSearch">&times;</span>
         </div>
 
         <div id="outputSection">
@@ -163,6 +176,13 @@
                     item.style.display = "none";
                 }
             });
+        });
+
+        // Clear search input when "X" icon is clicked
+        document.getElementById("clearSearch").addEventListener("click", function() {
+            const searchInput = document.getElementById("searchInput");
+            searchInput.value = "";
+            searchInput.dispatchEvent(new Event('input'));
         });
     </script>
 </body>
