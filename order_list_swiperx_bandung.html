@@ -8,21 +8,16 @@
     <link href="https://cdn.jsdelivr.net/npm/dragula@3.7.2/dist/dragula.min.css" rel="stylesheet">
     <style>
         .draggable {
-            cursor: move;
             padding: 8px;
             margin: 4px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
-            user-select: none; /* Prevents text selection */
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        #previewSection {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-        #outputSection {
+        #previewSection, #outputSection {
             max-height: 200px;
             overflow-y: auto;
             border: 1px solid #ddd;
@@ -40,6 +35,12 @@
             cursor: pointer;
             font-size: 1.2rem;
             color: #ccc;
+        }
+        .drag-icon {
+            cursor: move;
+            padding: 5px;
+            margin-right: 10px;
+            color: #555;
         }
     </style>
 </head>
@@ -88,32 +89,43 @@
                     if (cells[0]) {
                         const item = document.createElement("div");
                         item.className = "draggable";
-                        item.innerHTML = `<input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]}`;
-                        item.addEventListener("change", function(event) {
-                            if (event.target.classList.contains('draggable-checkbox')) {
-                                if (event.target.checked) {
-                                    addToPreview(event.target.value);
-                                } else {
-                                    removeFromPreview(event.target.value);
-                                }
+                        item.innerHTML = `
+                            <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> 
+                            ${cells[0]}
+                            <span class="drag-icon">&#x2630;</span>`;
+                        
+                        item.querySelector('.draggable-checkbox').addEventListener('change', function(event) {
+                            if (event.target.checked) {
+                                addToPreview(event.target.value);
+                            } else {
+                                removeFromPreview(event.target.value);
                             }
                         });
+
                         outputDiv.appendChild(item);
                     }
                 });
 
-                // Initialize Dragula for drag-and-drop functionality
-                dragula([document.getElementById('outputSection'), document.getElementById('previewSection')])
-                    .on('drop', function (el, target) {
-                        const data = el.textContent.trim();
-                        if (target.id === 'previewSection') {
-                            addToPreview(data);
-                        } else {
-                            removeFromPreview(data);
-                        }
-                    });
+                initializeDragAndDrop();
             })
             .catch(error => console.error("Error fetching data:", error));
+
+        function initializeDragAndDrop() {
+            const drake = dragula([document.getElementById('outputSection'), document.getElementById('previewSection')], {
+                moves: function (el, container, handle) {
+                    return handle.classList.contains('drag-icon');
+                }
+            });
+
+            drake.on('drop', function(el, target, source, sibling) {
+                const data = el.querySelector('.draggable-checkbox').value;
+                if (target.id === 'previewSection') {
+                    addToPreview(data);
+                } else if (source.id === 'previewSection') {
+                    removeFromPreview(data);
+                }
+            });
+        }
 
         function addToPreview(value) {
             if (!selectedData.includes(value)) {
@@ -154,14 +166,11 @@
 
             let whatsappURL;
             if (isMobile) {
-                // If on mobile, use WhatsApp URI scheme
                 whatsappURL = `whatsapp://send?text=${encodedMessage}`;
             } else {
-                // If on desktop, use WhatsApp Web
                 whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
             }
 
-            // Open the WhatsApp URL
             window.open(whatsappURL, '_blank');
         });
 
