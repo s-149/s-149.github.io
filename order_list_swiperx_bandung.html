@@ -15,7 +15,6 @@
             user-select: none;
             display: flex;
             align-items: center;
-            justify-content: space-between;
         }
         #outputSection {
             max-height: 200px;
@@ -39,8 +38,13 @@
         .drag-icon {
             cursor: move;
             padding: 5px;
-            margin-right: 10px;
+            margin-right: 5px;
             color: #555;
+        }
+        .draggable-checkbox {
+            margin: 0;
+            margin-right: 10px;
+            padding: 0;
         }
     </style>
 </head>
@@ -62,7 +66,7 @@
             <input type="text" id="nameInput" name="nameInput" class="form-control" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Kirim Data ke WhatsApp</button>
+        <button type="submit" class="btn btn-primary" style="float: right;">Kirim Data ke WhatsApp</button><br><br>
     </form>
 
     <script>
@@ -82,7 +86,7 @@
                         item.className = "draggable";
                         item.innerHTML = `
                             <span class="drag-icon">&#9776;</span>
-                            <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]}
+                            <input type="checkbox" value="${cells[1]}" class="draggable-checkbox"> ${cells[1]} , ${cells[0]}
                         `;
                         item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
                             if (event.target.checked) {
