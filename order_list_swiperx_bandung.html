@@ -15,6 +15,9 @@
             background-color: #f9f9f9;
             border-radius: 4px;
         }
+        .form-control {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -24,6 +27,10 @@
             <div class="form-group">
                 <label for="nameInput">Nama:</label>
                 <input type="text" id="nameInput" name="nameInput" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="searchInput">Cari Data:</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Cari...">
             </div>
             <h3 class="mt-4">Pilih Data:</h3>
             <div id="output" class="mb-4">
@@ -41,20 +48,30 @@
         fetch(sheetURL)
             .then(response => response.text()) // Baca sebagai teks
             .then(data => {
-                // Data berhasil diambil, sekarang tampilkan di HTML
                 const rows = data.split("\n"); // Pisahkan baris
 
                 const outputDiv = document.getElementById("output");
+                const searchInput = document.getElementById("searchInput");
 
-                // Loop melalui setiap baris data (mulai dari baris kedua untuk menghindari header)
-                rows.slice(1).forEach(row => {
-                    const cells = row.split(","); // Pisahkan sel dengan koma
-                    if (cells[0]) {
-                        outputDiv.innerHTML += `
-                            <div class="draggable">
-                                <input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}
-                            </div>`;
-                    }
+                function renderData(filter = "") {
+                    outputDiv.innerHTML = ""; // Kosongkan div sebelum merender data
+                    rows.slice(1).forEach(row => {
+                        const cells = row.split(","); // Pisahkan sel dengan koma
+                        if (cells[0] && cells[0].toLowerCase().includes(filter.toLowerCase())) {
+                            outputDiv.innerHTML += `
+                                <div class="draggable">
+                                    <input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}
+                                </div>`;
+                        }
+                    });
+                }
+
+                // Render data awal tanpa filter
+                renderData();
+
+                // Event listener untuk pencarian
+                searchInput.addEventListener("input", function() {
+                    renderData(searchInput.value);
                 });
             })
             .catch(error => console.error("Error fetching data:", error));
