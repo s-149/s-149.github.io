@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/dragula@3.7.2/dist/dragula.min.css" rel="stylesheet">
     <style>
         .draggable {
             padding: 8px;
@@ -16,8 +15,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            cursor: move;
         }
-        #previewSection, #outputSection {
+        #outputSection {
             max-height: 200px;
             overflow-y: auto;
             border: 1px solid #ddd;
@@ -57,11 +57,6 @@
             <!-- Data dari spreadsheet akan ditampilkan di sini -->
         </div>
 
-        <h3>Data Terpilih:</h3>
-        <div id="previewSection">
-            <!-- Data yang dipilih oleh user akan dipreview di sini -->
-        </div>
-
         <div class="mb-3">
             <label for="nameInput" class="form-label">Nama:</label>
             <input type="text" id="nameInput" name="nameInput" class="form-control" required>
@@ -70,9 +65,9 @@
         <button type="submit" class="btn btn-primary">Kirim Data ke WhatsApp</button>
     </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/dragula@3.7.2/dist/dragula.min.js"></script>
     <script>
         let selectedData = [];
+        let draggedItem = null;
 
         const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
 
@@ -89,66 +84,49 @@
                     if (cells[0]) {
                         const item = document.createElement("div");
                         item.className = "draggable";
+                        item.draggable = true;
                         item.innerHTML = `
-                            <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> 
-                            ${cells[0]}
-                            <span class="drag-icon">&#x2630;</span>`;
-                        
-                        item.querySelector('.draggable-checkbox').addEventListener('change', function(event) {
-                            if (event.target.checked) {
-                                addToPreview(event.target.value);
-                            } else {
-                                removeFromPreview(event.target.value);
+                            <span class="drag-icon">&#9776;</span>
+                            <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]}
+                        `;
+                        item.querySelector('.drag-icon').addEventListener('mousedown', (e) => {
+                            item.setAttribute('draggable', true);
+                        });
+                        item.addEventListener('mouseup', (e) => {
+                            item.setAttribute('draggable', false);
+                        });
+                        item.addEventListener('dragstart', function() {
+                            draggedItem = item;
+                        });
+                        item.addEventListener('dragover', function(event) {
+                            event.preventDefault();
+                        });
+                        item.addEventListener('drop', function() {
+                            if (draggedItem !== this) {
+                                outputDiv.insertBefore(draggedItem, this);
                             }
                         });
-
+                        item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
+                            if (event.target.checked) {
+                                addToSelectedData(event.target.value);
+                            } else {
+                                removeFromSelectedData(event.target.value);
+                            }
+                        });
                         outputDiv.appendChild(item);
                     }
                 });
-
-                initializeDragAndDrop();
             })
             .catch(error => console.error("Error fetching data:", error));
 
-        function initializeDragAndDrop() {
-            const drake = dragula([document.getElementById('outputSection'), document.getElementById('previewSection')], {
-                moves: function (el, container, handle) {
-                    return handle.classList.contains('drag-icon');
-                }
-            });
-
-            drake.on('drop', function(el, target, source, sibling) {
-                const data = el.querySelector('.draggable-checkbox').value;
-                if (target.id === 'previewSection') {
-                    addToPreview(data);
-                } else if (source.id === 'previewSection') {
-                    removeFromPreview(data);
-                }
-            });
-        }
-
-        function addToPreview(value) {
+        function addToSelectedData(value) {
             if (!selectedData.includes(value)) {
                 selectedData.push(value);
-                updatePreview();
             }
         }
 
-        function removeFromPreview(value) {
+        function removeFromSelectedData(value) {
             selectedData = selectedData.filter(item => item !== value);
-            updatePreview();
-        }
-
-        function updatePreview() {
-            const previewDiv = document.getElementById("previewSection");
-            previewDiv.innerHTML = "";
-
-            selectedData.forEach(data => {
-                const item = document.createElement("div");
-                item.className = "draggable";
-                item.innerHTML = `<span>${data}</span>`;
-                previewDiv.appendChild(item);
-            });
         }
 
         // Kirim data ke WhatsApp
@@ -157,7 +135,7 @@
 
             const name = document.getElementById("nameInput").value;
 
-            // Build message based on the order of selected data in preview
+            // Build message based on the selected data
             const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
             const encodedMessage = encodeURIComponent(message);
 
@@ -166,11 +144,14 @@
 
             let whatsappURL;
             if (isMobile) {
+                // If on mobile, use WhatsApp URI scheme
                 whatsappURL = `whatsapp://send?text=${encodedMessage}`;
             } else {
+                // If on desktop, use WhatsApp Web
                 whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
             }
 
+            // Open the WhatsApp URL
             window.open(whatsappURL, '_blank');
         });
 
