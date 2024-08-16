@@ -14,7 +14,6 @@
             margin: 4px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
-            touch-action: none; /* Tambahan CSS untuk perangkat mobile */
         }
 
         #preview {
@@ -57,7 +56,7 @@
         const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
         const outputDiv = document.getElementById("output");
         const previewDiv = document.getElementById("preview");
-        const selectedData = [];
+        let selectedData = [];
 
         fetch(sheetURL)
             .then(response => response.text())
@@ -89,10 +88,7 @@
             if (checkbox.checked) {
                 selectedData.push(checkbox.value);
             } else {
-                const index = selectedData.indexOf(checkbox.value);
-                if (index > -1) {
-                    selectedData.splice(index, 1);
-                }
+                selectedData = selectedData.filter(item => item !== checkbox.value);
             }
             updatePreview();
         });
@@ -112,8 +108,6 @@
             new Sortable(previewDiv, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
-                fallbackOnBody: true,
-                forceFallback: true,
                 onEnd: function (evt) {
                     const oldIndex = evt.oldIndex;
                     const newIndex = evt.newIndex;
