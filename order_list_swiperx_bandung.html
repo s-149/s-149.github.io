@@ -6,7 +6,6 @@
     <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
     <!-- Tambahkan Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <style>
         .draggable {
             cursor: move;
@@ -56,12 +55,6 @@
                                 <input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}
                             </div>`;
                     }
-                });
-
-                // Aktifkan Sortable.js pada div output
-                new Sortable(outputDiv, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
                 });
             })
             .catch(error => console.error("Error fetching data:", error));
