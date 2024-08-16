@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menampilkan dan Mengirim Data dari Google Sheets</title>
+    <style>
+        .draggable {
+            cursor: move;
+            padding: 8px;
+            margin: 4px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Form Data</h1>
+    <form id="dataForm">
+        <label for="nameInput">Nama:</label>
+        <input type="text" id="nameInput" name="nameInput" required><br><br>
+        <h3>Pilih Data:</h3>
+        <div id="output">
+            <!-- Data dari spreadsheet akan ditampilkan di sini -->
+        </div>
+        <br>
+        <button type="submit">Kirim Data</button>
+    </form>
+
+    <script>
+        // URL Google Sheets sebagai CSV
+        const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
+
+        // Ambil data dari Google Sheets
+        fetch(sheetURL)
+            .then((response) => response.text()) // Baca sebagai teks
+            .then((data) => {
+                // Data berhasil diambil, sekarang tampilkan di HTML
+                const rows = data.split("\n"); // Pisahkan baris
+
+                const outputDiv = document.getElementById("output");
+
+                // Loop melalui setiap baris data (mulai dari baris kedua untuk menghindari header)
+                rows.slice(1).forEach((row) => {
+                    const cells = row.split(","); // Pisahkan sel dengan koma
+                    if (cells[0]) {
+                        outputDiv.innerHTML += `<div class="draggable"><input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}</div>`;
+                    }
+                });
+
+                // Aktifkan fungsi drag-and-drop
+                activateDragAndDrop();
+            })
+            .catch((error) => console.error("Error fetching data:", error));
+
+        // Fungsi drag-and-drop
+        function activateDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable');
+            let draggingElement = null;
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggingElement = draggable;
+                    setTimeout(() => draggable.classList.add('dragging'), 0);
+                });
+
+                draggable.addEventListener('dragend', () => {
+                    setTimeout(() => {
+                        draggingElement = null;
+                        draggable.classList.remove('dragging');
+                    }, 0);
+                });
+            });
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(outputDiv, e.clientY);
+                if (afterElement == null) {
+                    outputDiv.appendChild(draggingElement);
+                } else {
+                    outputDiv.insertBefore(draggingElement, afterElement);
+                }
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+        }
+
+        // Kirim data ke Google Sheets
+        document.getElementById("dataForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Mencegah form submit default
+
+            const name = document.getElementById("nameInput").value;
+            const selectedData = [];
+            const checkboxes = document.querySelectorAll('input[name="dataSelection"]:checked');
+
+            checkboxes.forEach((checkbox) => {
+                selectedData.push(checkbox.value);
+            });
+
+            const sheetName = "Result"; // Ganti dengan nama sheet yang diinginkan
+
+            // Data yang akan dikirim ke Google Sheets
+            const data = {
+                name: name,
+                selectedData: selectedData,
+                sheetName: sheetName
+            };
+
+            // Kirim data ke Google Apps Script
+            fetch('https://script.google.com/macros/s/AKfycbw-6edqwrTyfPSavRplGFJXT9pssGjPy2XgQuHzBppbFhYYEPFSLonb48t88Sb8TrUuYg/exec', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Success:', data);
+                alert("Data berhasil dikirim ke Google Sheets!");
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("Terjadi kesalahan saat mengirim data.");
+            });
+        });
+    </script>
+</body>
+</html>
