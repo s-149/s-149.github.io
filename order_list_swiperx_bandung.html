@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menampilkan dan Mengirim Data dari Google Sheets</title>
+    <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <style>
         .draggable {
@@ -25,7 +25,7 @@
             <!-- Data dari spreadsheet akan ditampilkan di sini -->
         </div>
         <br>
-        <button type="submit">Kirim Data</button>
+        <button type="submit">Kirim Data ke WhatsApp</button>
     </form>
 
     <script>
@@ -34,15 +34,15 @@
 
         // Ambil data dari Google Sheets
         fetch(sheetURL)
-            .then((response) => response.text()) // Baca sebagai teks
-            .then((data) => {
+            .then(response => response.text()) // Baca sebagai teks
+            .then(data => {
                 // Data berhasil diambil, sekarang tampilkan di HTML
                 const rows = data.split("\n"); // Pisahkan baris
 
                 const outputDiv = document.getElementById("output");
 
                 // Loop melalui setiap baris data (mulai dari baris kedua untuk menghindari header)
-                rows.slice(1).forEach((row) => {
+                rows.slice(1).forEach(row => {
                     const cells = row.split(","); // Pisahkan sel dengan koma
                     if (cells[0]) {
                         outputDiv.innerHTML += `<div class="draggable"><input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}</div>`;
@@ -55,9 +55,9 @@
                     ghostClass: 'sortable-ghost',
                 });
             })
-            .catch((error) => console.error("Error fetching data:", error));
+            .catch(error => console.error("Error fetching data:", error));
 
-        // Kirim data ke Google Sheets
+        // Kirim data ke WhatsApp
         document.getElementById("dataForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Mencegah form submit default
 
@@ -65,39 +65,19 @@
             const selectedData = [];
             const checkboxes = document.querySelectorAll('input[name="dataSelection"]:checked');
 
-            checkboxes.forEach((checkbox) => {
+            checkboxes.forEach(checkbox => {
                 selectedData.push(checkbox.value);
             });
 
-            const sheetName = "Result"; // Ganti dengan nama sheet yang diinginkan
+            // Format pesan
+            const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
+            const encodedMessage = encodeURIComponent(message);
 
-            // Data yang akan dikirim ke Google Sheets
-            const data = {
-                name: name,
-                selectedData: selectedData,
-                sheetName: sheetName
-            };
+            // URL WhatsApp Web dengan pesan yang sudah diisi
+            const whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
 
-            // Ganti dengan URL Web App dari Google Apps Script yang sudah di-deploy
-            const webAppURL = 'https://script.google.com/macros/s/AKfycbwlceqwqaNPMWT1s1uQPutzejHUlac3oT8BbHH7jzTcT1gzC9X8iadkVTlwlgqqlCfYkQ/exec';
-
-            // Kirim data ke Google Apps Script via POST
-            fetch(webAppURL, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log('Success:', data);
-                alert("Data berhasil dikirim ke Google Sheets!");
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert("Terjadi kesalahan saat mengirim data.");
-            });
+            // Buka URL WhatsApp Web di tab baru
+            window.open(whatsappURL, '_blank');
         });
     </script>
 </body>
