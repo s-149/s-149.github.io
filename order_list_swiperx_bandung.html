@@ -127,6 +127,7 @@
             new Sortable(previewDiv, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                touchStartThreshold: 10, // Add a threshold for touch events
                 onEnd: function (evt) {
                     const oldIndex = evt.oldIndex;
                     const newIndex = evt.newIndex;
