@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order List SwipeRX Bandung</title>
+    <meta content="List AWB" name="description" />
+    <meta content="inv,INV,awb,AWB" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700"
+      rel="stylesheet"
+    />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
     <style>
@@ -15,7 +24,7 @@
             user-select: none;
             display: flex;
             align-items: center;
-            cursor: move; /* Cursors for drag item */
+            cursor: move;
         }
         #outputSection {
             max-height: 400px;
@@ -23,6 +32,12 @@
             border: 1px solid #ddd;
             padding: 10px;
             margin-bottom: 20px;
+        }
+        #dataCount {
+            font-weight: bold;
+        }
+        #checkedCount {
+            font-weight: bold;
         }
         .search-container {
             position: relative;
@@ -50,21 +65,25 @@
     </style>
 </head>
 <body class="container mt-5">
-    <h1>Form Data</h1>
+    <h1>LIST AWB</h1>
     <form id="dataForm">
         <div class="mb-3 search-container">
-            <label for="searchInput" class="form-label">Search Data:</label>
-            <input type="text" id="searchInput" class="form-control" placeholder="Cari data...">
+            <label for="searchInput" class="form-label">Cari AWB :</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Masukkan Keyword...">
             <span class="clear-icon" id="clearSearch">&times;</span>
         </div>
 
         <div id="outputSection">
             <!-- Data dari spreadsheet akan ditampilkan di sini -->
         </div>
+        <p id="dataCount">Jumlah AWB: 0</p> <!-- Ini akan menampilkan jumlah data -->
+        <p id="checkedCount">Jumlah AWB yang dipilih: 0</p> <!-- Ini akan menampilkan jumlah data yang dicek secara realtime -->
 
         <div class="mb-3">
-            <label for="nameInput" class="form-label">Nama:</label>
-            <input type="text" id="nameInput" name="nameInput" class="form-control" required>
+            <label for="nameSelect" class="form-label">Nama:</label>
+            <select id="nameSelect" name="nameSelect" class="form-control" required>
+                <!-- Options will be populated here -->
+            </select>
         </div>
 
         <button type="submit" class="btn btn-primary" style="float: right;">Kirim Data ke WhatsApp</button><br><br>
@@ -72,45 +91,82 @@
 
     <script>
         let selectedData = [];
-        const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
+        const sheetURLListData = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
+        const sheetURLSelectData = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=647332045&single=true&output=csv";
 
-        fetch(sheetURL)
-            .then(response => response.text())
-            .then(data => {
-                const rows = data.split("\n");
-                const outputDiv = document.getElementById("outputSection");
+        // Fungsi untuk memuat list data (draggable items)
+        function loadListData() {
+            fetch(sheetURLListData)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split("\n");
+                    const outputDiv = document.getElementById("outputSection");
+                    const dataCount = document.getElementById("dataCount"); // Ambil elemen dataCount
+                    const checkedCount = document.getElementById("checkedCount"); // Ambil elemen checkedCount
 
-                rows.slice(1).forEach(row => {
-                    const cells = row.split(",");
-                    if (cells[0]) {
-                        const item = document.createElement("div");
-                        item.className = "draggable";
-                        item.innerHTML = `
-                            <span class="drag-icon">&#9776;</span>
-                            <input type="checkbox" value="${cells[1]}" class="draggable-checkbox"> ${cells[1]} , ${cells[0]}
-                        `;
-                        item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
-                            if (event.target.checked) {
-                                addToSelectedData(event.target.value);
-                            } else {
-                                removeFromSelectedData(event.target.value);
-                            }
-                        });
+                    let count = 0; // Inisialisasi penghitung
 
-                        outputDiv.appendChild(item);
-                    }
-                });
+                    rows.slice(1).forEach(row => {
+                        const cells = row.split(",");
+                        if (cells[0] && cells[1]) { // Pastikan cells tidak kosong
+                            count++; // Tambah penghitung setiap kali item valid ditemukan
 
-                new Sortable(outputDiv, {
-                    handle: '.drag-icon',
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    onEnd: function (evt) {
-                        updateSelectedData();
-                    }
-                });
-            })
-            .catch(error => console.error("Error fetching data:", error));
+                            const item = document.createElement("div");
+                            item.className = "draggable";
+                            item.innerHTML = `
+                                <span class="drag-icon">&#9776;</span>
+                                <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]} , ${cells[1]}
+                            `;
+                            item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
+                                if (event.target.checked) {
+                                    addToSelectedData(event.target.value);
+                                } else {
+                                    removeFromSelectedData(event.target.value);
+                                }
+                                updateCheckedCount(); // Update jumlah data yang dicek
+                            });
+
+                            outputDiv.appendChild(item);
+                        }
+                    });
+
+                    // Perbarui elemen dataCount dengan jumlah data yang ditemukan
+                    dataCount.textContent = `Jumlah AWB: ${count}`;
+
+                    new Sortable(outputDiv, {
+                        handle: '.drag-icon',
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        onEnd: function (evt) {
+                            updateSelectedData();
+                        }
+                    });
+
+                    updateCheckedCount(); // Panggil fungsi ini untuk menginisialisasi jumlah data yang dicek
+                })
+                .catch(error => console.error("Error fetching list data:", error));
+        }
+
+        // Fungsi untuk memuat select data (dropdown options)
+        function loadSelectData() {
+            fetch(sheetURLSelectData)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split("\n");
+                    const nameSelect = document.getElementById("nameSelect");
+
+                    rows.slice(1).forEach(row => {
+                        const cells = row.split(",");
+                        if (cells[0]) { // Pastikan cells[9] tidak kosong
+                            const option = document.createElement("option");
+                            option.value = cells[0];
+                            option.textContent = cells[0];
+                            nameSelect.appendChild(option);
+                        }
+                    });
+                })
+                .catch(error => console.error("Error fetching select data:", error));
+        }
 
         function addToSelectedData(value) {
             if (!selectedData.includes(value)) {
@@ -128,12 +184,18 @@
                 .map(item => item.querySelector('.draggable-checkbox').value);
         }
 
+        function updateCheckedCount() {
+            const checkedCount = document.getElementById("checkedCount");
+            const checkedItems = document.querySelectorAll("#outputSection .draggable-checkbox:checked");
+            checkedCount.textContent = `Jumlah AWB yang dipilih: ${checkedItems.length}`;
+        }
+
         document.getElementById("dataForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
-            const name = document.getElementById("nameInput").value;
+            const name = document.getElementById("nameSelect").value;
 
-            const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
+            const message = `Nama: ${name}\nList AWB:\n${selectedData.join(',\n')}`;
             const encodedMessage = encodeURIComponent(message);
 
             const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -166,6 +228,12 @@
             const searchInput = document.getElementById("searchInput");
             searchInput.value = "";
             searchInput.dispatchEvent(new Event('input'));
+        });
+
+        // Panggil fungsi untuk memuat data setelah halaman dimuat
+        document.addEventListener("DOMContentLoaded", function() {
+            loadListData();
+            loadSelectData();
         });
     </script>
 </body>
