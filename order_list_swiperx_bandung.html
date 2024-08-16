@@ -6,17 +6,49 @@
     <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
     <!-- Tambahkan Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Tambahkan Sortable CSS -->
     <style>
         .draggable {
             cursor: move;
             padding: 8px;
-            margin: 4px;
+            margin: 4px 0;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
             border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .form-control {
-            width: 100%;
+        .sortable-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sortable-list li {
+            margin: 4px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .data-section {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .preview-section {
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -25,70 +57,113 @@
         <h1 class="mb-4">Form Data</h1>
         <form id="dataForm">
             <div class="form-group">
-                <label for="nameInput">Nama:</label>
-                <input type="text" id="nameInput" name="nameInput" class="form-control" required>
-            </div>
-            <div class="form-group">
                 <label for="searchInput">Cari Data:</label>
                 <input type="text" id="searchInput" class="form-control" placeholder="Cari...">
             </div>
             <h3 class="mt-4">Pilih Data:</h3>
-            <div id="output" class="mb-4">
+            <div id="output" class="data-section">
                 <!-- Data dari spreadsheet akan ditampilkan di sini -->
             </div>
-            <button type="submit" class="btn btn-primary">Kirim Data ke WhatsApp</button>
+            <div id="preview" class="mt-4">
+                <h3>Data yang Dipilih:</h3>
+                <div class="form-group">
+                    <label for="nameInput">Nama:</label>
+                    <input type="text" id="nameInput" name="nameInput" class="form-control" required>
+                </div>
+                <div class="preview-section">
+                    <ul id="selectedDataList" class="sortable-list">
+                        <!-- Daftar data yang dipilih akan ditampilkan di sini -->
+                    </ul>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Kirim Data ke WhatsApp</button>
         </form>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
         // URL Google Sheets sebagai CSV
         const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
 
-        // Ambil data dari Google Sheets
-        fetch(sheetURL)
-            .then(response => response.text()) // Baca sebagai teks
-            .then(data => {
-                const rows = data.split("\n"); // Pisahkan baris
+        // Menyimpan data yang dipilih
+        let selectedData = [];
 
-                const outputDiv = document.getElementById("output");
-                const searchInput = document.getElementById("searchInput");
-
-                function renderData(filter = "") {
+        function renderData(filter = "") {
+            fetch(sheetURL)
+                .then(response => response.text()) // Baca sebagai teks
+                .then(data => {
+                    const rows = data.split("\n"); // Pisahkan baris
+                    const outputDiv = document.getElementById("output");
                     outputDiv.innerHTML = ""; // Kosongkan div sebelum merender data
+
                     rows.slice(1).forEach(row => {
                         const cells = row.split(","); // Pisahkan sel dengan koma
                         if (cells[0] && cells[0].toLowerCase().includes(filter.toLowerCase())) {
+                            const isChecked = selectedData.includes(cells[0]);
                             outputDiv.innerHTML += `
                                 <div class="draggable">
-                                    <input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}
+                                    <input type="checkbox" name="dataSelection" value="${cells[0]}" ${isChecked ? 'checked' : ''}> ${cells[0]}
                                 </div>`;
                         }
                     });
+
+                    // Update preview untuk memastikan checkbox yang sudah dipilih tetap terlihat
+                    updateSelectedPreview();
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+
+        function updateSelectedPreview() {
+            const selectedDataList = document.getElementById("selectedDataList");
+            selectedDataList.innerHTML = ""; // Kosongkan daftar sebelum diperbarui
+
+            selectedData.forEach(item => {
+                const listItem = document.createElement("li");
+                listItem.textContent = item;
+                listItem.classList.add("draggable");
+                selectedDataList.appendChild(listItem);
+            });
+
+            // Aktifkan Sortable pada daftar data yang dipilih
+            new Sortable(selectedDataList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    // Update urutan data berdasarkan urutan baru
+                    const updatedList = Array.from(selectedDataList.children).map(item => item.textContent.trim());
+                    selectedData = updatedList;
                 }
+            });
+        }
 
-                // Render data awal tanpa filter
-                renderData();
+        document.addEventListener("DOMContentLoaded", () => {
+            // Render data awal tanpa filter
+            renderData();
 
-                // Event listener untuk pencarian
-                searchInput.addEventListener("input", function() {
-                    renderData(searchInput.value);
-                });
-            })
-            .catch(error => console.error("Error fetching data:", error));
+            // Event listener untuk pencarian
+            document.getElementById("searchInput").addEventListener("input", function() {
+                renderData(this.value);
+            });
+
+            // Event listener untuk memperbarui preview saat checkbox diubah
+            document.getElementById("output").addEventListener("change", function(event) {
+                const checkbox = event.target;
+                if (checkbox.checked) {
+                    // Tambahkan data yang dipilih
+                    selectedData.push(checkbox.value);
+                } else {
+                    // Hapus data yang tidak dipilih
+                    selectedData = selectedData.filter(data => data !== checkbox.value);
+                }
+                updateSelectedPreview();
+            });
+        });
 
         // Kirim data ke WhatsApp
         document.getElementById("dataForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Mencegah form submit default
 
             const name = document.getElementById("nameInput").value;
-            const selectedData = [];
-            const checkboxes = document.querySelectorAll('input[name="dataSelection"]:checked');
-
-            checkboxes.forEach(checkbox => {
-                selectedData.push(checkbox.value);
-            });
-
-            // Format pesan
             const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
             const encodedMessage = encodeURIComponent(message);
 
