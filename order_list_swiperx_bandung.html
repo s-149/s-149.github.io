@@ -86,7 +86,7 @@
                     const cells = row.split(",");
                     if (cells[0]) {
                         const item = document.createElement("div");
-                        item.className = "draggable";
+                        // item.className = "draggable";
                         item.innerHTML = `<input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]}`;
                         item.addEventListener("change", function(event) {
                             if (event.target.classList.contains('draggable-checkbox')) {
