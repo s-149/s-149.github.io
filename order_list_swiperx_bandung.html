@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menampilkan dan Mengirim Data ke WhatsApp</title>
+    <!-- Tambahkan Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <style>
         .draggable {
@@ -12,21 +14,25 @@
             margin: 4px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>Form Data</h1>
-    <form id="dataForm">
-        <label for="nameInput">Nama:</label>
-        <input type="text" id="nameInput" name="nameInput" required><br><br>
-        <h3>Pilih Data:</h3>
-        <div id="output">
-            <!-- Data dari spreadsheet akan ditampilkan di sini -->
-        </div>
-        <br>
-        <button type="submit">Kirim Data ke WhatsApp</button>
-    </form>
+    <div class="container mt-5">
+        <h1 class="mb-4">Form Data</h1>
+        <form id="dataForm">
+            <div class="form-group">
+                <label for="nameInput">Nama:</label>
+                <input type="text" id="nameInput" name="nameInput" class="form-control" required>
+            </div>
+            <h3 class="mt-4">Pilih Data:</h3>
+            <div id="output" class="mb-4">
+                <!-- Data dari spreadsheet akan ditampilkan di sini -->
+            </div>
+            <button type="submit" class="btn btn-primary">Kirim Data ke WhatsApp</button>
+        </form>
+    </div>
 
     <script>
         // URL Google Sheets sebagai CSV
@@ -45,7 +51,10 @@
                 rows.slice(1).forEach(row => {
                     const cells = row.split(","); // Pisahkan sel dengan koma
                     if (cells[0]) {
-                        outputDiv.innerHTML += `<div class="draggable"><input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}</div>`;
+                        outputDiv.innerHTML += `
+                            <div class="draggable">
+                                <input type="checkbox" name="dataSelection" value="${cells[0]}"> ${cells[0]}
+                            </div>`;
                     }
                 });
 
@@ -80,5 +89,10 @@
             window.open(whatsappURL, '_blank');
         });
     </script>
+
+    <!-- Tambahkan Bootstrap JS dan dependensi jQuery dan Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
