@@ -164,6 +164,8 @@
             event.preventDefault(); // Mencegah form submit default
 
             const name = document.getElementById("nameInput").value;
+
+            // Bangun pesan berdasarkan urutan data yang ada di preview
             const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
             const encodedMessage = encodeURIComponent(message);
 
