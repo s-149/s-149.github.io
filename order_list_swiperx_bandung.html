@@ -15,6 +15,7 @@
             user-select: none;
             display: flex;
             align-items: center;
+            cursor: move; /* Ubah cursor ke move untuk menunjukkan bisa di-drag */
         }
         #outputSection {
             max-height: 400px;
@@ -36,7 +37,6 @@
             color: #ccc;
         }
         .drag-icon {
-            cursor: move;
             padding: 5px;
             margin-right: 5px;
             color: #555;
@@ -85,7 +85,6 @@
                         const item = document.createElement("div");
                         item.className = "draggable";
                         item.innerHTML = `
-                            <span class="drag-icon">&#9776;</span>
                             <input type="checkbox" value="${cells[1]}" class="draggable-checkbox"> ${cells[1]} , ${cells[0]}
                         `;
                         item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
@@ -96,18 +95,16 @@
                             }
                         });
 
-                        // Hanya ikon drag yang bisa di-drag
-                        const dragIcon = item.querySelector('.drag-icon');
-                        new Sortable(outputDiv, {
-                            handle: '.drag-icon',
-                            animation: 150,
-                            ghostClass: 'sortable-ghost',
-                            onEnd: function (evt) {
-                                updateSelectedData();
-                            }
-                        });
-
                         outputDiv.appendChild(item);
+                    }
+                });
+
+                // Inisialisasi SortableJS tanpa handle agar seluruh elemen bisa di-drag
+                new Sortable(outputDiv, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function (evt) {
+                        updateSelectedData();
                     }
                 });
             })
