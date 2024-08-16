@@ -16,7 +16,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            cursor: move;
         }
         #outputSection {
             max-height: 200px;
@@ -68,17 +67,14 @@
 
     <script>
         let selectedData = [];
-
         const sheetURL = "https://docs.google.com/spreadsheets/d/1NStnH7B7HCvvxojIlAP-VFKMLpdRCmovKFN6Loe1n6w/pub?gid=1795785147&single=true&output=csv";
 
-        // Ambil data dari Google Sheets
         fetch(sheetURL)
             .then(response => response.text())
             .then(data => {
                 const rows = data.split("\n");
                 const outputDiv = document.getElementById("outputSection");
 
-                // Loop through each row and add it to the output section
                 rows.slice(1).forEach(row => {
                     const cells = row.split(",");
                     if (cells[0]) {
@@ -95,14 +91,20 @@
                                 removeFromSelectedData(event.target.value);
                             }
                         });
+
+                        // Hanya ikon drag yang bisa di-drag
+                        const dragIcon = item.querySelector('.drag-icon');
+                        new Sortable(outputDiv, {
+                            handle: '.drag-icon',
+                            animation: 150,
+                            ghostClass: 'sortable-ghost',
+                            onEnd: function (evt) {
+                                updateSelectedData();
+                            }
+                        });
+
                         outputDiv.appendChild(item);
                     }
-                });
-
-                // Initialize Sortable
-                new Sortable(outputDiv, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost'
                 });
             })
             .catch(error => console.error("Error fetching data:", error));
@@ -117,33 +119,32 @@
             selectedData = selectedData.filter(item => item !== value);
         }
 
-        // Kirim data ke WhatsApp
+        function updateSelectedData() {
+            selectedData = Array.from(document.querySelectorAll("#outputSection .draggable"))
+                .filter(item => item.querySelector('.draggable-checkbox').checked)
+                .map(item => item.querySelector('.draggable-checkbox').value);
+        }
+
         document.getElementById("dataForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
             const name = document.getElementById("nameInput").value;
 
-            // Build message based on the selected data
             const message = `Nama: ${name}\nData yang Dipilih:\n${selectedData.join('\n')}`;
             const encodedMessage = encodeURIComponent(message);
 
-            // Detect if the user is on mobile or desktop
             const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             let whatsappURL;
             if (isMobile) {
-                // If on mobile, use WhatsApp URI scheme
                 whatsappURL = `whatsapp://send?text=${encodedMessage}`;
             } else {
-                // If on desktop, use WhatsApp Web
                 whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
             }
 
-            // Open the WhatsApp URL
             window.open(whatsappURL, '_blank');
         });
 
-        // Filter data based on search input
         document.getElementById("searchInput").addEventListener("input", function() {
             const filter = this.value.toLowerCase();
             const items = document.querySelectorAll("#outputSection .draggable");
@@ -158,7 +159,6 @@
             });
         });
 
-        // Clear search input when "X" icon is clicked
         document.getElementById("clearSearch").addEventListener("click", function() {
             const searchInput = document.getElementById("searchInput");
             searchInput.value = "";
