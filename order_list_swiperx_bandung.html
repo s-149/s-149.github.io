@@ -87,12 +87,14 @@
                     if (cells[0]) {
                         const item = document.createElement("div");
                         item.className = "draggable";
-                        item.innerHTML = `<input type="checkbox" value="${cells[0]}"> ${cells[0]}`;
-                        item.addEventListener("change", function() {
-                            if (this.firstChild.checked) {
-                                addToPreview(this.firstChild.value);
-                            } else {
-                                removeFromPreview(this.firstChild.value);
+                        item.innerHTML = `<input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]}`;
+                        item.addEventListener("change", function(event) {
+                            if (event.target.classList.contains('draggable-checkbox')) {
+                                if (event.target.checked) {
+                                    addToPreview(event.target.value);
+                                } else {
+                                    removeFromPreview(event.target.value);
+                                }
                             }
                         });
                         outputDiv.appendChild(item);
