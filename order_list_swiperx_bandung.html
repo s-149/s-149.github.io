@@ -164,7 +164,7 @@
                         const cells = row.split(",");
                         if (cells[0]) { // Pastikan cells[9] tidak kosong
                             const option = document.createElement("option");
-                            option.value = cells[0];
+                            option.value = cells[0] + " , " + cells[1];
                             option.textContent = cells[0];
                             nameSelect.appendChild(option);
                         }
