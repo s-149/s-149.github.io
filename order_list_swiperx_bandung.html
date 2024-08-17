@@ -105,17 +105,19 @@
                     const checkedCount = document.getElementById("checkedCount"); // Ambil elemen checkedCount
 
                     let count = 0; // Inisialisasi penghitung
+                    let jmlOrder = 0;
 
                     rows.slice(1).forEach(row => {
                         const cells = row.split(",");
-                        if (cells[0] && cells[1]) { // Pastikan cells tidak kosong
+                        // jmlOrder = cells[6];
+                        if (cells[0]) { // Pastikan cells tidak kosong
                             count++; // Tambah penghitung setiap kali item valid ditemukan
 
                             const item = document.createElement("div");
                             item.className = "draggable";
                             item.innerHTML = `
                                 <span class="drag-icon">&#9776;</span>
-                                <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]} , ${cells[1]}
+                                <input type="checkbox" value="${cells[0]}" class="draggable-checkbox"> ${cells[0]} ${cells[1]}
                             `;
                             item.querySelector('.draggable-checkbox').addEventListener("change", function(event) {
                                 if (event.target.checked) {
@@ -129,9 +131,12 @@
                             outputDiv.appendChild(item);
                         }
                     });
+                    
+                    let cellss = rows[1].split(",");
+                    jmlOrder = cellss[6];
 
                     // Perbarui elemen dataCount dengan jumlah data yang ditemukan
-                    dataCount.textContent = `Jumlah AWB: ${count}`;
+                    dataCount.textContent = `Jumlah AWB: ${jmlOrder}`;
 
                     new Sortable(outputDiv, {
                         handle: '.drag-icon',
