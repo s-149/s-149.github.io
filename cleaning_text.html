@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daur Ulang Text</title>
+    <meta content="Untuk parsing data" name="description" />
+    <meta
+      content="inv,INV,awb,AWB,text,cerpen,novel,paragraf,data"
+      name="keywords"
+    />
+    <meta name="author" content="Mr.S-149" />
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        color: black;
+      }
+      textarea,
+      .highlight-container {
+        width: 100%;
+        margin-bottom: 10px;
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
+      }
+      .highlight-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        white-space: pre-wrap;
+        background-color: #f9f9f9;
+        overflow: auto; /* Menambahkan scroll jika konten melebihi area */
+        resize: both; /* Menambahkan kemampuan resize */
+        min-height: 150px; /* Tinggi minimal */
+        min-width: 100px; /* Lebar minimal */
+      }
+      label{
+        font-size: 18px;
+      }
+      input[type="text"],
+      input[type="number"] {
+        padding: 5px;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .output {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+      }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+      }
+      .highlight {
+        background-color: yellow;
+        color: black;
+      }
+      .replace-char-container {
+        margin-bottom: 10px;
+      }
+      .replace-char-field {
+        margin-bottom: 5px;
+      }
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f8d7da;
+        color: #721c24;
+        padding: 20px;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+        display: none;
+        z-index: 10000;
+      }
+      .footer {
+        background-color: #343a40;
+        color: #ffffff;
+        padding: 20px 0;
+      }
+      .footer a {
+        color: #ffffff;
+      }
+      .footer a:hover {
+        color: #d3d3d3;
+      }
+      .footer-logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="d-flex justify-content-center align-items-center">
+      <div class="container-sm">
+        <div class="col">
+          <h2><strong>DAUR ULANG TEXT</strong></h2>
+          <p>
+            Masukkan data anda dan proses secara realtime.
+          </p>
+          <div class="card">
+            <div class="card-body">
+              <label for="inputData">Masukkan Data :</label>
+              <textarea
+                id="inputData"
+                placeholder="Masukkan data di sini..."
+                class="form-control"
+              ></textarea>
+            </div>
+          </div><br>
+          <div id="highlightContainer" class="highlight-container"></div>
+
+          <br />
+          <div class="card">
+            <div class="card-body">
+              <label for="delimiter">Pilih Pembatas: </label>
+              <input
+                type="text"
+                id="delimiter"
+                class="form-control"
+                placeholder="Masukkan pembatas"
+              />
+              <br>
+              <div id="replaceCharContainer" class="replace-char-container">
+                <label>Karakter yang Dihapus dan Pengganti:</label>
+                <div class="replace-char-field">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <input
+                        type="text"
+                        class="replaceChar form-control"
+                        placeholder="Masukkan karakter yang dihapus"
+                      />
+                    </div>
+                    <div class="col-lg-6">
+                      <input
+                        type="text"
+                        class="replaceWith form-control"
+                        placeholder="Masukkan karakter pengganti"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="float: right">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onclick="addReplaceCharField()"
+                  title="Tambah Form ReplaceChar"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  onclick="removeReplaceCharField()"
+                  title="Kurangi Form ReplaceChar"
+                >
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="output">
+            <h3 id="headerOutput">Data yang Digabungkan:</h3>
+            <textarea id="outputData" class="form-control" readonly></textarea>
+          </div>
+          <br />
+          <!-- Footer -->
+          <footer class="footer text-center">
+            <div class="container">
+              <div class="row">
+                <p>&copy; 2024 Jejak Programmer. All Rights Reserved.</p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay">
+      <img src="assets-blitz/img/logo/blitz.png" alt="logo" width="200px" />
+    </div>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+      Karakter yang dihapus tidak ditemukan dalam data.
+    </div>
+
+    <script>
+      const highlightColors = [
+        "#ff9999",
+        "#99ff99",
+        "#9999ff",
+        "#ffcc99",
+        "#cc99ff",
+      ];
+
+      function showOverlay() {
+        document.getElementById("overlay").style.display = "flex";
+      }
+
+      function hideOverlay() {
+        document.getElementById("overlay").style.display = "none";
+      }
+
+      function showNotFoundPopup() {
+        document.getElementById("popup").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("popup").style.display = "none";
+        }, 3000); // Tampilkan popup selama 3 detik
+      }
+
+      function highlightData(inputData, replaceChars) {
+        let highlightedData = inputData;
+
+        replaceChars.forEach((replaceChar, index) => {
+          if (replaceChar.length > 0) {
+            const color = highlightColors[index % highlightColors.length];
+            const regex = new RegExp(replaceChar, "g");
+
+            highlightedData = highlightedData.replace(regex, function (match) {
+              return `<span style="background-color: ${color}; color: black;">${match}</span>`;
+            });
+          }
+        });
+
+        return highlightedData;
+      }
+
+      function mergeData() {
+        showOverlay();
+        setTimeout(function () {
+          var inputData = document.getElementById("inputData").value.trim();
+          var delimiter = document.getElementById("delimiter").value || ""; // Biarkan kosong jika pembatas tidak diisi
+
+          // Ambil semua karakter yang dihapus dan penggantinya
+          var replaceChars = Array.from(
+            document.getElementsByClassName("replaceChar")
+          )
+            .map((input) => input.value.trim())
+            .filter((value) => value.length > 0);
+          var replaceWiths = Array.from(
+            document.getElementsByClassName("replaceWith")
+          ).map((input) => input.value.trim());
+
+          // Cek apakah ada karakter yang dihapus yang tidak ada dalam data
+          var allCharsFound = replaceChars.every((replaceChar) =>
+            new RegExp(replaceChar, "g").test(inputData)
+          );
+
+          if (!allCharsFound) {
+            showNotFoundPopup();
+            hideOverlay();
+            return;
+          }
+
+          // Highlight data yang akan diganti
+          var highlightedData = highlightData(inputData, replaceChars);
+          document.getElementById("highlightContainer").innerHTML =
+            highlightedData;
+
+          // Ganti semua kemunculan karakter yang dihapus dengan karakter pengganti
+          replaceChars.forEach(function (replaceChar, index) {
+            if (replaceChar.length > 0) {
+              var regex = new RegExp(replaceChar, "g");
+              inputData = inputData.replace(regex, replaceWiths[index]);
+            }
+          });
+
+          // Pisahkan berdasarkan baris baru, dan hapus spasi tambahan
+          var dataList = inputData.split(/\r?\n/).map(function (item) {
+            return item.trim();
+          });
+
+          // Gabungkan data dengan pembatas, tetapi jaga baris tetap terpisah
+          var mergedData = dataList.join(delimiter + "\n");
+
+          // Hitung jumlah AWB
+          var numAWB = dataList.length;
+
+          // Tampilkan hasilnya dengan jumlah AWB di header
+          var headerMessage = `Data yang Digabungkan: ${numAWB} line ditemukan`;
+          document.getElementById("headerOutput").textContent = headerMessage;
+
+          // Tampilkan data yang digabungkan dalam textarea
+          document.getElementById("outputData").value = mergedData;
+
+          hideOverlay();
+        }, 1000); // Simulate a delay for processing
+      }
+
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      function addReplaceCharField() {
+        var container = document.getElementById("replaceCharContainer");
+        var newField = document.createElement("div");
+        newField.className = "replace-char-field";
+        newField.innerHTML = `
+        <div class="row">
+          <div class="col-lg-6">
+            <input type="text" class="replaceChar form-control" placeholder="Masukkan karakter yang dihapus" />
+          </div>
+          <div class="col-lg-6">
+            <input type="text" class="replaceWith form-control" placeholder="Masukkan karakter pengganti" />
+          </div>
+        </div>
+        `;
+        container.appendChild(newField);
+      }
+
+      function removeReplaceCharField() {
+        var container = document.getElementById("replaceCharContainer");
+        var fields = container.getElementsByClassName("replace-char-field");
+        if (fields.length > 0) {
+          container.removeChild(fields[fields.length - 1]);
+        }
+      }
+
+      document
+        .getElementById("inputData")
+        .addEventListener("input", debounce(mergeData, 500));
+      document
+        .getElementById("delimiter")
+        .addEventListener("input", debounce(mergeData, 500));
+      document
+        .getElementById("replaceCharContainer")
+        .addEventListener("input", debounce(mergeData, 500));
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
