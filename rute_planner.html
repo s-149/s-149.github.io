@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner</title>
+    <meta content="Rute planner" name="description" />
+    <meta content="inv,INV,awb,AWB,address,geocoding,longlat,lat,lng" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+    
+    <style>
+        .table-container {
+            max-height: 400px;
+            width: 100%;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+    
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f9fafb;
+            z-index: 1;
+        }
+    
+        tbody {
+            display: block;
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    
+        tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .custom-icon {
+            background-image: none !important;
+            background-color: transparent !important;
+            border: none;
+            font-size: 18px;
+            text-align: center;
+            line-height: 0px;
+        }
+
+        .leaflet-routing-container {
+            width: 100px !important;
+            z-index: 1 !important; /* Set z-index lebih rendah dari overlay */
+        }
+
+        .route-icon {
+            background-color: black;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-size: 16px;
+            color: white;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 1000; /* Pastikan z-index lebih tinggi dari peta */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .map-container, .leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane {
+            z-index: 1 !important; /* Set z-index lebih rendah dari overlay */
+        }
+        .spinner-border {
+            border-width: 4px;
+            border-style: solid;
+            border-top-color: white; /* Warna spinner */
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            border-left-color: transparent;
+            border-radius: 50%;
+            width: 2rem; /* Ukuran spinner */
+            height: 2rem; /* Ukuran spinner */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        img {
+            /* Mengatur ukuran gambar jika diperlukan */
+            width: 4rem; /* Sesuaikan ukuran gambar */
+            height: 4rem; /* Sesuaikan ukuran gambar */
+        }
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .space-y-2 {
+            margin-top: 0.5rem; /* Jarak antara elemen secara vertikal (lebih kecil) */
+        }
+
+        .text-white {
+            color: white;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem; /* Jarak atas elemen pesan */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="p-6 max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4">Route Planner</h1>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div class="col-span-1 lg:col-span-1 info-container bg-white p-4 rounded shadow-lg">
+                <div class="max-h-60 overflow-y-auto">
+                    <div class="col-span-1">
+                        <div class="mb-4">
+                            <p>Hub Addres : Jl. Sriwijaya No.52, Cigereleng, Kec. Regol, Kota Bandung, Jawa Barat 40253</p>
+                        <label class="block text-sm font-medium text-gray-700">Hub Address :</label>
+                        <input type="text" v-model="hubAddress" class="mt-2 p-2 border border-gray-300 rounded w-full" placeholder="Enter Hub Address"/>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Number of Routes :</label>
+                        <input type="number" v-model="routeCount" class="mt-2 p-2 border border-gray-300 rounded w-full" min="1" placeholder="Enter Rute Total" required/>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Import Excel File :</label>
+                        <input type="file" @change="importFromExcel" class="mt-2 p-2 border border-gray-300 rounded w-full"/>
+                    </div>
+                </div>      
+            </div><br>
+            <div class="mt-4">
+                <h2 class="text-xl font-semibold mb-2">Route List</h2>
+                <ul id="route-list" class="max-h-40 overflow-y-auto">
+                    <li @click="showAllRoutes" class="cursor-pointer px-4 py-2 mb-2 bg-gray-300 rounded">All Route</li>
+                    <li @click="showHub" class="cursor-pointer px-4 py-2 mb-2 bg-gray-300 rounded">Hub Address</li>
+                    <li v-for="(route, index) in routeData" :key="index" @click="showRoute(index)" :style="{ backgroundColor: route.color }" class="cursor-pointer px-4 py-2 mb-2 rounded">
+                        Route {{ index + 1 }} - {{ route.points.length }} Points - {{ route.totalDistance.toFixed(2) }} km
+                    </li>
+                </ul>
+            </div>            
+        </div>
+        <div id="map-container" class="col-span-2 lg:col-span-3">
+            <div id="map" class="h-96 w-full rounded" style="height: 500px; width: 100%;"></div>
+        </div>  
+    </div><br>
+    <div class="col-span-1 lg:col-span-1 info-container bg-white p-4 rounded shadow-lg">
+    <div class="mt-4 table-responsive">
+        <h2 class="text-xl font-semibold mb-2">Eksport Data</h2>
+                <table id="myDataTable" class="min-w-full divide-y divide-gray-200 table-container table">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sequence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distance from Point (km)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AWB</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="item in tableData" :key="item.AWB">
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Route }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Sequence }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.distanceFromHub }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.AWB }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Address }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div v-if="isProcessing" class="overlay fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="flex flex-col items-center space-y-2 text-center">
+                <div class="spinner-border animate-spin w-8 h-8 border-4 rounded-full border-t-white border-gray-300"></div>
+                <p class="text-white mt-2">{{ processingMessage }}</p>
+            </div>
+        </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                map: null,
+                rawData: [],
+                routeCount: 1, // jumlah rute
+                maxKm: null,        // Nilai maksimum kilometer yang diinput user
+                maxPoints: null, // Maximum points per route
+                maxDistancePerPoint: 1, // Default 1 km jika user tidak mengisi
+                geocodeCache: {}, // Cache untuk hasil geocoding
+                hubAddress: '',
+                routes: [],
+                markers: [],
+                routeColors: [],
+                routeData: [],
+                hubMarker: null,
+                hubIcon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1946/1946436.png', iconSize: [32, 32] }),
+                tableData: []
+            },
+            watch: {
+                hubAddress(newAddress) {
+                    this.updateHubMarker(newAddress);
+                }
+            },
+            computed: {
+                totalRecords() {
+                    return this.tableData.length;
+                }
+            },
+            methods: {
+                data() {
+                return {
+                    isProcessing: false,
+                    processingMessage: 'Processing...', // Pesan awal saat proses dimulai
+                    // Properti lainnya
+                };
+                },
+                async initializeMap() {
+                    this.map = L.map('map').setView([-6.914744, 107.60981], 11);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19
+                    }).addTo(this.map);
+            
+                    console.log('Map Initialized');
+                },
+                async updateHubMarker(address) {
+                    if (!address) return;
+        
+                    if (this.hubMarker) {
+                        this.map.removeLayer(this.hubMarker);
+                    }
+        
+                    const coords = await this.geocodeAddress(address);
+                    if (coords) {
+                        this.hubMarker = L.marker(coords, { icon: this.hubIcon }).addTo(this.map);
+                        this.hubMarker.bindPopup(`Hub Address: ${address}`).openPopup();
+        
+                        this.map.setView(coords, 13);
+                    } else {
+                        console.error(`Failed to geocode address: ${address}`);
+                    }
+                },
+            
+                async importFromExcel(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                        const headers = jsonData[0];
+                        const AWBIndex = headers.indexOf('AWB');
+                        const addressIndex = headers.indexOf('Address');
+                
+                        if (AWBIndex === -1 || addressIndex === -1) {
+                            alert('The Excel file must contain AWB and Address columns.');
+                            return;
+                        }
+                
+                        this.rawData = jsonData.slice(1).map(row => ({
+                            AWB: row[AWBIndex],
+                            Address: row[addressIndex],
+                        })).filter(item => item.AWB && item.Address);
+                
+                        await this.processData();
+                        this.showAllRoutes();
+                    };
+                    reader.readAsArrayBuffer(file);
+                },
+
+                async processData() {
+                    try {
+                        this.isProcessing = true; // Tampilkan overlay
+                        this.processingMessage = 'Starting process...'; // Pesan awal
+
+                        const maxDistance = 1; // Jarak maksimum dalam kilometer
+
+                            // Proses rute dengan pembagian
+                            this.processingMessage = 'Processing multiple routes...';
+
+                            this.routeColors = this.generateRouteColors(this.routeCount || 1);
+                            this.routeData = [];
+
+                            for (let i = 0; i < (this.routeCount || 1); i++) {
+                                this.routeData.push({ points: [], color: this.routeColors[i], totalDistance: 0 });
+                            }
+
+                            this.processingMessage = 'Geocoding hub address...';
+                            const hubCoords = await this.geocodeAddress(this.hubAddress);
+                            if (!hubCoords) {
+                                console.error(`Failed to geocode hub address: ${this.hubAddress}`);
+                                return;
+                            }
+
+                            // Caching geocoding results to avoid redundant API calls
+                            const geocodeCache = {};
+
+                            // Copy remainingPoints untuk menyimpan data sementara
+                            let remainingPoints = [...this.rawData];
+                            let orderedPoints = [];
+                            let currentPoint = { coords: hubCoords };
+
+                            // Mulai urutkan semua titik dari hub ke titik terdekat
+                            while (remainingPoints.length > 0) {
+                                this.processingMessage = `Finding nearest point... (${remainingPoints.length} left)`;
+
+                                let nearestPointIndex = -1;
+                                let nearestDistance = Infinity;
+
+                                // Cari titik terdekat dari currentPoint
+                                for (let i = 0; i < remainingPoints.length; i++) {
+                                    const pointAddress = remainingPoints[i].Address;
+                                    if (!geocodeCache[pointAddress]) {
+                                        geocodeCache[pointAddress] = await this.geocodeAddress(pointAddress);
+                                    }
+                                    const pointCoords = geocodeCache[pointAddress];
+                                    const distance = this.calculateDistance(currentPoint.coords, pointCoords);
+
+                                    if (distance < nearestDistance) {
+                                        nearestDistance = distance;
+                                        nearestPointIndex = i;
+                                    }
+                                }
+
+                                // Pindahkan titik terdekat ke orderedPoints
+                                const nearestPoint = remainingPoints.splice(nearestPointIndex, 1)[0];
+                                nearestPoint.coords = geocodeCache[nearestPoint.Address];
+                                nearestPoint.distanceFromHub = nearestDistance.toFixed(2);
+                                orderedPoints.push(nearestPoint);
+
+                                // Update currentPoint untuk iterasi berikutnya
+                                currentPoint = { coords: nearestPoint.coords };
+
+                                // Jika jarak lebih dari batas maksimum, pisahkan ke rute baru
+                                if (nearestDistance > maxDistance * 1000) {
+                                    // Mulai rute baru
+                                    this.routeData.push({ points: [], color: this.routeColors[this.routeData.length % this.routeColors.length], totalDistance: 0 });
+                                    currentPoint = { coords: hubCoords }; // Mulai dari hub lagi
+                                }
+                            }
+
+                            // Bagi orderedPoints menjadi beberapa rute
+                            const pointsPerRoute = Math.ceil(orderedPoints.length / (this.routeCount || 1));
+                            for (let i = 0; i < orderedPoints.length; i++) {
+                                const routeIndex = Math.floor(i / pointsPerRoute);
+                                const route = this.routeData[routeIndex];
+
+                                orderedPoints[i].Route = routeIndex + 1;
+                                orderedPoints[i].Sequence = route.points.length + 1;
+
+                                // Tambahkan titik ke rute
+                                route.points.push({
+                                    coords: orderedPoints[i].coords,
+                                    AWB: orderedPoints[i].AWB,
+                                    address: orderedPoints[i].Address,
+                                    Route: orderedPoints[i].Route,
+                                    distanceFromHub: orderedPoints[i].distanceFromHub
+                                });
+
+                                // Tambahkan jarak ke total jarak rute
+                                if (route.points.length > 1) {
+                                    const prevPoint = route.points[route.points.length - 2];
+                                    route.totalDistance += this.calculateDistance(prevPoint.coords, route.points[route.points.length - 1].coords);
+                                }
+
+                                // Tambahkan ke data tabel
+                                this.tableData.push({
+                                    Route: orderedPoints[i].Route,
+                                    Sequence: orderedPoints[i].Sequence,
+                                    AWB: orderedPoints[i].AWB,
+                                    Address: orderedPoints[i].Address,
+                                    distanceFromHub: orderedPoints[i].distanceFromHub
+                                });
+                            
+                        }
+
+                        this.$nextTick(() => {
+                            this.processingMessage = 'Initializing DataTable...';
+                            if ($.fn.DataTable.isDataTable('#myDataTable')) {
+                                $('#myDataTable').DataTable().destroy();
+                            }
+
+                            $('#myDataTable').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: ['csv', 'excel'],
+                                paging: true,
+                                pageLength: 10,
+                                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                                language: {
+                                    lengthMenu: "Show _MENU_ entries per page"
+                                }
+                            });
+                        });
+
+                        this.processingMessage = 'Data processing completed.';
+                    } catch (error) {
+                        console.error('An error occurred during data processing:', error);
+                    } finally {
+                        this.isProcessing = false; // Sembunyikan overlay setelah proses selesai
+                    }
+                },
+
+                generateRouteColors(count) {
+                    const colors = [
+                        '#FF5733', '#33FF57', '#3357FF', '#FF33A8', '#A833FF', '#33FFF3',
+                        '#FFC133', '#FF3333', '#33FF91', '#BFFF33'
+                    ];
+                    const generatedColors = [];
+                    for (let i = 0; i < count; i++) {
+                        generatedColors.push(colors[i % colors.length]);
+                    }
+                    return generatedColors;
+                },
+                generateRandomColor() {
+                    const letters = '0123456789ABCDEF';
+                    let color = '#';
+                    for (let i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                },
+                
+                async geocodeAddress(address) {
+                    // Example geocoding implementation
+                    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8`);
+                    const data = await response.json();
+                    if (data.results.length > 0) {
+                        const { lat, lng } = data.results[0].geometry.location;
+                        return [lat, lng];
+                    }
+                    return null;
+                },
+            
+                calculateDistance(coords1, coords2) {
+                    const rad = function(x) { return x * Math.PI / 180; };
+                    const R = 6378.137; // Earth’s mean radius in km
+                    const dLat = rad(coords2[0] - coords1[0]);
+                    const dLong = rad(coords2[1] - coords1[1]);
+                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(rad(coords1[0])) * Math.cos(rad(coords2[0])) *
+                            Math.sin(dLong / 2) * Math.sin(dLong / 2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    const d = R * c;
+                    return d;
+                },
+            
+                showAllRoutes() {
+                    this.clearMap();
+                    this.routeData.forEach(route => {
+                        this.displayRoute(route);
+                    });
+                },
+            
+                showRoute(index) {
+                    this.clearMap();
+                    this.displayRoute(this.routeData[index]);
+                },
+
+                showHub() {
+                    this.clearMap();
+                    if (this.hubMarker) {
+                        this.map.addLayer(this.hubMarker);
+                    }
+                },
+            
+                clearMap() {
+                    this.map.eachLayer(layer => {
+                        if (layer !== this.hubMarker && !layer._url) { // Exclude tile layer and hub marker
+                            this.map.removeLayer(layer);
+                        }
+                    });
+                },
+            
+                displayRoute(route) {
+                    const latlngs = route.points.map(point => point.coords);
+
+                    route.points.forEach((point, index) => {
+                        const icon = L.divIcon({
+                            className: 'custom-icon',
+                            html: `<div class="route-icon" style="background-color: ${route.color};">${index + 1}</div>`,
+                            iconSize: [30, 30]
+                        });
+                        const marker = L.marker(point.coords, { icon }).addTo(this.map);
+
+                        const routeLabel = point.Route ? `Route ${point.Route}` : 'Route Info';
+                        const distanceLabel = point.distanceFromHub !== undefined ? `${point.distanceFromHub} km` : 'N/A';
+
+                        marker.bindPopup(`<b>${routeLabel}</b><br>Sequence: ${index + 1}<br>AWB: ${point.AWB}<br>Address: ${point.address}<br>Distance from Point: ${distanceLabel}`);
+                        this.markers.push(marker);
+                    });
+
+                    L.polyline(latlngs, { color: route.color }).addTo(this.map);
+                    this.map.fitBounds(latlngs);
+                }
+
+            },
+            mounted() {
+                this.initializeMap();
+            }
+        });
+    </script>
+</body>
+</html>
