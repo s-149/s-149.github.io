@@ -202,6 +202,11 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distance from Point (km)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AWB</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other1</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other2</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other3</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other4</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other5</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -211,6 +216,11 @@
                             <td class="px-6 py-4 whitespace-nowrap">{{ item.distanceFromHub }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">{{ item.AWB }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">{{ item.Address }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Other1 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Other2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Other3 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Other4 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ item.Other5 }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -301,8 +311,13 @@
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
                 
                         const headers = jsonData[0];
-                        const AWBIndex = headers.indexOf('AWB');
-                        const addressIndex = headers.indexOf('Address');
+                        const AWBIndex = headers.indexOf('*AWB');
+                        const addressIndex = headers.indexOf('*Address');
+                        const other1Index = headers.indexOf('Other1');
+                        const other2Index = headers.indexOf('Other2');
+                        const other3Index = headers.indexOf('Other3');
+                        const other4Index = headers.indexOf('Other4');
+                        const other5Index = headers.indexOf('Other5');
                 
                         if (AWBIndex === -1 || addressIndex === -1) {
                             alert('The Excel file must contain AWB and Address columns.');
@@ -312,6 +327,11 @@
                         this.rawData = jsonData.slice(1).map(row => ({
                             AWB: row[AWBIndex],
                             Address: row[addressIndex],
+                            Other1:row[other1Index],
+                            Other2:row[other2Index],
+                            Other3:row[other3Index],
+                            Other4:row[other4Index],
+                            Other5:row[other5Index],
                         })).filter(item => item.AWB && item.Address);
                 
                         await this.processData();
@@ -421,7 +441,12 @@
                                     Sequence: orderedPoints[i].Sequence,
                                     AWB: orderedPoints[i].AWB,
                                     Address: orderedPoints[i].Address,
-                                    distanceFromHub: orderedPoints[i].distanceFromHub
+                                    distanceFromHub: orderedPoints[i].distanceFromHub,
+                                    Other1: orderedPoints[i].Other1,
+                                    Other2: orderedPoints[i].Other2,
+                                    Other3: orderedPoints[i].Other3,
+                                    Other4: orderedPoints[i].Other4,
+                                    Other5: orderedPoints[i].Other5
                                 });
                             
                         }
