@@ -113,6 +113,7 @@
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>DATE</th>
                         <th>UNIT</th>
                         <th>NOPOL</th>
@@ -120,6 +121,7 @@
                         <th>PIC REQUEST</th>
                         <th>STATUS</th>
                         <th>ADMIN</th>
+                        <th>INFORMATION</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -165,22 +167,22 @@
 
                                 // Store unique values for filtering
                                 switch (index) {
-                                    case 0:
+                                    case 1:
                                         uniqueValues.date.add(cell.trim());
                                         break;
-                                    case 1:
+                                    case 2:
                                         uniqueValues.unit.add(cell.trim());
                                         break;
-                                    case 2:
+                                    case 3:
                                         uniqueValues.nopol.add(cell.trim());
                                         break;
-                                    case 3:
+                                    case 4:
                                         uniqueValues.request.add(cell.trim());
                                         break;
-                                    case 4:
+                                    case 5:
                                         uniqueValues.picRequest.add(cell.trim()); // Simpan nilai unik untuk PIC REQUEST
                                         break;
-                                    case 5:
+                                    case 6:
                                         uniqueValues.status.add(cell.trim());
                                         break;
                                 }
@@ -210,7 +212,7 @@
                             buttons: [
                                 'copy', 'csv', 'excel', 'pdf', 'print' // Enable these export options
                             ],
-                            lengthMenu: [10, 25, 50, 100], // Opsi jumlah baris yang akan ditampilkan
+                            lengthMenu: [10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500], // Opsi jumlah baris yang akan ditampilkan
                             pageLength: 10 // Jumlah baris default yang akan ditampilkan
                         });
                     });
@@ -243,17 +245,17 @@
                     unit: $('#filterUnit').val(),
                     nopol: $('#filterNopol').val(),
                     request: $('#filterRequest').val(),
-                    picRequest: $('#filterPicRequest').val(), // Ubah ID menjadi picRequest
+                    picRequest: $('#filterPicRequest').val(),
                     status: $('#filterStatus').val()
                 };
 
                 dataTable
-                    .columns(0).search(filters.date ? filters.date.join('|') : '', true, false) // DATE
-                    .columns(1).search(filters.unit ? filters.unit.join('|') : '', true, false) // UNIT
-                    .columns(2).search(filters.nopol ? filters.nopol.join('|') : '', true, false) // NOPOL
-                    .columns(3).search(filters.request ? filters.request.join('|') : '', true, false) // REQUEST
-                    .columns(4).search(filters.picRequest ? filters.picRequest.join('|') : '', true, false) // PIC REQUEST
-                    .columns(5).search(filters.status ? filters.status.join('|') : '', true, false) // STATUS
+                    .columns(1).search(filters.date ? filters.date.join('|') : '', true, false) // DATE
+                    .columns(2).search(filters.unit ? filters.unit.join('|') : '', true, false) // UNIT
+                    .columns(3).search(filters.nopol ? filters.nopol.join('|') : '', true, false) // NOPOL
+                    .columns(4).search(filters.request ? filters.request.join('|') : '', true, false) // REQUEST
+                    .columns(5).search(filters.picRequest ? filters.picRequest.join('|') : '', true, false) // PIC REQUEST
+                    .columns(6).search(filters.status ? filters.status.join('|') : '', true, false) // STATUS
                     .draw();
             });
         }
@@ -261,12 +263,6 @@
         // Load data on page load
         loadData();
     </script>
-    <!-- <script>
-        $('#filterDate').select2({
-            placeholder: 'Select DATE', // Placeholder akan bekerja dengan baik
-            allowClear: true
-        });
-    </script> -->
 
 </body>
 
