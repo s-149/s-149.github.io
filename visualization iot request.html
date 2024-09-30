@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualization IOT Request</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
+        }
+        
+        canvas {
+            max-width: 100%;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2 class="text-center mb-4">Visualization for IOT Requests</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <!-- Select for Chart Type -->
+                <div class="form-group">
+                    <label for="chartType">Select Chart</label>
+                    <select id="chartType" class="form-control" onchange="updateChart()">
+                        <option value="dateChart">Date</option>
+                        <option value="unitChart">Unit</option>
+                        <option value="nopolChart">Nopol</option>
+                        <option value="requestChart">Request</option>
+                        <option value="picRequestChart">PIC Request</option>
+                        <option value="statusChart">Status</option>
+                        <option value="adminChart">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Select for Chart Visualization Type -->
+                <div class="form-group">
+                    <label for="chartTypeSelection">Select Visualization</label>
+                    <select id="chartTypeSelection" class="form-control" onchange="updateChartType()">
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                        <option value="pie">Pie</option>
+                        <option value="doughnut">Doughnut</option>
+                        <option value="radar">Radar</option>
+                        <option value="polarArea">Polar Area</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div id="charts-container" class="mt-4">
+            <canvas id="dateChart" style="display: none;"></canvas>
+            <canvas id="unitChart" style="display: none;"></canvas>
+            <canvas id="nopolChart" style="display: none;"></canvas>
+            <canvas id="requestChart" style="display: none;"></canvas>
+            <canvas id="picRequestChart" style="display: none;"></canvas>
+            <canvas id="statusChart" style="display: none;"></canvas>
+            <canvas id="adminChart" style="display: none;"></canvas>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const sheetURL = "https://docs.google.com/spreadsheets/d/1P-GPp_bTfHu3dnBTpK16h-o_NNIbUXccQnl0o_e966o/pub?gid=0&single=true&output=csv";
+        let uniqueValues = {};
+        let charts = {}; // Store chart instances
+        let currentChartType = 'bar'; // Default chart type
+
+        // Load data from Google Sheets and generate charts
+        function loadData() {
+            fetch(sheetURL)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split("\n").slice(1); // Skip header row
+                    uniqueValues = {
+                        date: new Map(),
+                        unit: new Map(),
+                        nopol: new Map(),
+                        request: new Map(),
+                        picRequest: new Map(),
+                        status: new Map(),
+                        admin: new Map()
+                    };
+
+                    rows.forEach(row => {
+                        const cells = row.split(",");
+                        if (cells[0]) { // Ensure data is not empty
+                            // Store unique values for charts
+                            updateValueMap(uniqueValues.date, cells[1].trim());
+                            updateValueMap(uniqueValues.unit, cells[2].trim());
+                            updateValueMap(uniqueValues.nopol, cells[3].trim());
+                            updateValueMap(uniqueValues.request, cells[4].trim());
+                            updateValueMap(uniqueValues.picRequest, cells[5].trim());
+                            updateValueMap(uniqueValues.status, cells[6].trim());
+                            updateValueMap(uniqueValues.admin, cells[7].trim());
+                        }
+                    });
+
+                    // Generate charts for all types
+                    generateCharts();
+
+                    // Set default chart visibility to dateChart
+                    updateChart('dateChart'); // Show the default chart
+                });
+        }
+
+        // Helper function to update the unique value map
+        function updateValueMap(map, value) {
+            if (map.has(value)) {
+                map.set(value, map.get(value) + 1);
+            } else {
+                map.set(value, 1);
+            }
+        }
+
+        // Helper function to generate random colors
+        function generateRandomColors(num) {
+            const colors = [];
+            for (let i = 0; i < num; i++) {
+                // Generate a random hex color
+                const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colors.push(color);
+            }
+            return colors;
+        }
+
+        // Helper function to generate all charts
+        function generateCharts() {
+            const chartsToGenerate = ['dateChart', 'unitChart', 'nopolChart', 'requestChart', 'picRequestChart', 'statusChart', 'adminChart'];
+            chartsToGenerate.forEach(chartId => {
+                generateChart(chartId, chartId.replace('Chart', '').replace(/([A-Z])/g, ' $1').trim(), uniqueValues[chartId.replace('Chart', '')]);
+            });
+        }
+
+        // Helper function to generate a chart
+        function generateChart(chartId, label, dataMap) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            const barColors = generateRandomColors(dataMap.size);
+
+            // Create a new chart instance and store it
+            charts[chartId] = new Chart(ctx, {
+                type: currentChartType, // Use the current chart type
+                data: {
+                    labels: Array.from(dataMap.keys()),
+                    datasets: [{
+                        label: label,
+                        data: Array.from(dataMap.values()),
+                        backgroundColor: barColors,
+                        borderColor: barColors.map(color => darkenColor(color, 20)),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function to darken a color (for borders)
+        function darkenColor(color, percent) {
+            const num = parseInt(color.slice(1), 16),
+                amt = Math.round(2.55 * percent),
+                R = (num >> 16) + amt,
+                G = (num >> 8 & 0x00FF) + amt,
+                B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 256 ? R < 1 ? 0 : R > 255 ? 255 : R : 255) * 0x10000 + (G < 256 ? G < 1 ? 0 : G > 255 ? 255 : G : 255) * 0x100 + (B < 256 ? B < 1 ? 0 : B > 255 ? 255 : B : 255)).toString(16).slice(1);
+        }
+
+        // Helper function to update chart type based on user selection
+        function updateChartType() {
+            const selectedChartType = document.getElementById('chartTypeSelection').value;
+            currentChartType = selectedChartType; // Update current chart type
+
+            const selectedChart = document.getElementById('chartType').value;
+
+            if (charts[selectedChart]) {
+                // Destroy the previous chart instance
+                charts[selectedChart].destroy();
+
+                // Generate a new chart with updated type
+                const label = selectedChart.replace('Chart', '').replace(/([A-Z])/g, ' $1').trim(); // Create a label from chartId
+                generateChart(selectedChart, label, uniqueValues[selectedChart.replace('Chart', '')]);
+            }
+        }
+
+        // Update chart based on selected option
+        function updateChart(selectedChart) {
+            // Default to dateChart if no specific chart is passed
+            selectedChart = selectedChart || document.getElementById('chartType').value;
+
+            const chartsToShow = ['dateChart', 'unitChart', 'nopolChart', 'requestChart', 'picRequestChart', 'statusChart', 'adminChart'];
+
+            chartsToShow.forEach(chartId => {
+                const chartElement = document.getElementById(chartId);
+                if (chartId === selectedChart) {
+                    chartElement.style.display = 'block'; // Show the selected chart
+                    if (!charts[chartId]) {
+                        const label = chartId.replace('Chart', '').replace(/([A-Z])/g, ' $1').trim(); // Create a label from chartId
+                        generateChart(chartId, label, uniqueValues[chartId.replace('Chart', '')]);
+                    }
+                } else {
+                    chartElement.style.display = 'none'; // Hide other charts
+                    if (charts[chartId]) {
+                        charts[chartId].destroy(); // Destroy other chart instances
+                        delete charts[chartId]; // Remove from chart instance storage
+                    }
+                }
+            });
+        }
+
+        // Load data on page load
+        window.onload = loadData;
+    </script>
+</body>
+
+</html>
