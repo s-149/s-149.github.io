@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Order Grab Mart Kilat</title>
+    <meta content="Monitoring Data" name="description" />
+    <meta content="inv,INV,awb,AWB,address,geocoding,longlat,lat,lng" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <!-- Link Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Link DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+    <style>
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tbody tr:nth-child(odd) {
+            background-color: #fff;
+        }
+        
+        .table-container {
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+
+    <!-- Tambahkan jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS dan Bootstrap JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12 text-center mt-4">
+                <h1 class="display-5">Data Order Grab Mart Kilat</h1>
+                <p class="lead">Live orders feed, updated every minute.</p>
+            </div>
+        </div>
+
+        <!-- Tabel -->
+        <div class="row">
+            <div class="col-12 table-container">
+                <div class="table-responsive">
+                    <table id="orderTable" class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Created At</th>
+                                <th>AWB Number</th>
+                                <th>Merchant Order ID</th>
+                                <th>Business</th>
+                                <th>Status</th>
+                                <th>Pickup City</th>
+                                <th>Dropoff City</th>
+                                <th>Dropoff District</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data dari API akan ditambahkan di sini -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Bootstrap JS dan Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // URL API
+        const apiUrl = 'https://adminapis.rideblitz.id/api/v1/unbatched_orders?dir=1&page=1&business=33&limit=100';
+
+        // Fungsi untuk memanggil data menggunakan AJAX dan jQuery
+        function fetchData() {
+            $.ajax({
+                url: apiUrl,
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    displayData(response.results);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        // Fungsi untuk menampilkan data di tabel
+        function displayData(orders) {
+            const tableBody = $('#orderTable tbody');
+            tableBody.empty(); // Kosongkan tabel sebelum menambahkan data baru
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set waktu ke tengah malam untuk perbandingan
+            console.log(today);
+
+            const awbToday = []; // Array untuk menyimpan AWB yang dibuat hari ini
+
+            orders.forEach(order => {
+                const createdAtFormatted = formatDate(order.created_at);
+
+                let milliseconds = Number(order.created_at > 1e15 ? order.created_at / 1e6 : order.created_at);
+                const createdAtDate = new Date(milliseconds);
+                createdAtDate.setHours(0, 0, 0, 0); // Set waktu ke tengah malam untuk perbandingan
+
+                // Cek apakah order dibuat hari ini
+                if (createdAtDate.getTime() === today.getTime()) {
+                    awbToday.push(order.awb_number);
+                }
+
+                const row = `
+                    <tr>
+                        <td>${createdAtFormatted}</td>
+                        <td>${order.awb_number}</td>
+                        <td>${order.merchant_order_id}</td>
+                        <td>${order.business}</td>
+                        <td>${order.order_status}</td>
+                        <td>${order.pickup_city}</td>
+                        <td>${order.dropoff_city}</td>
+                        <td>${order.dropoff_district}</td>
+                    </tr>
+                `;
+
+                tableBody.append(row);
+            });
+
+            // Jika ada AWB yang dibuat hari ini, tampilkan alert dan mainkan suara
+            if (awbToday.length > 0) {
+                const notificationSound = new Audio('assets-blitz/audio/ringtone.mp3');
+
+                // Mainkan suara terlebih dahulu
+                notificationSound.play();
+
+                // Tunggu 1 detik (1000 ms) setelah suara dimainkan, lalu tampilkan alert
+                setTimeout(() => {
+                    alert(`New Orders:\n${awbToday.join(', ')}`);
+                }, 3000); // Waktu tunggu 1000 ms (1 detik) sebelum alert muncul
+            }
+
+            // Initialize DataTable
+            $('#orderTable').DataTable();
+        }
+
+        // Fungsi untuk mengonversi timestamp menjadi format tanggal yang lebih mudah dibaca
+        function formatDate(timestamp) {
+            let milliseconds;
+
+            if (timestamp > 1e15) {
+                milliseconds = Number(timestamp) / 1e6; // Ubah dari nanodetik ke milidetik
+            } else {
+                milliseconds = Number(timestamp); // Anggap sudah dalam milidetik
+            }
+
+            const date = new Date(milliseconds);
+            if (isNaN(date.getTime())) {
+                return 'Invalid Date'; // Jika tidak valid
+            }
+
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Jakarta'
+            };
+
+            return date.toLocaleString('id-ID', options).replace('pukul', ':').trim();
+        }
+
+        // Panggil fetchData pertama kali saat halaman dimuat
+        $(document).ready(function() {
+            fetchData();
+            // Panggil fungsi fetchData setiap 1 menit
+            setInterval(fetchData, 60000); // 60 detik
+        });
+    </script>
+
+</body>
+
+</html>
