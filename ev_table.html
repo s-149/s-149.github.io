@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Installment Logistics | Table</title>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.3.3/css/fixedColumns.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/3.3.3/js/dataTables.fixedColumns.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <style>
+        table td {
+            max-height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
+            vertical-align: middle;
+        }
+        
+        table th {
+            vertical-align: middle;
+            white-space: nowrap;
+            color: white;
+        }
+        
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
+        <div id="data-table" class="table-responsive">
+            <table id="myTable" class="display nowrap table table-bordered table-hover" style="width:100%">
+                <thead>
+                    <tr id="table-header" style="background-color: black;"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Fetch data from Google Sheets CSV
+            $.ajax({
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShAhgYcLynOa9mMSAiNgxhWgCUlQT24BQLi6XhDReu5LIEJYB6UhQuN0-H4YfqSLmeV1LWSmDI0_FF/pub?gid=0&single=true&output=csv',
+                dataType: 'text',
+                success: function(data) {
+                    processData(data);
+                }
+            });
+
+            function processData(data) {
+                var rows = data.split('\n');
+                var headers = rows[0].split(',');
+                var tableHeader = $('#table-header');
+                var tableBody = $('#table-body');
+
+                // Create table headers
+                headers.forEach(function(header) {
+                    tableHeader.append('<th>' + header + '</th>');
+                });
+
+                // Create table rows
+                for (var i = 1; i < rows.length; i++) {
+                    var row = rows[i].split(',');
+                    if (row.length > 1) { // Check for valid row
+                        var tableRow = '<tr>';
+                        row.forEach(function(cell) {
+                            tableRow += '<td>' + cell + '</td>';
+                        });
+                        tableRow += '</tr>';
+                        tableBody.append(tableRow);
+                    }
+                }
+
+                // Initialize DataTables with Buttons, FixedColumns, and FixedHeader
+                $('#myTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    scrollX: true, // Enable horizontal scrolling
+                    scrollY: 300, // Set max height for vertical scrolling
+                    fixedHeader: true, // Freeze header
+                    fixedColumns: {
+                        leftColumns: 2 // Freeze first and second columns
+                    },
+                    dom: 'lBfrtip',
+                    buttons: [{
+                        extend: 'copy',
+                        exportOptions: {
+                            // This will exclude the header
+                            modifier: {
+                                page: 'all'
+                            },
+                            format: {
+                                body: function(data, row, column) {
+                                    // return the data as is, excluding headers
+                                    return data;
+                                }
+                            }
+                        }
+                    }, {
+                        extend: 'excel',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            },
+                            format: {
+                                body: function(data, row, column) {
+                                    return data;
+                                }
+                            }
+                        }
+                    }, {
+                        extend: 'csv',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            },
+                            format: {
+                                body: function(data, row, column) {
+                                    return data;
+                                }
+                            }
+                        }
+                    }, {
+                        extend: 'pdf',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            },
+                            format: {
+                                body: function(data, row, column) {
+                                    return data;
+                                }
+                            }
+                        }
+                    }, {
+                        extend: 'print',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            },
+                            format: {
+                                body: function(data, row, column) {
+                                    return data;
+                                }
+                            }
+                        }
+                    }]
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
