@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Installment (Logistics)</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        #data-container,
+        #data-container-2 {
+            display: none;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-container input {
+            height: 60px;
+            border-radius: 25px;
+            padding: 0 50px;
+            text-align: center;
+            line-height: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(45deg, #f1c40f, #e67e22);
+            background-size: 200% 200%;
+            color: #fff;
+            border: none;
+        }
+        
+        .search-container input:focus {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            outline: none;
+        }
+        
+        .search-container .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 30px;
+        }
+        
+        .search-container input:hover+.search-icon,
+        .search-container input:focus+.search-icon {
+            color: #007bff;
+        }
+        
+        table td {
+            max-height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
+            vertical-align: middle;
+        }
+        
+        table th {
+            vertical-align: middle;
+            white-space: nowrap;
+            color: white;
+        }
+        
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
+
+        <div class="mb-3 search-container">
+            <input type="text" id="search-input" class="form-control" placeholder="Search Vehicle Number..." required autofocus>
+            <i class="bi bi-search search-icon"></i>
+        </div><br><br>
+
+        <div id="data-container" class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr id="table-header" style="background-color: black;"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="data-container-2" class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr id="table-header-2" style="background-color: black;"></tr>
+                </thead>
+                <tbody id="table-body-2"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShAhgYcLynOa9mMSAiNgxhWgCUlQT24BQLi6XhDReu5LIEJYB6UhQuN0-H4YfqSLmeV1LWSmDI0_FF/pub?gid=0&single=true&output=csv',
+                dataType: 'text',
+                success: function(data) {
+                    processData(data);
+                }
+            });
+
+            let allRows = [];
+            let headers = [];
+
+            function processData(data) {
+                var rows = data.split('\n');
+                headers = rows[0].split(',');
+
+                headers.forEach(function(header, index) {
+                    if (index < 7) {
+                        $('#table-header').append('<th>' + header + '</th>');
+                    }
+                    if (index >= 7) {
+                        $('#table-header-2').append('<th>' + header + '</th>');
+                    }
+                });
+
+                for (var i = 1; i < rows.length; i++) {
+                    var row = rows[i].split(',');
+                    if (row.length > 1) {
+                        allRows.push(row);
+                    }
+                }
+
+                $('.search-icon').on('click', function() {
+                    var searchTerm = $('#search-input').val().trim();
+
+                    // Cek apakah input kosong
+                    if (searchTerm === '') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oops...',
+                            text: 'Field pencarian tidak boleh kosong!',
+                            confirmButtonText: 'Oke'
+                        });
+                        return; // Stop jika input kosong
+                    }
+
+                    var matchFound = false; // Flag untuk cek apakah data cocok ditemukan
+
+                    $('#table-body').empty();
+                    $('#table-body-2').empty();
+                    $('#data-container').hide();
+                    $('#data-container-2').hide();
+
+                    allRows.forEach(function(row) {
+                        if (row.some(cell => cell === searchTerm)) {
+                            matchFound = true; // Tandai bahwa ada kecocokan
+
+                            var tableRow = '<tr>';
+                            for (var index = 0; index < 7; index++) {
+                                tableRow += '<td>' + (row[index] || '') + '</td>';
+                            }
+                            tableRow += '</tr>';
+                            $('#table-body').append(tableRow);
+
+                            var tableRow2 = '<tr>';
+                            for (var index = 7; index < row.length; index++) {
+                                tableRow2 += '<td>' + (row[index] || '') + '</td>';
+                            }
+                            tableRow2 += '</tr>';
+                            $('#table-body-2').append(tableRow2);
+                        }
+                    });
+
+                    // Jika tidak ada data yang cocok, tampilkan alert
+                    if (!matchFound) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Data tidak ditemukan',
+                            text: 'Tidak ada hasil pencarian yang cocok dengan "' + searchTerm + '"',
+                            confirmButtonText: 'Oke'
+                        });
+                    } else {
+                        // Jika cocok, munculkan SweetAlert sebelum menampilkan data
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data Ditemukan!',
+                            text: 'Menampilkan hasil pencarian untuk "' + searchTerm + '"',
+                            confirmButtonText: 'Tampilkan Data'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $('#data-container').show();
+                                $('#data-container-2').show();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
