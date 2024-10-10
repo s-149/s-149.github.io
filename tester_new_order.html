@@ -120,6 +120,7 @@
             console.log(today);
 
             const awbToday = []; // Array untuk menyimpan AWB yang dibuat hari ini
+            let totalNew = 0;
 
             orders.forEach(order => {
                 const createdAtFormatted = formatDate(order.created_at);
@@ -130,6 +131,7 @@
 
                 // Cek apakah order dibuat hari ini
                 if (createdAtDate.getTime() === today.getTime()) {
+                    totalNew++
                     awbToday.push(order.awb_number);
                 }
 
@@ -159,7 +161,7 @@
 
                 // Tunggu 1 detik (1000 ms) setelah suara dimainkan, lalu tampilkan alert
                 setTimeout(() => {
-                    alert(`New Orders:\n${awbToday.join(', ')}`);
+                    alert(`New Orders : ${totalNew}\n${awbToday.join(', ')}`);
                 }, 3000); // Waktu tunggu 1000 ms (1 detik) sebelum alert muncul
             }
 
