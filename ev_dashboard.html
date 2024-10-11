@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV | Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f7f9fb;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+        }
+        
+        .sidebar a {
+            color: #ffffff;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .sidebar a:hover {
+            background-color: #495057;
+            text-decoration: none;
+        }
+        
+        .dropdown-panel {
+            display: none;
+            background-color: #495057;
+            padding: 10px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        #content-area {
+            overflow: auto;
+        }
+        
+        #content-area iframe {
+            width: 100%;
+            height: 80vh;
+            border: none;
+        }
+        
+        .icon {
+            margin-right: 10px;
+        }
+        /* Responsif */
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                transition: left 0.3s ease;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+        
+        .toggle-sidebar {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar a {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+                <div class="sidebar-sticky">
+                    <h4 class="text-white p-3">BLITZ EV</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" id="link-default"><i class="fas fa-home icon"></i>Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" id="link-page1"><i class="fas fa-folder icon"></i> EV Installment</a>
+                            <div class="dropdown-panel" id="dropdown-page1">
+                                <a class="dropdown-item" href="#" id="link-page1-sub1"><i class="fas fa-file-alt icon"></i> EV Search</a>
+                                <a class="dropdown-item" href="#" id="link-page1-sub2"><i class="fas fa-file-alt icon"></i> EV Table</a>
+                                <a class="dropdown-item" href="#" id="link-page1-sub3"><i class="fas fa-file-alt icon"></i> EV Visualization</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Content -->
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 content">
+                <div id="content-area">
+                    <h2>Welcome to the Dashboard</h2>
+                    <p>This is the default content displayed when the page is first loaded.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Script -->
+    <script>
+        $(document).ready(function() {
+            // Load default content
+            $('#content-area').html(`
+                <h2>Welcome to the Dashboard</h2>
+                <p>This is the default content displayed when the page is first loaded.</p>
+            `);
+
+            // Event listeners for sidebar links
+            $('#link-default').on('click', function(e) {
+                e.preventDefault();
+                $('#content-area').html(`
+                    <h2>Welcome to the Dashboard</h2>
+                    <p>This is the default content displayed when the page is first loaded.</p>
+                `);
+            });
+
+            // Toggle dropdown
+            $('#link-page1').on('click', function(e) {
+                e.preventDefault();
+                $('#dropdown-page1').slideToggle();
+            });
+
+            // Submenu event listeners
+            $('#link-page1-sub1').on('click', function(e) {
+                e.preventDefault();
+                $('#content-area').html(`
+                    <h2>EV Search</h2>
+                    <iframe src="ev_search.html"></iframe>
+                `);
+            });
+
+            $('#link-page1-sub2').on('click', function(e) {
+                e.preventDefault();
+                $('#content-area').html(`
+                    <h2>EV Table</h2>
+                    <iframe src="ev_table.html"></iframe>
+                `);
+            });
+
+            $('#link-page1-sub3').on('click', function(e) {
+                e.preventDefault();
+                $('#content-area').html(`
+                    <h2>EV Visualization</h2>
+                    <iframe src="ev_visualization.html"></iframe>
+                `);
+            });
+        });
+    </script>
+</body>
+
+</html>
