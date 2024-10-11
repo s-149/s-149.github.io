@@ -210,7 +210,7 @@
                         Swal.fire({
                             icon: 'warning',
                             title: 'Oops...',
-                            text: 'Field pencarian tidak boleh kosong!',
+                            text: 'Form pencarian tidak boleh kosong!',
                             confirmButtonText: 'Oke'
                         });
                         return; // Stop jika input kosong
@@ -247,7 +247,7 @@
                     if (!matchFound) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Data tidak ditemukan',
+                            title: 'Hemzz,, data tidak ditemukan',
                             text: 'Tidak ada hasil pencarian yang cocok dengan "' + searchTerm + '"',
                             confirmButtonText: 'Oke'
                         });
@@ -255,7 +255,7 @@
                         // Jika cocok, munculkan SweetAlert sebelum menampilkan data
                         Swal.fire({
                             icon: 'success',
-                            title: 'Data Ditemukan!',
+                            title: 'Hore,,, data Ditemukan!',
                             text: 'Menampilkan hasil pencarian untuk "' + searchTerm + '"',
                             confirmButtonText: 'Tampilkan Data'
                         }).then((result) => {
@@ -269,7 +269,7 @@
             }
         });
 
-        const text = "hello users ....."; // Teks yang ingin ditampilkan
+        const text = "hello users, welcome back ....."; // Teks yang ingin ditampilkan
         const marquee = document.getElementById("marquee"); // Mengambil elemen marquee
         let index = 0; // Indeks untuk melacak karakter yang ditampilkan
 
@@ -277,7 +277,7 @@
             if (index < text.length) {
                 marquee.innerHTML += text.charAt(index); // Menambahkan karakter ke elemen marquee
                 index++; // Meningkatkan indeks
-                setTimeout(typeText, 150); // Mengatur jeda 200ms sebelum karakter berikutnya ditampilkan
+                setTimeout(typeText, 300); // Mengatur jeda 200ms sebelum karakter berikutnya ditampilkan
             }
         }
         // Memulai fungsi typeText setelah halaman dimuat
