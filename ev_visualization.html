@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Installment Logistics | Visualization</title>
+    <meta content="Search EV with Vehicle Number" name="description" />
+    <meta content="input, search, blitz, electric, mobility, molis, ev, EV" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
+        }
+        
+        canvas {
+            max-width: 100%;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <!-- Select for Chart Type using Select2 -->
+                <div class="form-group">
+                    <label for="chartType">Select Data</label>
+                    <select id="chartType" class="form-control" onchange="updateChart()">
+                        <!-- Options will be dynamically filled -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Select for Chart Visualization Type -->
+                <div class="form-group">
+                    <label for="chartTypeSelection">Select Visualization</label>
+                    <select id="chartTypeSelection" class="form-control" onchange="updateChartType()">
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                        <option value="pie">Pie</option>
+                        <option value="doughnut">Doughnut</option>
+                        <option value="radar">Radar</option>
+                        <option value="polarArea">Polar Area</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div id="charts-container" class="mt-4">
+            <canvas id="selectedChart"></canvas>
+        </div>
+        <!-- Data display section below the chart -->
+        <div id="data-display" class="mt-4">
+            <h4>Summary :</h4>
+            <table>
+                <tr>
+                    <th>Accumulated Fund</th>
+                    <td> : <span id="accumulated-fund">0</span></td>
+                </tr>
+                <tr>
+                    <th>Target</th>
+                    <td> : <span id="target">0</span></td>
+                </tr>
+                <tr>
+                    <th>Remaining</th>
+                    <td> : <span id="remaining">0</span></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vShAhgYcLynOa9mMSAiNgxhWgCUlQT24BQLi6XhDReu5LIEJYB6UhQuN0-H4YfqSLmeV1LWSmDI0_FF/pub?gid=0&single=true&output=csv";
+        let charts = {}; // Store chart instances
+        let currentChartType = 'bar'; // Default chart type
+        let rowData = []; // Store row data
+        let labels = []; // Store dynamic labels (headers)
+
+        // Load data from Google Sheets and populate select2
+        function loadData() {
+            fetch(sheetURL)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.split("\n").map(row => row.split(","));
+
+                    // Extract header row (first row) and use as labels
+                    labels = rows[0].slice(7); // Use rest of the columns for labels
+
+                    // Store the rest of the data
+                    rowData = rows.slice(1); // Skip the header row
+                    const chartOptions = rowData.map(row => row[0].trim()); // Use first column as options
+
+                    // Populate select2 options
+                    populateSelect2(chartOptions);
+
+                    // Generate chart for the first row by default
+                    updateChart();
+                });
+        }
+
+        // Function to format numbers by removing dots, replacing commas, and removing trailing zeros
+        function formatNumber(data) {
+            return data.map(item => {
+                if (item.endsWith(".00")) {
+                    item = item.slice(0, -3);
+                }
+                let cleanedItem = item.replace(/[^0-9]/g, '');
+                let number = parseInt(cleanedItem, 10);
+                if (isNaN(number)) {
+                    return 0;
+                }
+                return number;
+            });
+        }
+
+        function formatRupiah(angka) {
+            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '.00';
+        }
+
+        // Function to populate Select2 dropdown
+        function populateSelect2(options) {
+            const select = $('#chartType');
+            select.empty(); // Clear any existing options
+
+            // Append 'Summary' option
+            select.append(new Option("Summary", "summary"));
+
+            // Append new options from data
+            options.forEach((option, index) => {
+                select.append(new Option(option, index));
+            });
+
+            // Initialize Select2 after options are populated
+            select.select2({
+                placeholder: 'Select a data row',
+                allowClear: true
+            });
+        }
+
+        // Helper function to generate random colors
+        function generateRandomColors(num) {
+            const colors = [];
+            for (let i = 0; i < num; i++) {
+                const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colors.push(color);
+            }
+            return colors;
+        }
+
+        function updateChart() {
+            const selectedValue = $('#chartType').val(); // Dapatkan nilai opsi yang dipilih
+            if (selectedValue === "summary") {
+                // Ambil data dari kolom 4, 5, dan 6 dan jumlahkan
+                let totalAccumulatedFund = 0;
+                let totalTarget = 0;
+
+                rowData.forEach(row => {
+                    totalAccumulatedFund += parseFloat(formatNumber([row[3]])) || 0; // Kolom ke-4
+                    totalTarget += parseFloat(formatNumber([row[4]])) || 0; // Kolom ke-5
+                });
+
+                // Gunakan kolom pertama sebagai label grafik
+                const chartLabels = rowData.map(row => row[0]); // Gunakan kolom pertama sebagai label grafik
+                const summaryData = rowData.map(row => formatNumber([row[3]])[0]); // Dapatkan data kolom ke-4 untuk grafik
+
+                // Hasilkan warna acak untuk setiap data di summary
+                const barColors = generateRandomColors(summaryData.length);
+
+                renderChart("Summary", chartLabels, summaryData, barColors);
+
+                // Perbarui bagian tampilan data dengan nilai total
+                $("#accumulated-fund").text(formatRupiah(totalAccumulatedFund));
+                $("#target").text(formatRupiah(totalTarget));
+                $("#remaining").text(formatRupiah(totalAccumulatedFund - totalTarget));
+
+                $("#data-display").show(); // Pastikan bagian tampilan data terlihat
+            } else {
+
+                let totalAccumulatedFund = 0;
+                let totalTarget = 0;
+
+                const selectedRowData = rowData[selectedValue]; // Ambil data dari baris yang dipilih
+                let chartData = formatNumber(selectedRowData.slice(7)); // Format data grafik
+
+                // Tampilkan data spesifik baris
+                const accumulatedFund = selectedRowData[3]; // Kolom ke-4
+                const target = selectedRowData[4]; // Kolom ke-5
+
+                totalAccumulatedFund = formatNumber([accumulatedFund])[0] || 0; // Kolom ke-4
+                totalTarget = formatNumber([target])[0] || 0; // Kolom ke-5
+
+                // Perbarui bagian tampilan data dengan nilai spesifik baris
+                $("#accumulated-fund").text(formatRupiah(totalAccumulatedFund));
+                $("#target").text(formatRupiah(totalTarget));
+                $("#remaining").text(formatRupiah(totalAccumulatedFund - totalTarget));
+
+                $("#data-display").show(); // Pastikan bagian tampilan data terlihat
+
+                const barColors = generateRandomColors(chartData.length);
+                renderChart(selectedRowData[0], labels, chartData, barColors);
+            }
+        }
+
+        // Load the data once the DOM is ready
+        $(document).ready(function() {
+            loadData(); // Call the function to load data and populate select2
+            $("#data-display").hide(); // Initially hide the data display section
+        });
+
+
+        // Function to render the chart
+        function renderChart(label, chartLabels, chartData, barColors = []) {
+            // Destroy existing chart if it exists
+            if (charts['selectedChart']) {
+                charts['selectedChart'].destroy();
+            }
+
+            const ctx = document.getElementById('selectedChart').getContext('2d');
+
+            // Create new chart
+            charts['selectedChart'] = new Chart(ctx, {
+                type: currentChartType,
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: label,
+                        data: chartData,
+                        backgroundColor: barColors.length ? barColors : 'rgba(75, 192, 192, 0.2)',
+                        borderColor: barColors.length ? barColors : 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to update chart type
+        function updateChartType() {
+            currentChartType = $('#chartTypeSelection').val(); // Get selected chart type
+            updateChart(); // Refresh the chart
+        }
+    </script>
+</body>
+
+</html>
