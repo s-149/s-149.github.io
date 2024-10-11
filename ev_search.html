@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Installment Logistics | Search</title>
+    <meta content="Search EV with Vehicle Number" name="description" />
+    <meta content="input, search, blitz, electric, mobility, molis, ev, EV" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -17,6 +20,10 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
+        body {
+            background: linear-gradient(45deg, #edece6, #f7bc89);
+        }
+        
         #data-container,
         #data-container-2 {
             display: none;
@@ -57,7 +64,7 @@
         
         .search-container input:hover+.search-icon,
         .search-container input:focus+.search-icon {
-            color: #007bff;
+            color: black;
         }
         
         table td {
@@ -79,13 +86,58 @@
             max-height: 500px;
             overflow-y: auto;
         }
+        
+        .marquee {
+            overflow: hidden;
+            /* Menyembunyikan bagian yang keluar dari batas */
+            white-space: nowrap;
+            /* Mencegah teks terputus */
+            display: inline-block;
+            /* Membuat elemen inline agar bisa diterapkan transform */
+        }
+        
+        .icon-container {
+            position: relative;
+            /* Mengatur posisi relatif untuk ikon */
+        }
+        
+        .waving-icon {
+            transition: transform 0.2s ease;
+            /* Transisi saat bergerak */
+        }
+        
+        @keyframes wave {
+            0% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(30deg);
+            }
+            /* Putar 30 derajat ke kanan */
+            50% {
+                transform: rotate(-30deg);
+            }
+            /* Putar 30 derajat ke kiri */
+            75% {
+                transform: rotate(15deg);
+            }
+            /* Putar sedikit ke kanan */
+            100% {
+                transform: rotate(0deg);
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-5">
         <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
-
+        <h4 class="text-center mb-4">
+            <div class="icon-container" id="icon-container">
+                <img src="assets-blitz/images/hand.png" alt="Waving Hand" class="waving-icon" id="waving-icon" width="30">
+            </div>
+            <div class="marquee" id="marquee"></div>
+        </h4>
         <div class="mb-3 search-container">
             <input type="text" id="search-input" class="form-control" placeholder="Search Vehicle Number..." required autofocus>
             <i class="bi bi-search search-icon"></i>
@@ -101,6 +153,7 @@
         </div>
 
         <div id="data-container-2" class="table-responsive">
+            <h3>Transaction</h3>
             <table class="table table-bordered">
                 <thead>
                     <tr id="table-header-2" style="background-color: black;"></tr>
@@ -214,6 +267,33 @@
                     }
                 });
             }
+        });
+
+        const text = "hello users ....."; // Teks yang ingin ditampilkan
+        const marquee = document.getElementById("marquee"); // Mengambil elemen marquee
+        let index = 0; // Indeks untuk melacak karakter yang ditampilkan
+
+        function typeText() {
+            if (index < text.length) {
+                marquee.innerHTML += text.charAt(index); // Menambahkan karakter ke elemen marquee
+                index++; // Meningkatkan indeks
+                setTimeout(typeText, 150); // Mengatur jeda 200ms sebelum karakter berikutnya ditampilkan
+            }
+        }
+        // Memulai fungsi typeText setelah halaman dimuat
+        window.onload = typeText;
+
+        const iconContainer = document.getElementById("icon-container");
+        const wavingIcon = document.getElementById("waving-icon");
+
+        iconContainer.addEventListener("mouseenter", () => {
+            wavingIcon.style.transform = "translateY(-10px)"; // Menggerakkan ikon ke atas
+            wavingIcon.style.animation = "wave 0.5s infinite"; // Menambahkan animasi gelombang
+        });
+
+        iconContainer.addEventListener("mouseleave", () => {
+            wavingIcon.style.transform = "translateY(0)"; // Mengembalikan ikon ke posisi semula
+            wavingIcon.style.animation = ""; // Menghentikan animasi gelombang
         });
     </script>
 </body>
