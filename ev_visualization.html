@@ -38,24 +38,13 @@
             max-width: 100%;
             margin-bottom: 30px;
         }
-        
-        .marquee {
-            overflow: hidden;
-            /* Menyembunyikan bagian yang keluar dari batas */
-            white-space: nowrap;
-            /* Mencegah teks terputus */
-            display: inline-block;
-            /* Membuat elemen inline agar bisa diterapkan transform */
-        }
     </style>
 </head>
 
 <body>
 
     <div class="container">
-        <h2 class="text-center mb-4">
-            <div class="marquee" id="marquee"></div>
-        </h2>
+        <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -294,20 +283,6 @@
             currentChartType = $('#chartTypeSelection').val(); // Get selected chart type
             updateChart(); // Refresh the chart
         }
-
-        const text = "EV Installment (Logistics)"; // Teks yang ingin ditampilkan
-        const marquee = document.getElementById("marquee"); // Mengambil elemen marquee
-        let index = 0; // Indeks untuk melacak karakter yang ditampilkan
-
-        function typeText() {
-            if (index < text.length) {
-                marquee.innerHTML += text.charAt(index); // Menambahkan karakter ke elemen marquee
-                index++; // Meningkatkan indeks
-                setTimeout(typeText, 500); // Mengatur jeda 200ms sebelum karakter berikutnya ditampilkan
-            }
-        }
-        // Memulai fungsi typeText setelah halaman dimuat
-        window.onload = typeText;
     </script>
 </body>
 
