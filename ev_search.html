@@ -88,6 +88,7 @@
             vertical-align: middle;
             white-space: nowrap;
             color: white;
+            background-color: black;
         }
         
         .table-responsive {
@@ -142,7 +143,7 @@
         <h2 class="text-center mb-4">EV Installment (Logistics)</h2>
         <h4 class="text-center mb-4">
             <div class="icon-container" id="icon-container">
-                <img src="assets-blitz/images/hand.png" alt="Waving Hand" class="waving-icon" id="waving-icon" width="30">
+                <img src="assets-blitz/images/hand.png" alt="Waving Hand" class="waving-icon" id="waving-icon" width="50">
             </div>
             <div class="marquee" id="marquee"></div>
         </h4>
@@ -151,23 +152,49 @@
             <i class="bi bi-search search-icon"></i>
         </div><br><br>
 
-        <div id="data-container" class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr id="table-header" style="background-color: black;"></tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-
-        <div id="data-container-2" class="table-responsive">
-            <h3>Transaction</h3>
-            <table class="table table-bordered">
-                <thead>
-                    <tr id="table-header-2" style="background-color: black;"></tr>
-                </thead>
-                <tbody id="table-body-2"></tbody>
-            </table>
+        <div id="data-container">
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Details
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tbody id="table-body"></tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Transaction
+                    </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr style="background-color: silver;">
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body-2"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -194,14 +221,14 @@
                 var rows = data.split('\n');
                 headers = rows[0].split(',');
 
-                headers.forEach(function(header, index) {
-                    if (index < 7) {
-                        $('#table-header').append('<th>' + header + '</th>');
-                    }
-                    if (index >= 7) {
-                        $('#table-header-2').append('<th>' + header + '</th>');
-                    }
-                });
+                // headers.forEach(function(header, index) {
+                //     // if (index < 7) {
+                //     //     $('#table-header').append('<th>' + header + '</th>');
+                //     // }
+                //     // if (index >= 7) {
+                //     //     $('#table-header-2').append('<th>' + header + '</th>');
+                //     // }
+                // });
 
                 for (var i = 1; i < rows.length; i++) {
                     var row = rows[i].split(',');
@@ -235,18 +262,16 @@
                         if (row.some(cell => cell === searchTerm)) {
                             matchFound = true; // Tandai bahwa ada kecocokan
 
-                            var tableRow = '<tr>';
+                            var tableRow = '';
                             for (var index = 0; index < 7; index++) {
-                                tableRow += '<td>' + (row[index] || '') + '</td>';
+                                tableRow += '<tr><th style="background-color: black;">' + headers[index] + '</th><td>' + (row[index] || '') + '</td></tr>';
                             }
-                            tableRow += '</tr>';
                             $('#table-body').append(tableRow);
 
-                            var tableRow2 = '<tr>';
+                            var tableRow2 = '';
                             for (var index = 7; index < row.length; index++) {
-                                tableRow2 += '<td>' + (row[index] || '') + '</td>';
+                                tableRow2 += '<tr><th style="background-color: black;">' + headers[index] + '</th><td>' + (row[index] || '') + '</td></tr>';
                             }
-                            tableRow2 += '</tr>';
                             $('#table-body-2').append(tableRow2);
                         }
                     });
@@ -296,7 +321,7 @@
 
         iconContainer.addEventListener("mouseenter", () => {
             wavingIcon.style.transform = "translateY(-10px)"; // Menggerakkan ikon ke atas
-            wavingIcon.style.animation = "wave 0.5s infinite"; // Menambahkan animasi gelombang
+            wavingIcon.style.animation = "wave 0.6s infinite"; // Menambahkan animasi gelombang
         });
 
         iconContainer.addEventListener("mouseleave", () => {
