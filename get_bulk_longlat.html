@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Get Component Address</title>
+    <meta content="Get LongLat from Address" name="description" />
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.4/css/buttons.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            background-color: silver;
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        /* Hide the file input */
+        
+        #file-input {
+            display: none;
+        }
+        /* Style for the icon */
+        
+        .file-icon {
+            cursor: pointer;
+            font-size: 16px;
+            color: #0a0e11;
+            margin-bottom: 10px;
+        }
+        
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="d-flex justify-content-center align-items-center" style="margin-top: 25px;">
+        <div class="container-sm">
+            <div class="col">
+                <h2>Get Component Address</h2>
+                <div style="float: right;">
+                    <a href="assets-blitz/data/dataTest.xlsx">
+                        <span class="file-icon btn btn-success">
+                            <i class="fas fa-file-excel"></i> Template
+                        </span>
+                    </a>
+                    <span class="file-icon btn btn-primary" onclick="document.getElementById('file-input').click();">
+                        <i class="fas fa-file-import"></i> Import
+                    </span>
+                    <input type="file" id="file-input" class="form-control" />
+                    <br />
+                </div>
+                <div id="map"></div><br>
+                <table id="myDataTable" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Full Address</th>
+                            <th>City</th>
+                            <th>Province</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>LatLong</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data akan ditambahkan di sini -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.print.min.js"></script>
+
+    <script>
+        let map;
+        const cache = {}; // Objek cache untuk menyimpan hasil geocoding
+        const markers = []; // Menyimpan marker
+
+        async function initializeMap() {
+            map = L.map("map").setView([-6.2088, 106.8456], 11); // Jakarta
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19
+            }).addTo(map);
+            console.log("Map Initialized");
+        }
+
+        initializeMap();
+
+        // Fungsi untuk membaca file Excel
+        document.getElementById("file-input").addEventListener("change", handleFile);
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {
+                    type: "array"
+                });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(firstSheet, {
+                    header: 1
+                });
+
+                // Ambil Kode dan Address dari kolom yang sesuai
+                const addresses = json.map(row => ({
+                    kode: row[0],
+                    address: row[1]
+                })).filter(row => row.address); // Hanya alamat yang tidak kosong
+
+                processAddresses(addresses);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Inisialisasi DataTable
+        $(document).ready(function() {
+            const table = $('#myDataTable').DataTable({
+                dom: 'Bfrtip', // Ubah dom untuk menunjukkan tombol di atas tabel
+                buttons: [{
+                    extend: 'csvHtml5',
+                    text: 'Export CSV',
+                    className: 'btn btn-info'
+                }, {
+                    extend: 'excelHtml5',
+                    text: 'Export Excel',
+                    className: 'btn btn-success'
+                }],
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ]
+            });
+
+            // Atur tombol untuk muncul di atas tabel
+            table.buttons().container().appendTo('#myDataTable_wrapper .col-md-6:eq(0)');
+        });
+
+        // Proses alamat dan ambil koordinat
+        function processAddresses(addresses) {
+            addresses.forEach(item => {
+                getLongLat(item.kode, item.address);
+            });
+        }
+
+        function getLongLat(kode, address) {
+            // Cek apakah alamat ada di cache
+            if (cache[address]) {
+                const {
+                    lat,
+                    lng,
+                    fullAddress,
+                    city,
+                    province
+                } = cache[address];
+                updateMap(lat, lng, kode, fullAddress, city, province);
+                return;
+            }
+
+            const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8"; // API Key Google Maps
+            const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+
+            fetch(geocodeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "OK") {
+                        const location = data.results[0].geometry.location;
+                        const lat = location.lat;
+                        const lng = location.lng;
+                        const fullAddress = data.results[0].formatted_address;
+                        const addressComponents = data.results[0].address_components;
+                        let city = "",
+                            province = "";
+
+                        addressComponents.forEach(component => {
+                            if (component.types.includes("administrative_area_level_2")) {
+                                city = component.long_name;
+                            }
+                            if (component.types.includes("administrative_area_level_1")) {
+                                province = component.long_name;
+                            }
+                        });
+
+                        // Simpan hasil ke dalam cache
+                        cache[address] = {
+                            lat,
+                            lng,
+                            fullAddress,
+                            city,
+                            province
+                        };
+                        updateMap(lat, lng, kode, fullAddress, city, province);
+                    } else {
+                        console.log("Geocoding failed: " + data.status);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
+
+        function updateMap(lat, lng, kode, fullAddress, city, province) {
+            const location = [lat, lng];
+
+            // Tambahkan marker baru untuk setiap alamat
+            const marker = L.marker(location).addTo(map);
+            markers.push(marker); // Simpan marker di array
+
+            const popupContent = `
+                Kode : ${kode}<br>
+                Address : ${fullAddress}<br>
+                City : ${city}<br>
+                Province : ${province}<br>
+                Latitude : ${lat}<br>
+                Longitude : ${lng}<br>
+                LatLong : ${lat}, ${lng}
+            `;
+            marker.bindPopup(popupContent).openPopup();
+
+            // Tambahkan data ke DataTable
+            const table = $('#myDataTable').DataTable();
+            table.row.add([kode, fullAddress, city, province, lat, lng, `${lat}, ${lng}`]).draw();
+        }
+    </script>
+</body>
+
+</html>
