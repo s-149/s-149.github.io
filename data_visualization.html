@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <meta content="Data Visualization" name="description" />
+    <meta content="input, search, blitz, electric, mobility, molis, ev, EV, analis, data analis, grafik, chart" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <!-- Favicons -->
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link rel="icon" href="assets-blitz/img/logo/logo.jpg" type="image/jpeg">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f4f7fa;
+            font-family: Arial, sans-serif;
+        }
+        
+        h1 {
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        
+        #summary {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #chart {
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <h1 class="text-center mt-4">Data Visualization</h1>
+
+    <!-- Input Excel File with Icon -->
+    <div class="form-group text-center">
+        <label for="template" class="btn btn-outline-primary">
+            <a id="template" href="assets-blitz/data/sample_report.xlsx">
+                <i class="fas fa-file-download fa-2x"></i>
+                <span class="d-block mt-2">Download Sample</span>
+            </a>
+        </label>
+        <label for="fileInput" class="btn btn-outline-primary">
+        <i class="fas fa-file-upload fa-2x"></i>
+        <span class="d-block mt-2">Upload Excel File</span>
+    </label>
+        <input type="file" class="d-none" id="fileInput" accept=".xlsx, .xls">
+    </div>
+
+    <!-- Dropdown for selecting columns to visualize -->
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="x-axis">X-Axis:</label>
+            <select class="form-control" id="x-axis" title="Sumbu X (X-Axis): Digunakan untuk menunjukkan variabel independen, misalnya kategori atau waktu. Contoh judulnya bisa seperti Bulan, Kategori, atau Waktu."></select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="y-axis">Y-Axis:</label>
+            <select class="form-control" id="y-axis" title="Sumbu Y (Y-Axis): Digunakan untuk menunjukkan variabel dependen, yaitu hasil dari variabel pada sumbu X. Contoh judulnya bisa seperti Penjualan, Jumlah, atau Nilai."></select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="chart-type">Chart Type:</label>
+            <select class="form-control" id="chart-type" title="Chart Type adalah pilihan visualisasi data yang membantu menampilkan informasi dengan cara berbeda, memudahkan pengguna untuk memahami pola atau tren dalam data."></select>
+        </div>
+    </div>
+
+    <!-- Container for Chart -->
+    <div id="chart" style="width: 100%; height: 500px;"></div>
+
+    <!-- Summary Section -->
+    <div id="summary"></div>
+
+    <script>
+        let chartData;
+
+        // Supported chart types by Plotly
+        const chartTypes = [
+            'bar',
+            'line',
+            'pie',
+            'doughnut',
+            'radar',
+            'polarArea',
+            'scatter',
+            'candlestick'
+        ];
+
+        // Event listener for file input
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+
+        // Handle uploaded file
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+
+                // Get data from the first sheet
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
+                    header: 1
+                });
+
+                // Get headers from the first row and data from the rest
+                const headers = worksheet[0];
+                const dataRows = worksheet.slice(1);
+
+                populateDropdowns(headers, dataRows);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Populate dropdowns for X-Axis, Y-Axis, and Chart Type
+        function populateDropdowns(headers, dataRows) {
+            const xAxisSelect = document.getElementById('x-axis');
+            const yAxisSelect = document.getElementById('y-axis');
+            const chartTypeSelect = document.getElementById('chart-type');
+
+            // Clear dropdowns before repopulating
+            xAxisSelect.innerHTML = '';
+            yAxisSelect.innerHTML = '';
+            chartTypeSelect.innerHTML = '';
+
+            // Fill dropdowns for X-Axis and Y-Axis
+            headers.forEach((header, index) => {
+                const optionX = document.createElement('option');
+                optionX.value = index;
+                optionX.text = header;
+                xAxisSelect.appendChild(optionX);
+
+                const optionY = document.createElement('option');
+                optionY.value = index;
+                optionY.text = header;
+                yAxisSelect.appendChild(optionY);
+            });
+
+            // Fill dropdown for chart types
+            chartTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.text = type.charAt(0).toUpperCase() + type.slice(1);
+                chartTypeSelect.appendChild(option);
+            });
+
+            // Event listeners for rendering chart on dropdown change
+            xAxisSelect.addEventListener('change', () => renderChart(dataRows));
+            yAxisSelect.addEventListener('change', () => renderChart(dataRows));
+            chartTypeSelect.addEventListener('change', () => renderChart(dataRows));
+        }
+
+        // Render chart based on user selections
+        function renderChart(dataRows) {
+            const xIndex = document.getElementById('x-axis').value;
+            const yIndex = document.getElementById('y-axis').value;
+            const chartType = document.getElementById('chart-type').value;
+
+            // Get labels and values based on selected indices
+            const labels = dataRows.map(row => row[xIndex]);
+            const values = dataRows.map(row => Number(row[yIndex]));
+
+            if (chartType === 'candlestick') {
+                const candlestickData = dataRows.map(row => ({
+                    x: row[xIndex],
+                    open: Number(row[yIndex]),
+                    high: Number(row[yIndex]) + 5,
+                    low: Number(row[yIndex]) - 5,
+                    close: Number(row[yIndex])
+                }));
+
+                createCandlestickChart(candlestickData);
+            } else if (chartType === 'pie') {
+                createPieChart(labels, values);
+            } else if (chartType === 'doughnut') {
+                createDoughnutChart(labels, values);
+            } else if (chartType === 'radar') {
+                createRadarChart(labels, values);
+            } else if (chartType === 'polarArea') {
+                createPolarAreaChart(labels, values);
+            } else if (chartType === 'scatter') {
+                createScatterChart(labels, values);
+            } else {
+                createChart(labels, values, chartType);
+            }
+
+            displaySummary(labels, values);
+        }
+
+        // Create a Pie chart
+        function createPieChart(labels, values) {
+            const trace = {
+                labels: labels,
+                values: values,
+                type: 'pie',
+                textinfo: 'label+percent',
+                insidetextorientation: 'radial'
+            };
+
+            const layout = {
+                title: 'Pie Chart'
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a Doughnut chart
+        function createDoughnutChart(labels, values) {
+            const trace = {
+                labels: labels,
+                values: values,
+                type: 'pie',
+                hole: 0.4,
+                textinfo: 'label+percent',
+                insidetextorientation: 'radial'
+            };
+
+            const layout = {
+                title: 'Doughnut Chart'
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a Radar chart
+        function createRadarChart(labels, values) {
+            const trace = {
+                r: values,
+                theta: labels,
+                type: 'scatterpolar',
+                fill: 'toself',
+                name: 'Radar Chart'
+            };
+
+            const layout = {
+                title: 'Radar Chart',
+                polar: {
+                    radialaxis: {
+                        visible: true,
+                        range: [0, Math.max(...values) + 10]
+                    }
+                },
+                showlegend: false
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a Polar Area chart
+        function createPolarAreaChart(labels, values) {
+            const trace = {
+                r: values,
+                theta: labels,
+                type: 'scatterpolar',
+                fill: 'toself',
+                name: 'Polar Area Chart'
+            };
+
+            const layout = {
+                title: 'Polar Area Chart'
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a Scatter chart
+        function createScatterChart(labels, values) {
+            const trace = {
+                x: labels,
+                y: values,
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 12,
+                    color: 'rgba(156, 165, 196, 0.95)',
+                    line: {
+                        width: 2
+                    }
+                }
+            };
+
+            const layout = {
+                title: 'Scatter Chart'
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a generic chart
+        function createChart(labels, values, type) {
+            const trace = {
+                x: labels,
+                y: values,
+                type: type
+            };
+
+            const layout = {
+                title: `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Create a Candlestick chart
+        function createCandlestickChart(data) {
+            const trace = {
+                x: data.map(item => item.x),
+                open: data.map(item => item.open),
+                high: data.map(item => item.high),
+                low: data.map(item => item.low),
+                close: data.map(item => item.close),
+                type: 'candlestick',
+                name: 'Candlestick Chart'
+            };
+
+            const layout = {
+                title: 'Candlestick Chart'
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        // Display summary of the data
+        function displaySummary(labels, values) {
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                <h5>Data Summary</h5>
+                
+                <table>
+                    <tr>
+                        <th>Total Points</th>
+                        <td>:</td>
+                        <td>${labels.length}</td>
+                    </tr>
+                    <tr>
+                        <th>Sum of Values</th>
+                        <td>:</td>
+                        <td>${values.reduce((a, b) => a + b, 0)}</td>
+                    </tr>
+                    <tr>
+                        <th>Average Value</th>
+                        <td>:</td>
+                        <td>${(values.reduce((a, b) => a + b, 0) / values.length)}</td>
+                    </tr>
+                    <tr>
+                        <th>Max of Values</th>
+                        <td>:</td>
+                        <td>${Math.max(...values)}</td>
+                    </tr>
+                    <tr>
+                        <th>Min of Values</th>
+                        <td>:</td>
+                        <td>${Math.min(...values)}</td>
+                    </tr>
+                </table>
+            `;
+        }
+    </script>
+</body>
+
+</html>
