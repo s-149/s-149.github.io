@@ -57,6 +57,26 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
+        
+        table td {
+            max-height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
+            vertical-align: middle;
+        }
+        
+        table th {
+            vertical-align: middle;
+            white-space: nowrap;
+            color: black;
+        }
+        
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
@@ -213,6 +233,15 @@
                     // Initialize DataTables with Export Buttons
                     $(document).ready(function() {
                         dataTable = $('#dataTable').DataTable({
+                            paging: true,
+                            searching: true,
+                            ordering: true,
+                            scrollX: true, // Enable horizontal scrolling
+                            scrollY: 300, // Set max height for vertical scrolling
+                            fixedHeader: true, // Freeze header
+                            fixedColumns: {
+                                leftColumns: 1 // Freeze first and second columns
+                            },
                             dom: 'lBfrtip', // Define the elements to show buttons (B)
                             buttons: [
                                 'copy', 'csv', 'excel', 'pdf', 'print' // Enable these export options
