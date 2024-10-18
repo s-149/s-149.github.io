@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Berita</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin-top: 56px;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .carousel-caption h1,
+        .carousel-caption p {
+            display: inline-block;
+            padding: 0.5rem;
+        }
+        
+        .card {
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: scale(1.05);
+        }
+        
+        .section-title {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+            text-align: center;
+        }
+        
+        .select2-container--default .select2-selection--single {
+            background-color: transparent;
+            border: 0px solid #fff;
+            margin-top: 5px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Portal Berita</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="latestNewsLink" href="#">Berita</a>
+                    </li>
+                    <li class="nav-item">
+                        <select class="form-select" id="categorySelect" aria-label="Select Kategori">
+                            <option selected disabled>Kategori</option>
+                        </select>
+                    </li>
+                </ul>
+                <form class="d-flex" role="search" id="searchForm">
+                    <input class="form-control me-2" type="search" placeholder="Cari berita" aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div id="carouselExampleIndicators" class="carousel slide mt-4" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner" id="carouselItems"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    <div class="container">
+        <div class="row">
+            <!-- Konten pertama -->
+            <div class="col-md-8">
+                <section class="container mt-5">
+                    <h2 class="section-title" id="latestNewsTitle">Berita</h2>
+                    <div class="row" id="latestNews">............</div>
+                </section>
+            </div>
+
+            <!-- Konten kedua -->
+            <div class="col-md-4">
+                <section class="container mt-5">
+                    <h2 class="section-title" id="latestNewsTitle">Berita Hari ini</h2>
+                    <div class="row" id="todayNews">............</div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <section class="container mt-5">
+        <h2 class="section-title">Berita Terpopuler</h2>
+        <div class="row" id="popularNews">............</div>
+    </section>
+
+    <footer class="bg-dark text-light text-center p-3 mt-5">
+        &copy; 2024 Portal Berita. All Rights Reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
+        const spreadsheetId = '1na_je0LElk7uei-6Tqur_suzoUwPBAbUMnTD0I5eRy0';
+
+        async function fetchData(range) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.values;
+        }
+
+        async function displayCategories() {
+            const categorySelect = $('#categorySelect');
+            const data = await fetchData('Kategori');
+            const categories = data.slice(1);
+
+            categories.forEach(row => {
+                categorySelect.append(new Option(row[1], row[1]));
+            });
+
+            categorySelect.select2();
+
+            categorySelect.on('change', async function() {
+                const selectedCategory = $(this).val();
+                await displayNews(selectedCategory, 'category');
+            });
+        }
+
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        async function displayNews(filter = '', type = 'latest', onlyOne = false, selectedRow = null) {
+            const newsContainer = type === 'category' ? document.getElementById('latestNews') : document.getElementById('latestNews');
+            const title = type === 'category' ? `Berita: ${filter}` : 'Berita Terbaru';
+            const data = await fetchData('Berita');
+
+            newsContainer.innerHTML = '';
+            if (type === 'category') {
+                document.getElementById('latestNewsTitle').textContent = title;
+            }
+
+            data.slice(1, 16).forEach((row, index) => {
+                if (type === 'latest' || (type === 'category' && row[7] === filter)) {
+                    if (onlyOne && selectedRow !== index) return;
+
+                    const shortDescription = truncateText(row[2], 50); // Panggil fungsi untuk memotong teks
+
+                    const newsItem = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="${row[4]}" class="card-img-top" alt="${row[1]}">
+                            <div class="card-body">
+                                <h5 class="card-title">${row[1]}</h5>
+                                <p class="card-text">${shortDescription}</p> <!-- Tampilkan deskripsi yang sudah dipotong -->
+                                <a href="#" class="btn btn-primary" onclick="showSingleNews(${index})">Read More</a>
+                            </div>
+                        </div>
+                    </div>`;
+                    newsContainer.innerHTML += newsItem;
+                }
+            });
+        }
+
+        async function todayNews() {
+            const newsContainer = document.getElementById('todayNews');
+            const data = await fetchData('Berita');
+
+            // Dapatkan tanggal hari ini
+            const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+            newsContainer.innerHTML = '';
+
+            // Filter berita berdasarkan tanggal hari ini
+            const filteredNews = data.slice(1).filter((row) => {
+                const rowDate = new Date(row[5]).toISOString().split('T')[0];
+                return rowDate === today;
+            });
+
+            // Batasi hanya menampilkan 5 berita
+            filteredNews.slice(0, 5).forEach((row, index) => {
+                const shortDescription = truncateText(row[2], 50); // Panggil fungsi untuk memotong teks
+
+                const newsItem = `
+                <div class="col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="${row[4]}" class="card-img-top" alt="${row[1]}">
+                        <div class="card-body">
+                            <h5 class="card-title">${row[1]}</h5>
+                            <p class="card-text">${shortDescription}</p> <!-- Tampilkan deskripsi yang sudah dipotong -->
+                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${index})">Read More</a>
+                        </div>
+                    </div>
+                </div>`;
+
+                newsContainer.innerHTML += newsItem;
+            });
+        }
+
+
+
+        async function showSingleNews(index) {
+            const data = await fetchData('Berita');
+            const row = data[index + 1]; // +1 karena data[0] adalah header
+            const newsContainer = document.getElementById('latestNews');
+
+            newsContainer.innerHTML = `
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <img src="${row[4]}" class="card-img-top" alt="${row[1]}">
+                    <div class="card-body">
+                        <h5 class="card-title">${row[1]}</h5>
+                        <p class="card-text">${row[3]}</p>
+                        <p class="card-text" style="text-align: justify;">${row[2]}</p> <!-- Deskripsi lengkap -->
+                        <a href="#" class="btn btn-secondary" onclick="displayNews()">Kembali</a>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function displayPopularNews() {
+            try {
+                const commentsData = await fetchData('Komentar');
+                const newsData = await fetchData('Berita');
+
+                console.log('Data Komentar:', commentsData);
+                console.log('Data Berita:', newsData);
+
+                if (!commentsData || !Array.isArray(commentsData)) {
+                    console.error('Data Komentar tidak valid:', commentsData);
+                    return;
+                }
+                if (!newsData || !Array.isArray(newsData)) {
+                    console.error('Data Berita tidak valid:', newsData);
+                    return;
+                }
+
+                const commentCounts = {};
+                commentsData.forEach((comment) => {
+                    const newsId = comment[1];
+                    commentCounts[newsId] = (commentCounts[newsId] || 0) + 1;
+                });
+
+                const newsWithComments = newsData.map((news) => {
+                    const newsId = news[0];
+                    return {
+                        id: newsId,
+                        title: news[1],
+                        description: news[2],
+                        image: news[4],
+                        commentCount: commentCounts[newsId] || 0
+                    };
+                });
+
+                const popularNews = newsWithComments.sort((a, b) => b.commentCount - a.commentCount);
+                const topNews = popularNews.slice(0, 3);
+
+                console.log('Top 3 Berita:', topNews);
+
+                const newsContainer = document.getElementById('popularNews');
+                newsContainer.innerHTML = '';
+
+                topNews.forEach((newsItem) => {
+                    const newsHTML = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="${newsItem.image}" class="card-img-top" alt="${newsItem.title}">
+                            <div class="card-body">
+                                <h5 class="card-title">${newsItem.title}</h5>
+                                <p class="card-text">${truncateText(newsItem.description, 50)}</p>
+                                <a href="#" class="btn btn-primary" onclick="showSingleNews(${newsItem.id-1})">Read More</a>
+                            </div>
+                        </div>
+                    </div>`;
+                    newsContainer.innerHTML += newsHTML;
+                });
+            } catch (error) {
+                console.error('Error saat menampilkan berita:', error);
+            }
+        }
+
+        async function displayCarousel() {
+            const carouselItemsContainer = document.getElementById('carouselItems');
+            const data = await fetchData('Carousel');
+
+            if (data.length > 1) {
+                data.slice(1).forEach((row, index) => {
+                    const activeClass = index === 0 ? 'active' : '';
+                    const carouselItem = `
+                    <div class="carousel-item ${activeClass}">
+                        <img src="${row[2]}" class="d-block w-100" alt="${row[2]}">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h1>${row[1]}</h1>
+                        </div>
+                    </div>`;
+                    carouselItemsContainer.innerHTML += carouselItem;
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', displayPopularNews);
+        document.addEventListener('DOMContentLoaded', todayNews);
+        $(document).ready(async function() {
+            await displayCategories();
+            await displayNews();
+            await displayCarousel();
+            await todayNews();
+        });
+    </script>
+</body>
+
+</html>
