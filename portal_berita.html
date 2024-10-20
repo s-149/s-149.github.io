@@ -84,7 +84,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Portal Berita</a>
+            <a class="navbar-brand" href="#"><img src="logo_transparant.png" width="200px" alt="logo"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -151,7 +151,7 @@
     </section>
 
     <footer class="bg-dark text-light text-center p-3 mt-5">
-        &copy; 2024 Portal Berita. All Rights Reserved.
+        &copy; 2024 Jendela informasi kami. All Rights Reserved.
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -240,16 +240,16 @@
                     const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
 
                     const newsItem = `
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm">
-                    <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                    <div class="card-body">
-                        <h5 class="card-title">${row[1]}</h5>
-                        <p class="card-text">${shortDescription}</p>
-                        <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
-                    </div>
-                </div>
-            </div>`;
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                            <div class="card-body">
+                                <h5 class="card-title">${row[1]}</h5>
+                                <p class="card-text">${shortDescription}</p>
+                                <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
+                            </div>
+                        </div>
+                    </div>`;
                     newsContainer.innerHTML += newsItem;
                 }
             });
@@ -350,6 +350,7 @@
 
             // Dapatkan tanggal hari ini
             const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+            console.log(today)
 
             newsContainer.innerHTML = '';
 
