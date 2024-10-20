@@ -107,7 +107,7 @@
                     </li>
                 </ul>
                 <form class="d-flex" role="search" id="searchForm">
-                    <input class="form-control me-2" type="search" placeholder="Cari berita" aria-label="Search">
+                    <input class="form-control me-2" type="search" placeholder="Cari berita" id="searchQuery" aria-label="Search">
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
             </div>
@@ -189,6 +189,20 @@
             });
         }
 
+        // Handle search form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('searchForm');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Mencegah submit form secara default
+                const searchQuery = document.getElementById('searchQuery').value; // Pastikan ID input sesuai
+                if (searchQuery) {
+                    displayNews(searchQuery, 'search');
+                }
+            });
+        });
+
+
+
         function truncateText(text, maxLength) {
             if (text.length <= maxLength) return text;
             return text.substring(0, maxLength) + '...';
@@ -199,63 +213,67 @@
 
         async function displayNews(filter = '', type = 'latest', onlyOne = false, selectedRow = null) {
             const newsContainer = document.getElementById('latestNews');
-            const paginationContainer = document.getElementById('pagination'); // Elemen untuk pagination
-            // Update the title based on the type and filter
+            const paginationContainer = document.getElementById('pagination');
             const titleElement = document.getElementById('latestNewsTitle');
-            const title = type === 'category' && filter ? `Berita ${filter}` : 'Berita Terbaru';
 
-            // Set the title text to the appropriate value
+            // Ubah judul pencarian
+            const title = type === 'category' && filter ? `Berita ${filter}` : type === 'search' ? 'Hasil Pencarian' : 'Berita Terbaru';
             titleElement.textContent = title;
 
-            const data = await fetchData('Berita');
+            const data = await fetchData('Berita'); // Ambil data berita
 
-            newsContainer.innerHTML = '';
-            paginationContainer.innerHTML = ''; // Bersihkan pagination sebelumnya
-
-            if (type === 'category') {
-                document.getElementById('latestNewsTitle').textContent = title;
+            // Cek apakah data berhasil diambil
+            if (!data || data.length === 0) {
+                newsContainer.innerHTML = '<p>Data berita tidak ditemukan.</p>';
+                return;
             }
 
-            // Filter data based on the type and filter provided
+            // Reset tampilan
+            newsContainer.innerHTML = '';
+            paginationContainer.innerHTML = '';
+
+            // Filter data berdasarkan tipe pencarian
             let filteredData = data;
-            if (type === 'category') {
-                filteredData = data.filter(row => row[7] === filter); // Sesuaikan filter dengan kolom yang sesuai
+            if (type === 'search') {
+                // Pastikan kolom yang difilter sesuai dengan input yang diinginkan
+                filteredData = data.filter(row => row[3].toLowerCase().includes(filter.toLowerCase()));
+            } else if (type === 'category') {
+                filteredData = data.filter(row => row[7] === filter);
             }
 
             // Balik urutan data
-            const reversedData = filteredData.slice(1).reverse(); // Membalikkan urutan seluruh data
-            const totalPages = Math.ceil(reversedData.length / itemsPerPage); // Hitung total halaman
+            const reversedData = filteredData.slice(1).reverse();
+            const totalPages = Math.ceil(reversedData.length / itemsPerPage);
 
             // Tampilkan data untuk halaman saat ini
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const currentItems = reversedData.slice(startIndex, endIndex);
 
+            if (currentItems.length === 0) {
+                newsContainer.innerHTML = '<p>Data tidak ditemukan sesuai pencarian.</p>';
+                return;
+            }
+
             currentItems.forEach((row, index) => {
-                const adjustedIndex = startIndex + index; // Sesuaikan indeks untuk menampilkan berita yang benar
+                const adjustedIndex = startIndex + index;
 
-                if (type === 'latest' || (type === 'category' && row[7] === filter)) {
-                    if (onlyOne && selectedRow !== adjustedIndex) return;
+                const shortDescription = truncateText(row[2], 50);
+                const imageId = row[4].split('id=')[1];
+                const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
 
-                    const shortDescription = truncateText(row[2], 50); // Panggil fungsi untuk memotong teks
-
-                    // Mengonversi URL Google Drive ke format thumbnail
-                    const imageId = row[4].split('id=')[1]; // Ambil ID dari URL
-                    const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
-
-                    const newsItem = `
-                    <div class="col-md-4 mb-4">
-                        <div class="card shadow-sm">
-                            <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                            <div class="card-body">
-                                <h5 class="card-title">${row[1]}</h5>
-                                <p class="card-text">${shortDescription}</p>
-                                <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
-                            </div>
-                        </div>
-                    </div>`;
-                    newsContainer.innerHTML += newsItem;
-                }
+                const newsItem = `
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                <div class="card-body">
+                    <h5 class="card-title">${row[1]}</h5>
+                    <p class="card-text">${shortDescription}</p>
+                    <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
+                </div>
+            </div>
+        </div>`;
+                newsContainer.innerHTML += newsItem;
             });
 
             // Tambahkan tombol "Previous" dan "Next"
@@ -340,6 +358,7 @@
             };
             paginationContainer.appendChild(nextButton);
         }
+
 
         async function todayNews() {
             const newsContainer = document.getElementById('todayNews');
