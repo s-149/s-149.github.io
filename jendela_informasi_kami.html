@@ -357,21 +357,23 @@
             paginationContainer.appendChild(nextButton);
         }
 
-
         async function todayNews() {
             const newsContainer = document.getElementById('todayNews');
             const data = await fetchData('Berita');
 
-            // Dapatkan tanggal hari ini
-            const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-            console.log(today)
+            // Dapatkan tanggal hari ini dengan zona waktu lokal
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            console.log(`Waktu saat ini : ${today}`);
 
             newsContainer.innerHTML = '';
 
             // Filter berita berdasarkan tanggal hari ini
             const filteredNews = data.slice(1).filter((row) => {
-                const rowDate = new Date(row[5]).toISOString().split('T')[0];
-                return rowDate === today;
+                const rowDate = new Date(row[5]);
+                const formattedRowDate = `${rowDate.getFullYear()}-${String(rowDate.getMonth() + 1).padStart(2, '0')}-${String(rowDate.getDate()).padStart(2, '0')}`;
+                console.log(`Waktu sistem : ${formattedRowDate}`);
+                return formattedRowDate === today;
             });
 
             // Batasi hanya menampilkan 5 berita
@@ -383,20 +385,21 @@
                 const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
 
                 const newsItem = `
-                <div class="col-md-12 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                        <div class="card-body">
-                            <h5 class="card-title">${row[1]}</h5>
-                            <p class="card-text">${shortDescription}</p> <!-- Tampilkan deskripsi yang sudah dipotong -->
-                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${index})">Read More</a>
-                        </div>
-                    </div>
-                </div>`;
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                <div class="card-body">
+                    <h5 class="card-title">${row[1]}</h5>
+                    <p class="card-text">${shortDescription}</p> <!-- Tampilkan deskripsi yang sudah dipotong -->
+                    <a href="#" class="btn btn-primary" onclick="showSingleNews(${index+1})">${index+1} Read More</a>
+                </div>
+            </div>
+        </div>`;
 
                 newsContainer.innerHTML += newsItem;
             });
         }
+
 
         async function showSingleNews(index) {
             const data = await fetchData('Berita');
