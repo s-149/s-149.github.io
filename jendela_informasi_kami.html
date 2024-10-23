@@ -91,6 +91,22 @@
             padding: 10px;
             border: 1px solid #ddd;
         }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* Aspect Ratio 16:9 */
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 
@@ -174,9 +190,6 @@
         const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
         const spreadsheetId = '1ZysJHFiIt9zUm5W0H-wUpOpPOlNo_5MlTZTcFFF_zEM';
 
-        let currentPage = 1;
-        const itemsPerPage = 6; // Jumlah item per halaman
-
         async function fetchData(range) {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
             const response = await fetch(url);
@@ -218,6 +231,20 @@
             return text.substring(0, maxLength) + '...';
         }
 
+        function convertYouTubeUrlToEmbed(url) {
+            const regex = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+            const match = url.match(regex);
+            if (match && match[1]) {
+                return `https://www.youtube.com/embed/${match[1]}`;
+            } else {
+                throw new Error('Invalid YouTube URL');
+            }
+        }
+
+        // Variabel global untuk pagination
+        let itemsPerPage = 6; // Jumlah berita per halaman
+        let currentPage = 1; // Halaman awal
+
         async function displayNews(filter = '', type = 'latest', onlyOne = false, selectedRow = null) {
             const newsContainer = document.getElementById('latestNews');
             const paginationContainer = document.getElementById('pagination');
@@ -242,7 +269,6 @@
             // Filter data berdasarkan tipe pencarian
             let filteredData = data;
             if (type === 'search') {
-                // Pastikan kolom yang difilter sesuai dengan input yang diinginkan
                 filteredData = data.filter(row => row[3].toLowerCase().includes(filter.toLowerCase()));
             } else if (type === 'category') {
                 filteredData = data.filter(row => row[7] === filter);
@@ -262,24 +288,24 @@
                 return;
             }
 
+            // Render berita untuk halaman saat ini
             currentItems.forEach((row, index) => {
                 const adjustedIndex = startIndex + index;
-
                 const shortDescription = truncateText(row[2], 50);
                 const imageId = row[4].split('id=')[1];
                 const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
 
                 const newsItem = `
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                        <div class="card-body">
-                            <h5 class="card-title">${row[1]}</h5>
-                            <p class="card-text">${shortDescription}</p>
-                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
-                        </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                    <div class="card-body">
+                        <h5 class="card-title">${row[1]}</h5>
+                        <p class="card-text">${shortDescription}</p>
+                        <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
                     </div>
-                </div>`;
+                </div>
+            </div>`;
                 newsContainer.innerHTML += newsItem;
             });
 
@@ -297,15 +323,16 @@
             paginationContainer.appendChild(prevButton);
 
             // Menampilkan nomor halaman yang aktif dengan batasan 3 halaman
-            const maxVisiblePages = 1;
+            const maxVisiblePages = 3; // Munculkan 3 halaman di sekitar currentPage
             let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-            // Adjust if we're near the beginning or end of the total pages
+            // Adjust jika halaman awal atau akhir dekat dengan batas
             if (endPage - startPage < maxVisiblePages - 1) {
                 startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
 
+            // Tombol halaman pertama dan "..."
             if (startPage > 1) {
                 const firstPageButton = document.createElement('button');
                 firstPageButton.className = 'btn btn-secondary mx-1';
@@ -323,11 +350,12 @@
                 }
             }
 
+            // Tombol nomor halaman
             for (let page = startPage; page <= endPage; page++) {
                 const pageButton = document.createElement('button');
                 pageButton.className = 'btn btn-secondary mx-1';
                 pageButton.innerText = page;
-                pageButton.disabled = page === currentPage; // Nonaktifkan tombol untuk halaman saat ini
+                pageButton.disabled = page === currentPage; // Disable tombol untuk halaman aktif
                 pageButton.onclick = () => {
                     currentPage = page;
                     displayNews(filter, type, onlyOne, selectedRow);
@@ -335,6 +363,7 @@
                 paginationContainer.appendChild(pageButton);
             }
 
+            // Tombol halaman terakhir dan "..."
             if (endPage < totalPages) {
                 if (endPage < totalPages - 1) {
                     const dots = document.createElement('span');
@@ -365,6 +394,60 @@
             };
             paginationContainer.appendChild(nextButton);
         }
+
+        function displaySingleNews(row, container) {
+            const shortDescription = truncateText(row[2], 50);
+            const imageId = row[4].split('id=')[1];
+            const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
+
+            const newsItem = `
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                <div class="card-body">
+                    <h5 class="card-title">${row[1]}</h5>
+                    <p class="card-text">${shortDescription}</p>
+                    <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0] - 1})">Read More</a>
+                </div>
+            </div>
+        </div>`;
+            container.innerHTML += newsItem;
+        }
+
+        function addPaginationButtons(currentPage, totalPages, filter, type, onlyOne, selectedRow) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = ''; // Reset pagination buttons
+
+            // Tambahkan tombol "Previous"
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = `<i class="fas fa-chevron-left"></i> Previous`;
+            prevButton.className = 'btn btn-secondary mx-1';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayNews(filter, type, onlyOne, selectedRow);
+                }
+            };
+            paginationContainer.appendChild(prevButton);
+
+            // Display page buttons logic...
+            // (same logic as in your code to handle start/end of pages)
+
+            // Tambahkan tombol "Next"
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = `Next <i class="fas fa-chevron-right"></i>`;
+            nextButton.className = 'btn btn-secondary mx-1';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayNews(filter, type, onlyOne, selectedRow);
+                }
+            };
+            paginationContainer.appendChild(nextButton);
+        }
+
 
         async function todayNews() {
             const newsContainer = document.getElementById('todayNews');
@@ -417,6 +500,8 @@
             const imageId = row[4].split('id=')[1]; // Ambil ID dari URL
             const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
             const short = truncateText(row[8], 30);
+            const youtubeConvert = convertYouTubeUrlToEmbed(row[12]);
+            console.log("youtube link : ", youtubeConvert);
 
             newsContainer.innerHTML = `
             <div class="col-12 mb-4">
@@ -426,6 +511,12 @@
                         <h5 class="card-title">${row[1]}</h5>
                         <p class="card-text">${row[3]}</p>
                         <p class="card-text" style="text-align: justify;">${row[2]}</p>
+                        <p class="card-text" style="text-align: justify;">
+                            <div class="video-container">
+                                <iframe src="${youtubeConvert}" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </p>
+                        <p class="card-text" style="text-align: justify; color: blue;">Tags ${row[11]}</p>
                         <p class="card-text">
                             <table>
                                 <tr>
