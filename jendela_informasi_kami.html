@@ -187,45 +187,65 @@
                 <h2>Jendela informasi kami</h2>
                 <p style="max-width: 600px;">Mengulas informasi, opini dan Fakta.</p>
             </div>
-            <div style="display: flex; justify-content: center; flex-wrap: wrap;">
-                <div style="margin: 0 20px;">
-                    <h4>Tautan Cepat</h4>
-                    <ul style="list-style: none; padding: 0;">
-                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Beranda</a></li>
-                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Tentang Kami</a></li>
-                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Layanan</a></li>
-                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Kontak</a></li>
-                    </ul>
-                </div>
-                <div style="margin: 0 20px;">
-                    <h4>Kontak Kami</h4>
-                    <p>
-                        <a href="https://api.whatsapp.com/send?phone=6285846761639&text=hallo%20jejak%20programmer" target="_blank"><img width="50px" src="cv/images/whatshapp-logo.png" alt="whatshapp-logo" />+62 858 4676 1639</a>
-                    </p>
-                    <p>
-                        <a href="mailto:jendelainformasikami@gmail.com" target="_blank"><img width="50px" src="cv/images/gmail-logo.png" alt="gmail-logo" />jendelainformasikami@gmail.com</a>
-                    </p>
-                </div>
-                <div style="margin: 0 20px;">
-                    <h4>Ikuti Kami</h4>
-                    <div style="display: flex; justify-content: center;">
-                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://www.youtube.com/@jendelainformasikami" style="margin: 0 10px; color: #ffffff; text-decoration: none;" target="_blank">
-                            <i class="fab fa-youtube"></i>
-                        </a>
+            <div class="container">
+                <div class="row">
+                    <!-- Konten pertama -->
+                    <div class="col-md-4">
+                        <section class="container mt-5">
+                            <h2 class="section-title">Tautan Cepat</h2>
+                            <div class="row">
+                                <ul style="list-style: none; padding: 0;">
+                                    <li><a href="#" style="color: #ffffff; text-decoration: none;">Beranda</a></li>
+                                    <li><a href="#" style="color: #ffffff; text-decoration: none;">Tentang Kami</a></li>
+                                    <li><a href="#" style="color: #ffffff; text-decoration: none;">Layanan</a></li>
+                                    <li><a href="#" style="color: #ffffff; text-decoration: none;">Kontak</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Konten kedua -->
+                    <div class="col-md-4">
+                        <section class="container mt-5">
+                            <h2 class="section-title">Kontak Kami</h2>
+                            <div class="row">
+                                <p align="left">
+                                    <a href="https://api.whatsapp.com/send?phone=6285846761639&text=hallo%20jendela%20informasi" target="_blank"><img width="30px" src="cv/images/whatshapp-logo.png" alt="whatshapp-logo" />&nbsp; +62 858 4676 1639</a>
+                                </p>
+                                <p align="left">
+                                    <a href="mailto:jendelainformasikami@gmail.com" target="_blank"><img width="30px" src="cv/images/gmail-logo.png" alt="gmail-logo" />&nbsp; jendelainformasikami@gmail.com</a>
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Konten kedua -->
+                    <div class="col-md-4">
+                        <section class="container mt-5">
+                            <h2 class="section-title">Ikuti Kami</h2>
+                            <div class="row">
+
+                                <div style="display: flex; justify-content: center;">
+                                    <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="https://www.youtube.com/@jendelainformasikami" style="margin: 0 10px; color: #ffffff; text-decoration: none;" target="_blank">
+                                        <i class="fab fa-youtube"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
             <hr style="border: 1px solid #ffffff; margin: 20px 0;">
-            <p>&copy; 2024 <a href="https://s-149.github.io/" target="_blank">@jejakprogrammer</a> Semua hak dilindungi.</p>
+            <p>&copy; <span id="currentYear"></span> <a href="https://s-149.github.io/" target="_blank">@jejakprogrammer</a> Semua hak dilindungi.</p>
         </div>
     </footer>
 
@@ -235,6 +255,12 @@
     <script>
         const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
         const spreadsheetId = '1ZysJHFiIt9zUm5W0H-wUpOpPOlNo_5MlTZTcFFF_zEM';
+
+
+        // Mengambil tahun saat ini
+        const currentYear = new Date().getFullYear();
+        // Menampilkan tahun saat ini di elemen dengan id "currentYear"
+        document.getElementById('currentYear').textContent = currentYear;
 
         async function fetchData(range) {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
