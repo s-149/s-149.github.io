@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Berita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM6wX6D5G6sVVxG6Z4GR+cFJwF1F8Q4O0Fok5f" crossorigin="anonymous">
@@ -179,8 +180,53 @@
         <div class="row" id="popularNews">............</div>
     </section>
 
-    <footer class="bg-dark text-light text-center p-3 mt-5">
-        &copy; 2024 Jendela informasi kami, Mengulas informasi, opini dan Fakta.<a href="https://s-149.github.io/" target="_blank">@jejakprogramer</a> All Rights Reserved.
+    <footer style="background-color: #282c34; color: #ffffff; padding: 40px 20px; text-align: center;">
+        <div style="max-width: 1200px; margin: auto;">
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                <img src="logo_transparant.png" alt="Logo" style="margin-bottom: 10px;" width="300px">
+                <h2>Jendela informasi kami</h2>
+                <p style="max-width: 600px;">Mengulas informasi, opini dan Fakta.</p>
+            </div>
+            <div style="display: flex; justify-content: center; flex-wrap: wrap;">
+                <div style="margin: 0 20px;">
+                    <h4>Tautan Cepat</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Beranda</a></li>
+                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Tentang Kami</a></li>
+                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Layanan</a></li>
+                        <li><a href="#" style="color: #ffffff; text-decoration: none;">Kontak</a></li>
+                    </ul>
+                </div>
+                <div style="margin: 0 20px;">
+                    <h4>Kontak Kami</h4>
+                    <p>
+                        <a href="https://api.whatsapp.com/send?phone=6285846761639&text=hallo%20jejak%20programmer" target="_blank"><img width="50px" src="cv/images/whatshapp-logo.png" alt="whatshapp-logo" />+62 858 4676 1639</a>
+                    </p>
+                    <p>
+                        <a href="mailto:jendelainformasikami@gmail.com" target="_blank"><img width="50px" src="cv/images/gmail-logo.png" alt="gmail-logo" />jendelainformasikami@gmail.com</a>
+                    </p>
+                </div>
+                <div style="margin: 0 20px;">
+                    <h4>Ikuti Kami</h4>
+                    <div style="display: flex; justify-content: center;">
+                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" style="margin: 0 10px; color: #ffffff; text-decoration: none;">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@jendelainformasikami" style="margin: 0 10px; color: #ffffff; text-decoration: none;" target="_blank">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border: 1px solid #ffffff; margin: 20px 0;">
+            <p>&copy; 2024 <a href="https://s-149.github.io/" target="_blank">@jejakprogrammer</a> Semua hak dilindungi.</p>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -323,7 +369,7 @@
             paginationContainer.appendChild(prevButton);
 
             // Menampilkan nomor halaman yang aktif dengan batasan 3 halaman
-            const maxVisiblePages = 3; // Munculkan 3 halaman di sekitar currentPage
+            const maxVisiblePages = 1; // Munculkan 3 halaman di sekitar currentPage
             let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
