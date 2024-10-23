@@ -386,7 +386,7 @@
             });
 
             // Batasi hanya menampilkan 5 berita
-            filteredNews.slice(0, 5).forEach((row, index) => {
+            filteredNews.slice(0).forEach((row, index) => {
                 const shortDescription = truncateText(row[2], 50); // Panggil fungsi untuk memotong teks
 
                 // Mengonversi URL Google Drive ke format thumbnail
