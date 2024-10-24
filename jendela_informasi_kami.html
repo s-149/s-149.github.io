@@ -4,7 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Berita</title>
+    <meta name="description" content="Portal Berita" />
+    <meta name="author" content="MR S-149" />
+    <meta name="keyword" content="web, freelance, proggrammer, programming, laravel, IT, berita, tekhnologi, insiden, news, kejadian, jejakprogrammer, Jejak" />
+    <title>JENDELA INFORMASI KAMI</title>
+    <link href="jp.png" rel="icon" />
+    <link href="jp.png" rel="apple-touch-icon" />
+    <link rel="icon" href="jp.png" type="image/jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -189,7 +195,6 @@
             </div>
             <div class="container">
                 <div class="row">
-                    <!-- Konten pertama -->
                     <div class="col-md-4">
                         <section class="container mt-5">
                             <h2 class="section-title">Tautan Cepat</h2>
@@ -203,8 +208,6 @@
                             </div>
                         </section>
                     </div>
-
-                    <!-- Konten kedua -->
                     <div class="col-md-4">
                         <section class="container mt-5">
                             <h2 class="section-title">Kontak Kami</h2>
@@ -218,8 +221,6 @@
                             </div>
                         </section>
                     </div>
-
-                    <!-- Konten kedua -->
                     <div class="col-md-4">
                         <section class="container mt-5">
                             <h2 class="section-title">Ikuti Kami</h2>
@@ -245,7 +246,8 @@
                 </div>
             </div>
             <hr style="border: 1px solid #ffffff; margin: 20px 0;">
-            <p>&copy; <span id="currentYear"></span> <a href="https://s-149.github.io/" target="_blank">@jejakprogrammer</a> Semua hak dilindungi.</p>
+            <p>&copy; <span id="currentYear"></span> Copyright <strong>Jendela informasi kami</strong> All Rights Reserved</p>
+            <p>Designed by <a href="https://s-149.github.io/" target="_blank">JejakProgrammer</a></p>
         </div>
     </footer>
 
@@ -256,10 +258,12 @@
         const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
         const spreadsheetId = '1ZysJHFiIt9zUm5W0H-wUpOpPOlNo_5MlTZTcFFF_zEM';
 
+        // Variabel global untuk pagination
+        let itemsPerPage = 6; // Jumlah berita per halaman
+        let currentPage = 1; // Halaman awal
 
         // Mengambil tahun saat ini
         const currentYear = new Date().getFullYear();
-        // Menampilkan tahun saat ini di elemen dengan id "currentYear"
         document.getElementById('currentYear').textContent = currentYear;
 
         async function fetchData(range) {
@@ -313,10 +317,6 @@
             }
         }
 
-        // Variabel global untuk pagination
-        let itemsPerPage = 6; // Jumlah berita per halaman
-        let currentPage = 1; // Halaman awal
-
         async function displayNews(filter = '', type = 'latest', onlyOne = false, selectedRow = null) {
             const newsContainer = document.getElementById('latestNews');
             const paginationContainer = document.getElementById('pagination');
@@ -368,16 +368,16 @@
                 const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
 
                 const newsItem = `
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm">
-                    <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                    <div class="card-body">
-                        <h5 class="card-title">${row[1]}</h5>
-                        <p class="card-text">${shortDescription}</p>
-                        <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                        <div class="card-body">
+                            <h5 class="card-title">${row[1]}</h5>
+                            <p class="card-text">${shortDescription}</p>
+                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
+                        </div>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
                 newsContainer.innerHTML += newsItem;
             });
 
@@ -473,16 +473,16 @@
             const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
 
             const newsItem = `
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                <div class="card-body">
-                    <h5 class="card-title">${row[1]}</h5>
-                    <p class="card-text">${shortDescription}</p>
-                    <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0] - 1})">Read More</a>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
+                    <div class="card-body">
+                        <h5 class="card-title">${row[1]}</h5>
+                        <p class="card-text">${shortDescription}</p>
+                        <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0] - 1})">Read More</a>
+                    </div>
                 </div>
-            </div>
-        </div>`;
+            </div>`;
             container.innerHTML += newsItem;
         }
 
@@ -519,7 +519,6 @@
             };
             paginationContainer.appendChild(nextButton);
         }
-
 
         async function todayNews() {
             const newsContainer = document.getElementById('todayNews');
@@ -563,7 +562,6 @@
                 newsContainer.innerHTML += newsItem;
             });
         }
-
 
         async function showSingleNews(index) {
             const data = await fetchData('Berita');
