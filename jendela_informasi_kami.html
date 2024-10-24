@@ -683,7 +683,7 @@
                     const activeClass = index === 0 ? 'active' : '';
                     const carouselItem = `
                     <div class="carousel-item ${activeClass}">
-                        <img src="${row[2]}" class="d-block w-100" alt="${row[2]}">
+                        <img src="${row[2]}" class="d-block w-100" alt="${row[2]}" style="max-height: 400px;">
                         <div class="carousel-caption d-none d-md-block">
                             <h1>${row[1]}</h1>
                         </div>
@@ -695,7 +695,6 @@
 
         document.addEventListener('DOMContentLoaded', displayPopularNews);
         document.addEventListener('DOMContentLoaded', todayNews);
-        // Wait for the DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Get the element for the link
             const latestNewsLink = document.getElementById('latestNewsLink');
