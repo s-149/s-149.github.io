@@ -17,6 +17,7 @@
 
     <!-- Link DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.4/css/buttons.bootstrap5.min.css">
 
     <style>
         tbody tr:nth-child(even) {
@@ -47,6 +48,11 @@
     <!-- DataTables JS dan Bootstrap JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.print.min.js"></script>
 
 </head>
 
@@ -56,7 +62,7 @@
         <!-- Header -->
         <div class="row">
             <div class="col-12 text-center mt-4">
-                <h1 class="display-5">New Order</h1>
+                <h1 class="display-5">Tester New Order</h1>
                 <p class="lead">Live orders feed, updated every minute.</p>
             </div>
         </div>
@@ -166,7 +172,7 @@
             }
 
             // Initialize DataTable
-            $('#orderTable').DataTable();
+            initializeDataTable();
         }
 
         // Fungsi untuk mengonversi timestamp menjadi format tanggal yang lebih mudah dibaca
@@ -195,6 +201,30 @@
             };
 
             return date.toLocaleString('id-ID', options).replace('pukul', ':').trim();
+        }
+
+        // Fungsi untuk menginisialisasi DataTable
+        function initializeDataTable() {
+            // Jika DataTable sudah ada, hancurkan terlebih dahulu
+            if ($.fn.DataTable.isDataTable('#orderTable')) {
+                $('#orderTable').DataTable().destroy();
+            }
+
+            // Inisialisasi DataTable
+            $('#orderTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                scrollX: true, // Enable horizontal scrolling
+                scrollY: 300, // Set max height for vertical scrolling
+                fixedHeader: true, // Freeze header
+                dom: 'lBfrtip', // Define the elements to show buttons (B)
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print' // Enable these export options
+                ],
+                lengthMenu: [10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500], // Opsi jumlah baris yang akan ditampilkan
+                pageLength: 10 // Jumlah baris default yang akan ditampilkan
+            });
         }
 
         // Panggil fetchData pertama kali saat halaman dimuat
