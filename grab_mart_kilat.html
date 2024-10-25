@@ -205,6 +205,12 @@
 
         // Fungsi untuk menginisialisasi DataTable
         function initializeDataTable() {
+            // Jika DataTable sudah ada, hancurkan terlebih dahulu
+            if ($.fn.DataTable.isDataTable('#orderTable')) {
+                $('#orderTable').DataTable().destroy();
+            }
+
+            // Inisialisasi DataTable
             $('#orderTable').DataTable({
                 paging: true,
                 searching: true,
