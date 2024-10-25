@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -87,6 +87,7 @@
         
         a {
             text-decoration: none;
+            color: rgb(100, 10, 246);
         }
         
         .news-container {
@@ -133,6 +134,67 @@
         .suggestion-item:hover {
             background-color: #f0f0f0;
         }
+        /* Background with glowing effect */
+        
+        .bg-glow {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+        }
+        
+        .bg-glow::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(60deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+            border-radius: 10px;
+            z-index: -1;
+        }
+        /* Center text and icons */
+        
+        .text-center {
+            text-align: center;
+        }
+        /* Background dengan efek highlight */
+        
+        .bg-highlight {
+            background: linear-gradient(135deg, #3a6186, #89253e);
+            border-radius: 15px;
+        }
+        /* Section title styling */
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4a4a40;
+            text-transform: uppercase;
+        }
+        /* Text styling */
+        
+        .card-title {
+            font-size: 2rem;
+            color: #fdfdfd;
+        }
+        /* Card shadow and glow */
+        
+        .card.shadow-lg {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(255, 255, 255, 0.15);
+        }
+        
+        .text-light {
+            color: #f8f9fa;
+        }
+        
+        .lead {
+            font-size: 1.25rem;
+            font-weight: 300;
+            color: #f1f1f1;
+        }
     </style>
 </head>
 
@@ -146,17 +208,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link" id="home" href="#">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="about" href="#" style="color: white;">About</a>
+                        <a class="nav-link" id="about" href="#">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="latestNewsLink" href="#" style="color: white;">Berita</a>
+                        <a class="nav-link active" aria-current="page" href="">Berita</a>
                     </li>
                     <li class="nav-item">
                         <select class="form-select" id="categorySelect" aria-label="Select Kategori">
-                            <option selected disabled>Kategori</option>
+                          <option selected disabled>Kategori Berita</option>
+                          <option value="">Berita Terbaru</option>
                         </select>
                     </li>
                 </ul>
@@ -183,7 +246,7 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
-    <section id="content">
+    <section id="content" class="mb-4">
         <div class="container">
             <div class="row">
                 <!-- Konten pertama -->
@@ -289,8 +352,8 @@
         document.getElementById('currentYear').textContent = currentYear;
 
         // Dapatkan elemen link dan elemen konten
-        const aboutLink = document.getElementById("about");
         const contentSection = document.getElementById("content");
+        const aboutLink = document.getElementById("about");
 
         // Tambahkan event listener pada link
         aboutLink.addEventListener("click", function(event) {
@@ -299,28 +362,69 @@
 
             // Ubah konten dalam elemen #content
             contentSection.innerHTML = `
-                
               <div class="container">
-                  <div class="row">
-                      <div class="col-md-12">
-                          <section class="container mt-5">
-                              <h2 class="section-title">About</h2>
-                              <div class="col-md-12 mb-4">
-                                  <div class="card shadow-sm">
-                                      <div class="card-body">
-                                          <h5 class="card-title">Selamat Datang Jendela Informasi Kami!</h5>
-                                          <p class="card-text">Di era informasi yang serba cepat ini, kebutuhan akan berita akurat dan terkini semakin penting. Kami hadir sebagai sumber informasi yang dapat diandalkan, menyajikan berita terbaru dari berbagai bidang, mulai dari politik,
-                                              ekonomi, gaya hidup, hingga teknologi dan hiburan. Di sini, kami berkomitmen untuk menyajikan berita yang tidak hanya up-to-date tetapi juga berimbang dan mendalam, sehingga Anda dapat memahami setiap sudut pandang
-                                              dari peristiwa yang terjadi.</p>
-
-                                          <p class="card-text">Sebagai portal berita yang peduli pada kualitas dan kecepatan, tim kami bekerja tanpa lelah untuk menghadirkan berita yang relevan dan terpercaya setiap harinya. Dengan mengutamakan jurnalisme yang profesional dan berintegritas,
-                                              kami berharap dapat menjadi mitra terpercaya Anda dalam mengikuti perkembangan dunia. Nikmati pengalaman membaca yang informatif dan selalu terkini bersama kami!.</p>
+              <div class="row">
+                  <div class="col-md-12">
+                      <section class="container mt-5">
+                          <h1 class="section-title text-center">Tentang Kami</h1>
+                          <div class="col-md-12 mb-4">
+                              <div class="card shadow-sm bg-glow">
+                                  <div class="card-body">
+                                      <h3 class="card-title text-center"><i class="fas fa-window"></i> Jendela Informasi Kami</h3>
+                                      <p class="card-text text-center">"Portal kami hadir sebagai sumber informasi terpercaya, menghubungkan Anda dengan berita terbaru dan analisis mendalam dari berbagai bidang. Dari politik, ekonomi, hingga gaya hidup dan teknologi, kami berkomitmen untuk menyajikan informasi yang akurat, relevan, dan tepat waktu, semua dalam satu platform."</p>
+                                      <hr>
+                                      <div class="mt-4">
+                                          <h4 class="card-subtitle"><i class="fas fa-eye"></i> Visi</h4>
+                                          <p class="card-text">"Menjadi pusat informasi terpercaya yang menginspirasi dan mencerdaskan pembaca di era digital."</p>
+                                      </div>
+                                      <div class="mt-4">
+                                          <h4 class="card-subtitle"><i class="fas fa-bullseye"></i> Misi</h4>
+                                          <ul class="card-text">
+                                              <li><i class="fas fa-check-circle text-primary"></i> Menyajikan berita faktual dan terkini dari seluruh dunia.</li>
+                                              <li><i class="fas fa-check-circle text-primary"></i> Mengutamakan jurnalisme berintegritas dan berimbang.</li>
+                                              <li><i class="fas fa-check-circle text-primary"></i> Memberikan perspektif mendalam yang relevan bagi pembaca.</li>
+                                          </ul>
                                       </div>
                                   </div>
-                          </section>
+                              </div>
                           </div>
-                      </div>
+                      </section>
                   </div>
+              </div>
+          </div>
+
+                `;
+        });
+
+        // Dapatkan elemen link dan elemen konten
+        const homeLink = document.getElementById("home");
+
+        // Tambahkan event listener pada link
+        homeLink.addEventListener("click", function(event) {
+            // Mencegah link untuk melakukan reload halaman
+            event.preventDefault();
+
+            // Ubah konten dalam elemen #content
+            contentSection.innerHTML = `
+              <div class="container">
+              <div class="row">
+                  <div class="col-md-12">
+                      <section class="container mt-5 text-center">
+                          <h1 class="section-title mb-4"><i class="fas fa-globe"></i> Portal Berita Terkini</h1>
+                          <div class="col-md-12 mb-4">
+                              <div class="card shadow-lg border-0 bg-highlight text-light">
+                                  <div class="card-body p-5">
+                                      <h3 class="card-title display-5 mb-3"><i class="fas fa-door-open"></i> Selamat Datang di Jendela Informasi Kami!</h3>
+                                      <p class="card-text lead">Dapatkan berita terbaru dan terpercaya dari seluruh penjuru dunia! Kami menyajikan rangkaian informasi mendalam untuk memenuhi kebutuhan Anda akan berita terkini, dari isu nasional hingga peristiwa global.</p>
+                                      <hr class="my-4" style="border-top: 1px solid #ffffff50;">
+                                      <p class="card-text lead">Setiap berita adalah jendela untuk memahami dunia. Tim kami berdedikasi untuk menghadirkan berita yang akurat dan berimbang, memberi Anda perspektif yang luas dalam setiap informasi. Mari jelajahi wawasan baru, kapan pun dan di mana pun, bersama kami!</p>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+                  </div>
+              </div>
+          </div>
                 `;
         });
 
