@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM6wX6D5G6sVVxG6Z4GR+cFJwF1F8Q4O0Fok5f" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -113,6 +113,26 @@
             width: 100%;
             height: 100%;
         }
+        /* Style for the suggestion dropdown */
+        
+        .suggestions {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background-color: white;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 
@@ -129,6 +149,9 @@
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="about" href="#" style="color: white;">About</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="latestNewsLink" href="#" style="color: white;">Berita</a>
                     </li>
                     <li class="nav-item">
@@ -137,9 +160,9 @@
                         </select>
                     </li>
                 </ul>
-                <form class="d-flex" role="search" id="searchForm">
-                    <input class="form-control me-2" type="search" placeholder="Cari berita" id="searchQuery" aria-label="Search">
-                    <button class="btn btn-outline-light" type="submit">Search</button>
+                <form id="searchForm">
+                    <input type="text" class="form-control" id="searchQuery" placeholder="Search News..." autocomplete="off">
+                    <div id="suggestions" class="suggestions"></div>
                 </form>
             </div>
         </div>
@@ -160,29 +183,31 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
-    <div class="container">
-        <div class="row">
-            <!-- Konten pertama -->
-            <div class="col-md-8">
-                <section class="container mt-5">
-                    <h2 class="section-title" id="latestNewsTitle">Berita Terbaru</h2>
-                    <div class="row news-container" id="latestNews">............</div>
-                    <div id="pagination" class="mt-4"></div>
-                </section>
-            </div>
+    <section id="content">
+        <div class="container">
+            <div class="row">
+                <!-- Konten pertama -->
+                <div class="col-md-8">
+                    <section class="container mt-5">
+                        <h2 class="section-title" id="latestNewsTitle">Berita Terbaru</h2>
+                        <div class="row" id="latestNews">............</div>
+                        <div id="pagination" class="mt-4"></div>
+                    </section>
+                </div>
 
-            <!-- Konten kedua -->
-            <div class="col-md-4">
-                <section class="container mt-5">
-                    <h2 class="section-title" id="latestNewsTitle">Berita Hari ini</h2>
-                    <div id="todayNews" class="row news-container">..............</div>
-                </section>
+                <!-- Konten kedua -->
+                <div class="col-md-4">
+                    <section class="container mt-5">
+                        <h2 class="section-title" id="latestNewsTitle">Berita Hari ini</h2>
+                        <div id="todayNews" class="row news-container">..............</div>
+                    </section>
+                </div>
             </div>
         </div>
-    </div>
-    <section class="container mt-5">
-        <h2 class="section-title">Berita Terpopuler</h2>
-        <div class="row" id="popularNews">............</div>
+        <section class="container mt-5">
+            <h2 class="section-title">Berita Terpopuler</h2>
+            <div class="row" id="popularNews">............</div>
+        </section>
     </section>
 
     <footer style="background-color: #282c34; color: #ffffff; padding: 40px 20px; text-align: center;">
@@ -263,6 +288,42 @@
         const currentYear = new Date().getFullYear();
         document.getElementById('currentYear').textContent = currentYear;
 
+        // Dapatkan elemen link dan elemen konten
+        const aboutLink = document.getElementById("about");
+        const contentSection = document.getElementById("content");
+
+        // Tambahkan event listener pada link
+        aboutLink.addEventListener("click", function(event) {
+            // Mencegah link untuk melakukan reload halaman
+            event.preventDefault();
+
+            // Ubah konten dalam elemen #content
+            contentSection.innerHTML = `
+                
+              <div class="container">
+                  <div class="row">
+                      <div class="col-md-12">
+                          <section class="container mt-5">
+                              <h2 class="section-title">About</h2>
+                              <div class="col-md-12 mb-4">
+                                  <div class="card shadow-sm">
+                                      <div class="card-body">
+                                          <h5 class="card-title">Selamat Datang Jendela Informasi Kami!</h5>
+                                          <p class="card-text">Di era informasi yang serba cepat ini, kebutuhan akan berita akurat dan terkini semakin penting. Kami hadir sebagai sumber informasi yang dapat diandalkan, menyajikan berita terbaru dari berbagai bidang, mulai dari politik,
+                                              ekonomi, gaya hidup, hingga teknologi dan hiburan. Di sini, kami berkomitmen untuk menyajikan berita yang tidak hanya up-to-date tetapi juga berimbang dan mendalam, sehingga Anda dapat memahami setiap sudut pandang
+                                              dari peristiwa yang terjadi.</p>
+
+                                          <p class="card-text">Sebagai portal berita yang peduli pada kualitas dan kecepatan, tim kami bekerja tanpa lelah untuk menghadirkan berita yang relevan dan terpercaya setiap harinya. Dengan mengutamakan jurnalisme yang profesional dan berintegritas,
+                                              kami berharap dapat menjadi mitra terpercaya Anda dalam mengikuti perkembangan dunia. Nikmati pengalaman membaca yang informatif dan selalu terkini bersama kami!.</p>
+                                      </div>
+                                  </div>
+                          </section>
+                          </div>
+                      </div>
+                  </div>
+                `;
+        });
+
         async function fetchData(range) {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
             const response = await fetch(url);
@@ -287,21 +348,9 @@
             });
         }
 
-        // Handle search form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('searchForm');
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Mencegah submit form secara default
-                const searchQuery = document.getElementById('searchQuery').value; // Pastikan ID input sesuai
-                if (searchQuery) {
-                    displayNews(searchQuery, 'search');
-                }
-            });
-        });
-
         function truncateText(text, maxLength) {
             if (text.length <= maxLength) return text;
-            return text.substring(0, maxLength) + '...';
+            return text.substring(0, maxLength) + '..';
         }
 
         function convertYouTubeUrlToEmbed(url) {
@@ -314,13 +363,158 @@
             }
         }
 
+        /**
+         * Membuat elemen HTML untuk kartu berita.
+         *
+         * @param {number} id - ID unik berita yang akan digunakan dalam fungsi `showSingleNews`.
+         * @param {string} thumbnailUrl - URL gambar thumbnail untuk berita.
+         * @param {string} title - Judul berita yang akan ditampilkan.
+         * @param {string} shortDescription - Deskripsi singkat berita yang akan ditampilkan.
+         * @returns {string} - Kode HTML untuk kartu berita.
+         */
+        function createNewsCard(col, id, imageUrl, maxHeightImg, title, description) {
+            const imageId = imageUrl.split('id=')[1]; // mendapatkan id image
+            const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // convert agar tampil sebagai thumbnail
+            const shortDescription = truncateText(description, 50);
+            return `
+                  <div class="col-md-${col} mb-4">
+                      <div class="card shadow-sm">
+                          <img src="${thumbnailUrl}" class="card-img-top" alt="${title}" style="max-height: ${maxHeightImg}px;">
+                          <div class="card-body">
+                              <h5 class="card-title">${title}</h5>
+                              <p class="card-text">${shortDescription}</p>
+                              <a href="#" class="btn btn-primary" onclick="showSingleNews(${id})">Read More</a>
+                          </div>
+                      </div>
+                  </div>`;
+        }
+
+        function addPaginationButtons(currentPage, totalPages, filter, type, onlyOne, selectedRow) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = ''; // Reset pagination buttons
+
+            // Tambahkan tombol "Previous"
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = `<i class="fas fa-chevron-left"></i> Previous`;
+            prevButton.className = 'btn btn-secondary mx-1';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayNews(filter, type, onlyOne, selectedRow);
+                }
+            };
+            paginationContainer.appendChild(prevButton);
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = `Next <i class="fas fa-chevron-right"></i>`;
+            nextButton.className = 'btn btn-secondary mx-1';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayNews(filter, type, onlyOne, selectedRow);
+                }
+            };
+            paginationContainer.appendChild(nextButton);
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const searchQuery = document.getElementById('searchQuery');
+            const suggestionsBox = document.getElementById('suggestions');
+            const newsContainer = document.getElementById('latestNews');
+            let newsData = [];
+            const range = 'Berita!A2:F'; // Sesuaikan range sheet jika berbeda
+
+            // Fungsi untuk mengambil data dari Google Sheets menggunakan Google Sheets API
+            async function fetchDataFromSheet() {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
+                    console.log(data.values); // Log data untuk debugging
+                    return data.values; // Mengembalikan nilai dari sheet (array 2D)
+                } catch (error) {
+                    console.error('Error fetching data from Google Sheets:', error);
+                    return [];
+                }
+            }
+
+            // Fungsi untuk menampilkan suggestions berdasarkan input user
+            searchQuery.addEventListener('input', function() {
+                const query = searchQuery.value.trim().toLowerCase();
+                suggestionsBox.innerHTML = '';
+
+                if (query.length > 1) {
+                    const filteredData = newsData
+                        .filter(row => row[1].toLowerCase().includes(query)) // Filter berdasarkan judul berita
+                        .map(row => row[1]); // Ambil hanya kolom judul untuk disaring duplikasi
+
+                    const uniqueSuggestions = Array.from(new Set(filteredData)); // Hapus duplikasi judul
+
+                    if (uniqueSuggestions.length > 0) {
+                        uniqueSuggestions.forEach(title => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.classList.add('suggestion-item');
+                            suggestionItem.textContent = title;
+                            suggestionItem.addEventListener('click', () => {
+                                searchQuery.value = title; // Set value dari judul yang dipilih
+                                suggestionsBox.innerHTML = ''; // Bersihkan suggestions
+                                displayNews(title); // Panggil fungsi untuk menampilkan semua berita dengan judul yang dipilih
+                            });
+                            suggestionsBox.appendChild(suggestionItem);
+                        });
+                    } else {
+                        const noResultItem = document.createElement('div');
+                        noResultItem.classList.add('suggestion-item');
+                        noResultItem.textContent = 'No results found';
+                        suggestionsBox.appendChild(noResultItem);
+                    }
+                }
+            });
+
+            // Fungsi untuk menampilkan semua berita dengan judul yang cocok dari suggestions
+            function displayNews(selectedTitle) {
+                const filteredNews = newsData.filter(row => row[1] === selectedTitle); // Temukan semua berita dengan judul yang sama
+                const paginationContainer = document.getElementById('pagination');
+
+                // Reset tampilan
+                newsContainer.innerHTML = '';
+                paginationContainer.innerHTML = '';
+                const titleElement = document.getElementById('latestNewsTitle');
+                titleElement.textContent = `Hasil Pencarian untuk "${selectedTitle}"`;
+
+                if (filteredNews.length === 0) {
+                    newsContainer.innerHTML = '<p>Data tidak ditemukan sesuai pencarian.</p>';
+                    return;
+                }
+
+                // Render berita yang ditemukan
+                filteredNews.forEach(row => {
+                    const [id, title, description, konten, imageUrl, category] = row;
+                    const newsItem = `
+                              <p><a href="#" onclick="showSingleNews(${id})">${title}, ${konten}</a></p>`;
+
+                    // createNewsCard(6, id, imageUrl, 400, title, description);
+                    newsContainer.innerHTML += newsItem; // Tambahkan ke container
+                });
+
+            }
+
+            // Memuat data dari spreadsheet saat halaman pertama kali dimuat
+            newsData = await fetchDataFromSheet();
+        });
+
         async function displayNews(filter = '', type = 'latest', onlyOne = false, selectedRow = null) {
             const newsContainer = document.getElementById('latestNews');
             const paginationContainer = document.getElementById('pagination');
             const titleElement = document.getElementById('latestNewsTitle');
 
-            // Ubah judul pencarian
-            const title = type === 'category' && filter ? `Berita ${filter}` : type === 'search' ? 'Hasil Pencarian' : 'Berita Terbaru';
+            // Ubah judul
+            const title = type === 'category' && filter ? `Berita ${filter}` : 'Berita Terbaru';
             titleElement.textContent = title;
 
             const data = await fetchData('Berita'); // Ambil data berita
@@ -335,16 +529,11 @@
             newsContainer.innerHTML = '';
             paginationContainer.innerHTML = '';
 
-            // Filter data berdasarkan tipe pencarian
-            let filteredData = data;
-            if (type === 'search') {
-                filteredData = data.filter(row => row[3].toLowerCase().includes(filter.toLowerCase()));
-            } else if (type === 'category') {
-                filteredData = data.filter(row => row[7] === filter);
-            }
+            // Filter data berdasarkan kategori jika filter diberikan, jika tidak, tampilkan semua data
+            let filteredData = filter ? data.filter(row => row[7] === filter) : data.slice(1);
 
             // Balik urutan data
-            const reversedData = filteredData.slice(1).reverse();
+            const reversedData = filteredData.reverse();
             const totalPages = Math.ceil(reversedData.length / itemsPerPage);
 
             // Tampilkan data untuk halaman saat ini
@@ -360,21 +549,7 @@
             // Render berita untuk halaman saat ini
             currentItems.forEach((row, index) => {
                 const adjustedIndex = startIndex + index;
-                const shortDescription = truncateText(row[2], 50);
-                const imageId = row[4].split('id=')[1];
-                const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
-
-                const newsItem = `
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                        <div class="card-body">
-                            <h5 class="card-title">${row[1]}</h5>
-                            <p class="card-text">${shortDescription}</p>
-                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0]-1})">Read More</a>
-                        </div>
-                    </div>
-                </div>`;
+                const newsItem = createNewsCard(4, row[0], row[4], 100, row[1], row[2]);
                 newsContainer.innerHTML += newsItem;
             });
 
@@ -465,66 +640,16 @@
         }
 
         function displaySingleNews(row, container) {
-            const shortDescription = truncateText(row[2], 50);
-            const imageId = row[4].split('id=')[1];
-            const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`;
-
-            const newsItem = `
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm">
-                    <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                    <div class="card-body">
-                        <h5 class="card-title">${row[1]}</h5>
-                        <p class="card-text">${shortDescription}</p>
-                        <a href="#" class="btn btn-primary" onclick="showSingleNews(${row[0] - 1})">Read More</a>
-                    </div>
-                </div>
-            </div>`;
+            const newsItem = createNewsCard(4, row[0] - 1, row[4], row[1], row[1]);
             container.innerHTML += newsItem;
-        }
-
-        function addPaginationButtons(currentPage, totalPages, filter, type, onlyOne, selectedRow) {
-            const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = ''; // Reset pagination buttons
-
-            // Tambahkan tombol "Previous"
-            const prevButton = document.createElement('button');
-            prevButton.innerHTML = `<i class="fas fa-chevron-left"></i> Previous`;
-            prevButton.className = 'btn btn-secondary mx-1';
-            prevButton.disabled = currentPage === 1;
-            prevButton.onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    displayNews(filter, type, onlyOne, selectedRow);
-                }
-            };
-            paginationContainer.appendChild(prevButton);
-
-            // Display page buttons logic...
-            // (same logic as in your code to handle start/end of pages)
-
-            // Tambahkan tombol "Next"
-            const nextButton = document.createElement('button');
-            nextButton.innerHTML = `Next <i class="fas fa-chevron-right"></i>`;
-            nextButton.className = 'btn btn-secondary mx-1';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.onclick = () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    displayNews(filter, type, onlyOne, selectedRow);
-                }
-            };
-            paginationContainer.appendChild(nextButton);
         }
 
         async function todayNews() {
             const newsContainer = document.getElementById('todayNews');
             const data = await fetchData('Berita');
 
-            // Dapatkan tanggal hari ini dengan zona waktu lokal
             const now = new Date();
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            console.log(`Waktu saat ini : ${today}`);
 
             newsContainer.innerHTML = '';
 
@@ -532,7 +657,7 @@
             const filteredNews = data.slice(1).filter((row) => {
                 const rowDate = new Date(row[5]);
                 const formattedRowDate = `${rowDate.getFullYear()}-${String(rowDate.getMonth() + 1).padStart(2, '0')}-${String(rowDate.getDate()).padStart(2, '0')}`;
-                console.log(`Waktu sistem : ${formattedRowDate}`);
+                // console.log(`Waktu sistem : ${formattedRowDate}`);
                 return formattedRowDate === today;
             });
 
@@ -544,31 +669,19 @@
                 const imageId = row[4].split('id=')[1]; // Ambil ID dari URL
                 const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
 
-                const newsItem = `
-                <div class="col-md-12 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="${thumbnailUrl}" class="card-img-top" alt="${row[1]}">
-                        <div class="card-body">
-                            <h5 class="card-title">${row[1]}</h5>
-                            <p class="card-text">${shortDescription}</p> <!-- Tampilkan deskripsi yang sudah dipotong -->
-                            <a href="#" class="btn btn-primary" onclick="showSingleNews(${index+1})">Read More</a>
-                        </div>
-                    </div>
-                </div>`;
-
+                const newsItem = createNewsCard(12, row[0], row[4], 150, row[1], row[2]);
                 newsContainer.innerHTML += newsItem;
             });
         }
 
         async function showSingleNews(index) {
             const data = await fetchData('Berita');
-            const row = data[index + 1]; // +1 karena data[0] adalah header
+            const row = data[index]; // +1 karena data[0] adalah header
             const newsContainer = document.getElementById('latestNews');
             const imageId = row[4].split('id=')[1]; // Ambil ID dari URL
             const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
             const short = truncateText(row[8], 30);
             const youtubeConvert = convertYouTubeUrlToEmbed(row[12]);
-            console.log("youtube link : ", youtubeConvert);
 
             newsContainer.innerHTML = `
             <div class="col-12 mb-4">
@@ -614,9 +727,6 @@
                 const commentsData = await fetchData('Komentar');
                 const newsData = await fetchData('Berita');
 
-                console.log('Data Komentar:', commentsData);
-                console.log('Data Berita:', newsData);
-
                 if (!commentsData || !Array.isArray(commentsData)) {
                     console.error('Data Komentar tidak valid:', commentsData);
                     return;
@@ -646,27 +756,11 @@
                 const popularNews = newsWithComments.sort((a, b) => b.commentCount - a.commentCount);
                 const topNews = popularNews.slice(0, 3);
 
-                console.log('Top 3 Berita:', topNews);
-
                 const newsContainer = document.getElementById('popularNews');
                 newsContainer.innerHTML = '';
 
                 topNews.forEach((newsItem) => {
-
-                    // Mengonversi URL Google Drive ke format thumbnail
-                    const imageId = newsItem.image.split('id=')[1]; // Ambil ID dari URL
-                    const thumbnailUrl = `https://drive.google.com/thumbnail?id=${imageId}`; // Buat URL thumbnail
-                    const newsHTML = `
-                    <div class="col-md-4 mb-4">
-                        <div class="card shadow-sm">
-                            <img src="${thumbnailUrl}" class="card-img-top" alt="${newsItem.title}">
-                            <div class="card-body">
-                                <h5 class="card-title">${newsItem.title}</h5>
-                                <p class="card-text">${truncateText(newsItem.description, 50)}</p>
-                                <a href="#" class="btn btn-primary" onclick="showSingleNews(${newsItem.id-1})">Read More</a>
-                            </div>
-                        </div>
-                    </div>`;
+                    const newsHTML = createNewsCard(4, newsItem.id, newsItem.image, 200, newsItem.title, newsItem.description);
                     newsContainer.innerHTML += newsHTML;
                 });
             } catch (error) {
