@@ -207,8 +207,12 @@
                         origins: origin,
                         destinations: destination,
                         key: apiKey,
-                        units: 'metric',
-                        mode: 'driving'
+                        units: 'metric', // Satuan metrik
+                        mode: 'driving', // Mode berkendara
+                        departure_time: 'now', // Waktu keberangkatan sekarang
+                        traffic_model: 'best_guess', // Model lalu lintas
+                        region: 'ID', // Kode negara Indonesia
+                        language: 'id' // Bahasa Indonesia
                     }
                 });
                 if (response.data.rows[0].elements[0].status === "OK") {
