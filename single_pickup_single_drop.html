@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculate Distance for Single Pickup Single Drop</title>
+    <meta content="Rute planner" name="description" />
+    <meta content="inv,INV,awb,AWB,address,geocoding,longlat,lat,lng" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+    <div class="container mt-5">
+
+        <h1 class="text-center mt-4">Calculate Distance for Single Pickup Single Drop</h1>
+
+        <!-- Input Excel File with Icon -->
+        <div class="form-group text-center">
+            <label for="template" class="btn btn-outline-success">
+            <a id="template" href="assets-blitz/data/single_pickup_sample.xlsx" style="text-decoration: none;">
+                <i class="fas fa-file-download fa-2x"></i>
+                <span class="d-block mt-2">Download Sample</span>
+            </a>
+        </label>
+            <label for="fileInput" class="btn btn-outline-primary">
+        <i class="fas fa-file-upload fa-2x"></i>
+        <span class="d-block mt-2">Upload Excel File</span>
+    </label>
+            <input type="file" class="d-none" id="fileInput" accept=".xlsx, .xls">
+        </div>
+        <br>
+        <table id="distanceTable" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>AWB Number</th>
+                    <th>Pickup Address</th>
+                    <th>Dropoff Address</th>
+                    <th>Distance (KM)</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8";
+        let table;
+
+        document.getElementById('fileInput').addEventListener('change', async(e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async(event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1
+                });
+
+                if ($.fn.DataTable.isDataTable('#distanceTable')) {
+                    table.clear().draw();
+                } else {
+                    table = $('#distanceTable').DataTable({
+                        responsive: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        lengthChange: true,
+                        pageLength: 10,
+                        columnDefs: [{
+                            targets: [0, 1, 2, 3, 4],
+                            className: 'text-center'
+                        }],
+                        dom: '<"top"lBf>rt<"bottom"ip><"clear">',
+                        buttons: [{
+                            extend: 'excel',
+                            text: 'Export Excel',
+                            className: 'btn btn-success'
+                        }, {
+                            extend: 'pdf',
+                            text: 'Export PDF',
+                            className: 'btn btn-danger'
+                        }, {
+                            extend: 'print',
+                            text: 'Print',
+                            className: 'btn btn-info'
+                        }, {
+                            extend: 'copy',
+                            text: 'Copy',
+                            className: 'btn btn-secondary'
+                        }]
+                    });
+                }
+
+                for (const row of rows.slice(1)) {
+                    const [awbNumber, pickupAddress, dropoffAddress] = row;
+
+                    if (pickupAddress && dropoffAddress) {
+                        const {
+                            distance,
+                            duration
+                        } = await calculateDistance(pickupAddress, dropoffAddress);
+                        table.row.add([awbNumber, pickupAddress, dropoffAddress, distance, duration]).draw();
+                    }
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        const calculateDistance = async(origin, destination) => {
+            try {
+                const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json`, {
+                    params: {
+                        origins: origin,
+                        destinations: destination,
+                        key: apiKey,
+                        units: 'metric',
+                        mode: 'driving'
+                    }
+                });
+
+                const element = response.data.rows[0].elements[0];
+                if (element.status === "OK") {
+                    const distance = element.distance.value / 1000;
+                    const duration = element.duration.text;
+                    return {
+                        distance: distance.toFixed(2),
+                        duration
+                    };
+                } else {
+                    console.error(`Distance calculation error: ${element.status}`);
+                    return {
+                        distance: "N/A",
+                        duration: "N/A"
+                    };
+                }
+            } catch (error) {
+                console.error("Error calculating distance:", error);
+                return {
+                    distance: "N/A",
+                    duration: "N/A"
+                };
+            }
+        };
+    </script>
+</body>
+
+</html>
