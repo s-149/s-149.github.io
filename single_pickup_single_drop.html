@@ -17,6 +17,12 @@
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
+<style>
+    a:hover {
+        color: white;
+        /* Warna teks saat kursor di atasnya */
+    }
+</style>
 
 <body>
     <div class="container mt-5">
@@ -142,8 +148,12 @@
                         origins: origin,
                         destinations: destination,
                         key: apiKey,
-                        units: 'metric',
-                        mode: 'driving'
+                        units: 'metric', // Satuan metrik
+                        mode: 'driving', // Mode berkendara
+                        departure_time: 'now', // Waktu keberangkatan sekarang
+                        traffic_model: 'best_guess', // Model lalu lintas
+                        region: 'ID', // Kode negara Indonesia
+                        language: 'id' // Bahasa Indonesia
                     }
                 });
 
