@@ -198,6 +198,10 @@
                                         resultRow[field.newName] = transformNamaKota(row[field.index]) || '';
                                     } else if (field.newName === 'payment_type*') {
                                         resultRow[field.newName] = row[field.index] === 'COD' ? 'cod' : 'non_cod';
+                                    } else if (field.newName === 'sender_phone*') {
+                                        resultRow[field.newName] = cleaningString(row[field.index]) || '';
+                                    } else if (field.newName === 'consignee_phone*') {
+                                        resultRow[field.newName] = cleaningString(row[field.index]) || '';
                                     } else {
                                         resultRow[field.newName] = row[field.index] || '';
                                     }
@@ -277,10 +281,60 @@
                         return finalName;
                     }
 
+                    let cleaningString = (phoneNumber) => {
+                        // definisi awal
+                        let defaultFirstNumber = "+62";
+                        let defaultNumber = "+628000000000"
+                        let result;
+
+                        // percabangan untuk mendefinisikan hasil
+                        if (phoneNumber === "") {
+                            // kondisi jika parameter tidak bernilai maka akan di isi string "62"
+                            result = defaultNumber;
+                        } else {
+                            // kondisi jika parameter berisi nilai
+                            // konversi nilai menjadi string dan hapus nilai ",00"
+                            // menjadi nilai kosong
+                            let stringKoma00 = phoneNumber.toString().replace(',00', '');
+                            // konversi nilai menjadi string dan hapus nilai berikut : 
+                            // "'(' , ')' , '+' , ',' , '-' , 'E' , ' ' " 
+                            // menjadi nilai kosong
+                            let stringSpacial = stringKoma00.replace(/['"\s\(\)+,-]|E/g, '');
+
+                            // result = stringSpacial;
+                            if (stringSpacial.length <= 8) {
+                                // kondisi jika jumlah string kurang dari 7 
+                                result = defaultNumber;
+                            } else {
+                                if (stringSpacial.indexOf(62) === 0) {
+                                    // kondisi jika ditemukan string "62" di urutan awal
+                                    result = "+" + stringSpacial;
+                                } else {
+                                    // kondisi jika ditemukan string "0" di urutan awal
+                                    if (stringSpacial.charAt(0) === '0') {
+                                        // Menghapus karakter pertama
+                                        stringSpacialNol = stringSpacial.slice(1);
+                                        // gabungkan karakter
+                                        result = defaultFirstNumber + stringSpacialNol;
+                                    } else {
+                                        // gabungkan karakter
+                                        result = defaultFirstNumber + stringSpacial;
+                                    }
+                                }
+                            }
+                        }
+
+                        return result;
+                    }
+
                     // Fungsi untuk menampilkan data dalam tabel
                     function displayData(data) {
                         $('#dataTable tbody').empty();
                         data.forEach(row => {
+                                    // Set nilai width, height, dan length menjadi "0"
+                                    row['width'] = "0";
+                                    row['height'] = "0";
+                                    row['length'] = "0";
                                     const newRow = `<tr>
                         <td><input type="checkbox" class="rowSelect" /></td>
                         ${Object.values(row).map(value => `<td>${value || ''}</td>`).join('')}
