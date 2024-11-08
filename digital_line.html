@@ -56,23 +56,7 @@
         let scaleFactor = 1; // Default skala: 1 px = 0.026 cm (ubah setelah kalibrasi)
         let line, isDrawing = false;
         let calibrated = false;
-        let calibrationLengthCm = 10; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
-
-        // async function initCamera() {
-        //     const video = document.getElementById('video');
-        //     try {
-        //         const stream = await navigator.mediaDevices.getUserMedia({
-        //             video: true
-        //         });
-        //         video.srcObject = stream;
-        //         video.onloadedmetadata = () => {
-        //             video.play();
-        //             console.log('Video dimulai');
-        //         };
-        //     } catch (err) {
-        //         console.error("Error accessing camera: ", err);
-        //     }
-        // }
+        let calibrationLengthCm = 0; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
 
         async function initCamera() {
             const video = document.getElementById('video');
@@ -93,7 +77,6 @@
                 console.error("Error accessing camera: ", err);
             }
         }
-
 
         // Inisialisasi Fabric.js
         const canvas = new fabric.Canvas('canvas', {
@@ -153,17 +136,34 @@
         });
 
         // Tombol kalibrasi
-        document.getElementById('calibrate').addEventListener('click', () => {
-            if (line) {
-                const lengthPx = Math.sqrt(
-                    Math.pow(line.x2 - line.x1, 2) + Math.pow(line.y2 - line.y1, 2)
-                );
-                scaleFactor = lengthPx / calibrationLengthCm;
+        // document.getElementById('calibrate').addEventListener('click', () => {
+        //     if (line) {
+        //         const lengthPx = Math.sqrt(
+        //             Math.pow(line.x2 - line.x1, 2) + Math.pow(line.y2 - line.y1, 2)
+        //         );
+        //         scaleFactor = lengthPx / calibrationLengthCm;
+        //         calibrated = true;
+        //         alert(`Kalibrasi selesai! Skala diatur ke: ${scaleFactor.toFixed(2)} px per cm`);
+        //         console.log(`Skala kalibrasi: ${scaleFactor.toFixed(2)} px per cm`);
+        //     } else {
+        //         alert('Gambar garis untuk kalibrasi terlebih dahulu.');
+        //     }
+        // });
+
+        document.getElementById('calibrate').addEventListener('click', function() {
+            if (startX !== undefined && endX !== undefined) {
+                // Hitung panjang dalam piksel
+                const lengthPx = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                calibrationLengthPx = lengthPx;
+
+                // Hitung skala dalam cm per piksel
+                scaleFactor = calibrationLengthCm / lengthPx;
                 calibrated = true;
-                alert(`Kalibrasi selesai! Skala diatur ke: ${scaleFactor.toFixed(2)} px per cm`);
-                console.log(`Skala kalibrasi: ${scaleFactor.toFixed(2)} px per cm`);
+
+                document.getElementById('info').innerText = `Kalibrasi selesai: ${scaleFactor.toFixed(4)} cm/px`;
+                console.log(`Skala kalibrasi: ${scaleFactor.toFixed(4)} cm/px`);
             } else {
-                alert('Gambar garis untuk kalibrasi terlebih dahulu.');
+                alert('Silakan gambar garis kalibrasi terlebih dahulu.');
             }
         });
 
