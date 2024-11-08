@@ -56,7 +56,8 @@
         let scaleFactor = 1; // Default skala: 1 px = 0.026 cm (ubah setelah kalibrasi)
         let line, isDrawing = false;
         let calibrated = false;
-        let calibrationLengthCm = 0; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
+        let calibrationLengthCm = 10; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
+        let jarakStatisCm = 100; // Jarak statis antara kamera dan objek dalam cm
 
         async function initCamera() {
             const video = document.getElementById('video');
@@ -135,6 +136,23 @@
             }
         });
 
+        function hitungSkalaStatis(panjangKalibrasiPx) {
+            // Kalibrasi skala berdasarkan panjang objek yang diketahui
+            scaleFactor = calibrationLengthCm / panjangKalibrasiPx;
+            console.log('Skala diatur berdasarkan jarak statis: 1 px =', scaleFactor, 'cm');
+        }
+
+        // Misalkan kalibrasi dilakukan dengan panjang 10 cm yang diukur dalam piksel
+        document.getElementById('calibrate').addEventListener('click', () => {
+            if (line) {
+                let panjangKalibrasiPx = Math.sqrt(
+                    Math.pow((line.x2 - line.x1), 2) + Math.pow((line.y2 - line.y1), 2)
+                );
+                hitungSkalaStatis(panjangKalibrasiPx);
+                calibrated = true;
+            }
+        });
+
         // Tombol kalibrasi
         // document.getElementById('calibrate').addEventListener('click', () => {
         //     if (line) {
@@ -149,23 +167,6 @@
         //         alert('Gambar garis untuk kalibrasi terlebih dahulu.');
         //     }
         // });
-
-        document.getElementById('calibrate').addEventListener('click', function() {
-            if (startX !== undefined && endX !== undefined) {
-                // Hitung panjang dalam piksel
-                const lengthPx = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-                calibrationLengthPx = lengthPx;
-
-                // Hitung skala dalam cm per piksel
-                scaleFactor = calibrationLengthCm / lengthPx;
-                calibrated = true;
-
-                document.getElementById('info').innerText = `Kalibrasi selesai: ${scaleFactor.toFixed(4)} cm/px`;
-                console.log(`Skala kalibrasi: ${scaleFactor.toFixed(4)} cm/px`);
-            } else {
-                alert('Silakan gambar garis kalibrasi terlebih dahulu.');
-            }
-        });
 
         // Tombol hapus garis
         document.getElementById('clear').addEventListener('click', () => {
