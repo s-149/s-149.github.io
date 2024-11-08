@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Digital Ruler with Calibration</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        
+        video {
+            display: block;
+            position: absolute;
+            z-index: 1;
+        }
+        
+        canvas {
+            position: absolute;
+            z-index: 2;
+            border: 1px solid red;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 3;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="controls">
+        <button id="calibrate">Calibrate</button>
+        <button id="clear">Clear Lines</button>
+        <div id="info"></div>
+    </div>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script>
+        let startX, startY, endX, endY;
+        let drawing = false;
+        let scaleFactor = 1; // Default skala: 1 px = 0.026 cm (ubah setelah kalibrasi)
+        let line, isDrawing = false;
+        let calibrated = false;
+        let calibrationLengthCm = 10; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
+
+        async function initCamera() {
+            const video = document.getElementById('video');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true
+                });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    console.log('Video dimulai');
+                };
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+            }
+        }
+
+        // Inisialisasi Fabric.js
+        const canvas = new fabric.Canvas('canvas', {
+            selection: false
+        });
+
+        canvas.on('mouse:down', function(options) {
+            isDrawing = true;
+            const pointer = canvas.getPointer(options.e);
+            startX = pointer.x;
+            startY = pointer.y;
+            const points = [startX, startY, startX, startY];
+            line = new fabric.Line(points, {
+                strokeWidth: 2,
+                fill: 'red',
+                stroke: 'red',
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.add(line);
+        });
+
+        canvas.on('mouse:move', function(options) {
+            if (!isDrawing) return;
+            const pointer = canvas.getPointer(options.e);
+            line.set({
+                x2: pointer.x,
+                y2: pointer.y
+            });
+            canvas.renderAll();
+        });
+
+        canvas.on('mouse:up', function() {
+            isDrawing = false;
+            const lengthPx = Math.sqrt(
+                Math.pow(line.x2 - line.x1, 2) + Math.pow(line.y2 - line.y1, 2)
+            );
+            const lengthCm = (lengthPx / scaleFactor).toFixed(2);
+
+            // Tampilkan panjang garis
+            const text = new fabric.Text(`${lengthCm} cm`, {
+                left: (line.x1 + line.x2) / 2,
+                top: (line.y1 + line.y2) / 2 - 10,
+                fontSize: 14,
+                fill: 'blue',
+                selectable: false
+            });
+            canvas.add(text);
+
+            console.log(`Panjang garis: ${lengthPx.toFixed(2)} px (${lengthCm} cm)`);
+
+            if (calibrated) {
+                document.getElementById('info').innerText = `Panjang garis terakhir: ${lengthCm} cm`;
+            } else {
+                console.log('Skala belum dikalibrasi. Gunakan tombol "Calibrate" untuk kalibrasi.');
+            }
+        });
+
+        // Tombol kalibrasi
+        document.getElementById('calibrate').addEventListener('click', () => {
+            if (line) {
+                const lengthPx = Math.sqrt(
+                    Math.pow(line.x2 - line.x1, 2) + Math.pow(line.y2 - line.y1, 2)
+                );
+                scaleFactor = lengthPx / calibrationLengthCm;
+                calibrated = true;
+                alert(`Kalibrasi selesai! Skala diatur ke: ${scaleFactor.toFixed(2)} px per cm`);
+                console.log(`Skala kalibrasi: ${scaleFactor.toFixed(2)} px per cm`);
+            } else {
+                alert('Gambar garis untuk kalibrasi terlebih dahulu.');
+            }
+        });
+
+        // Tombol hapus garis
+        document.getElementById('clear').addEventListener('click', () => {
+            canvas.clear();
+        });
+
+        initCamera();
+    </script>
+</body>
+
+</html>
