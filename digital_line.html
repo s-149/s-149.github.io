@@ -58,21 +58,42 @@
         let calibrated = false;
         let calibrationLengthCm = 10; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
 
+        // async function initCamera() {
+        //     const video = document.getElementById('video');
+        //     try {
+        //         const stream = await navigator.mediaDevices.getUserMedia({
+        //             video: true
+        //         });
+        //         video.srcObject = stream;
+        //         video.onloadedmetadata = () => {
+        //             video.play();
+        //             console.log('Video dimulai');
+        //         };
+        //     } catch (err) {
+        //         console.error("Error accessing camera: ", err);
+        //     }
+        // }
+
         async function initCamera() {
             const video = document.getElementById('video');
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true
+                    video: {
+                        facingMode: {
+                            ideal: 'environment'
+                        } // Meminta kamera belakang
+                    }
                 });
                 video.srcObject = stream;
                 video.onloadedmetadata = () => {
                     video.play();
-                    console.log('Video dimulai');
+                    console.log('Video dimulai (kamera belakang)');
                 };
             } catch (err) {
                 console.error("Error accessing camera: ", err);
             }
         }
+
 
         // Inisialisasi Fabric.js
         const canvas = new fabric.Canvas('canvas', {
