@@ -53,10 +53,10 @@
     <script>
         let startX, startY, endX, endY;
         let drawing = false;
-        let scaleFactor = 5; // Default skala: 1 px = 0.026 cm (ubah setelah kalibrasi)
+        let scaleFactor = 1; // Default skala: 1 px = 0.026 cm (ubah setelah kalibrasi)
         let line, isDrawing = false;
         let calibrated = false;
-        let calibrationLengthCm = 10; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
+        let calibrationLengthCm = 120; // Panjang objek untuk kalibrasi dalam cm (ubah sesuai kebutuhan)
 
         async function initCamera() {
             const video = document.getElementById('video');
