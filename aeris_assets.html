@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assets | Table</title>
+    <meta content="Manage Aeris Data" name="description" />
+    <meta content="input, search, blitz, electric, mobility, molis, ev, EV" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <!-- Favicons -->
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link rel="icon" href="assets-blitz/img/logo/logo.jpg" type="image/jpeg">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+    <!-- DataTables Buttons CSS -->
+    <link href="https://cdn.datatables.net/buttons/2.3.1/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <!-- DataTables Buttons JS -->
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/dataTables.buttons.min.js"></script>
+
+    <!-- JSZip (required for Excel export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
+    <!-- PDFMake (required for PDF export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+
+    <!-- DataTables Button Extensions JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.1/js/buttons.print.min.js"></script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            table-layout: fixed;
+            /* Ensure equal column widths */
+        }
+        
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 20px;
+            /* Add consistent padding */
+            text-align: left;
+            vertical-align: middle;
+            /* Vertically align text in the middle */
+            min-height: 50px;
+            /* Set a minimum height for uniformity */
+            white-space: nowrap;
+            /* Prevent content from wrapping into multiple lines */
+            overflow: hidden;
+            /* Hide overflow content */
+            /* text-overflow: ellipsis; */
+            /* Add ellipsis (...) when content overflows */
+        }
+        
+        th {
+            background-color: #f4f4f4;
+        }
+        /* Make sure that the DataTable header remains visible */
+        
+        .dataTables_wrapper .dataTables_scrollHeadInner {
+            width: 100% !important;
+        }
+        
+        .dataTables_scrollBody {
+            overflow-x: auto !important;
+        }
+        
+        .content {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Bootstrap Container -->
+    <div class="container mt-5">
+        <h2 class="content">JSON File to Display Data</h2>
+
+        <div class="form-group text-center content">
+            <label for="file-input" class="btn btn-outline-primary">
+            <i class="fas fa-file-upload fa-2x"></i>
+            <span class="d-block mt-2">Upload JSON File</span>
+        </label>
+            <input type="file" id="file-input" class="d-none" />
+        </div>
+
+        <!-- Button to upload the JSON file -->
+        <div id="table-container">Please upload a JSON file to display data.</div>
+    </div>
+
+    <script>
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        console.log('Data from local file:', data); // Log the data to the console for debugging
+                        generateTable(data);
+                    } catch (error) {
+                        document.getElementById('table-container').innerHTML = `Error parsing JSON: ${error.message}`;
+                        console.error('Error parsing JSON:', error);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Function to flatten nested objects
+        function flattenObject(obj, parent = '', result = {}) {
+            for (let key in obj) {
+                const newKey = parent ? `${parent}_${key}` : key;
+                const value = obj[key];
+
+                if (typeof value === 'object' && value !== null) {
+                    flattenObject(value, newKey, result); // Recursively flatten nested objects
+                } else {
+                    result[newKey] = value; // Add value to result
+                }
+            }
+            return result;
+        }
+
+        // Function to convert timestamp to Indonesian time (WIB)
+        function formatTimestampToIndonesianTime(timestamp) {
+            const date = new Date(timestamp);
+            const options = {
+                weekday: 'long', // "Monday"
+                year: 'numeric', // "2024"
+                month: 'long', // "November"
+                day: 'numeric', // "12"
+                hour: '2-digit', // "02"
+                minute: '2-digit', // "00"
+                second: '2-digit', // "00"
+                timeZoneName: 'short', // "WIB"
+                timeZone: 'Asia/Jakarta' // Set the time zone to WIB
+            };
+            return date.toLocaleString('id-ID', options); // Format date in Indonesian format
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const options = {
+                year: 'numeric', // "2024"
+                month: 'numeric', // "November"
+                day: 'numeric', // "12"
+                hour: '2-digit', // "02"
+                minute: '2-digit', // "00"
+                second: '2-digit', // "00"
+                timeZone: 'Asia/Jakarta' // Set the time zone to WIB
+            };
+            return date.toLocaleString('id-ID', options); // Format date in Indonesian format
+        }
+
+        function getAddress(address, lat, lng) {
+            return `<a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank">
+                        ${address}
+                    </a>`;
+        }
+
+        function generateTable(data) {
+            // Ensure data is valid
+            if (!data || !data.assets || data.assets.length === 0) {
+                document.getElementById('table-container').innerHTML = 'No data available';
+                return;
+            }
+
+            // Flatten the objects in the assets array
+            const flattenedAssets = data.assets.map(asset => {
+                const flattenedAsset = flattenObject(asset);
+
+                // Check if any value is a timestamp and convert it
+                for (let key in flattenedAsset) {
+                    if (key.toLowerCase().includes('timestamp') && !isNaN(flattenedAsset[key])) {
+                        flattenedAsset[key] = formatTimestamp(flattenedAsset[key]);
+                    }
+                    if (key.toLowerCase().includes('status_since') && !isNaN(flattenedAsset[key])) {
+                        flattenedAsset[key] = formatTimestampToIndonesianTime(flattenedAsset[key]);
+                    }
+                    if (key.toLowerCase().includes('address')) {
+                        flattenedAsset[key] = getAddress(flattenedAsset[key], flattenedAsset['location_latlng_lat'], flattenedAsset['location_latlng_lng']);
+                    }
+                }
+
+                return flattenedAsset;
+            });
+
+            // Start table creation
+            let table = '<table id="data-table" class="display">';
+            table += `<thead><tr>`;
+
+            // Generate headers dynamically based on the keys of the first flattened object
+            const headers = Object.keys(flattenedAssets[0]);
+            headers.forEach(header => {
+                table += `<th>${header}</th>`;
+            });
+
+            table += `</tr></thead><tbody>`;
+
+            // Loop through flattened assets and add them to the table rows
+            flattenedAssets.forEach(asset => {
+                table += `<tr>`;
+                headers.forEach(header => {
+                    table += `<td>${asset[header]}</td>`;
+                });
+                table += `</tr>`;
+            });
+
+            table += '</tbody></table>';
+            document.getElementById('table-container').innerHTML = table;
+
+            // Initialize DataTable with additional settings
+            $('#data-table').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                scrollX: true, // Enable horizontal scrolling
+                scrollY: 300, // Set max height for vertical scrolling
+                fixedHeader: true, // Freeze header
+                fixedColumns: {
+                    leftColumns: 1 // Freeze the first column
+                },
+                dom: 'lBfrtip', // Define the elements to show buttons (B)
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print' // Enable these export options
+                ]
+            });
+        }
+    </script>
+
+</body>
+
+</html>
