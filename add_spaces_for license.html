@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Format License Plates</title>
+    <meta content="Untuk parsing data" name="description" />
+    <meta content="inv,INV,awb,AWB" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        form {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        textarea,
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>License Plate Formatter</h1>
+    <form id="formatForm">
+        <label for="inputData">Enter License Plates:</label>
+        <textarea id="inputData" placeholder="Enter license plates (e.g., B4805SVI)" rows="10" required></textarea>
+        <button type="submit">Format</button>
+    </form>
+
+    <div class="output">
+        <label for="formattedOutput">Formatted License Plates:</label>
+        <textarea id="formattedOutput" rows="10" readonly></textarea>
+    </div>
+
+    <script>
+        document.getElementById('formatForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from reloading the page
+
+            // Get the input data from textarea
+            const inputData = document.getElementById('inputData').value.trim();
+
+            // Split input into an array of license plates by newlines
+            const licensePlates = inputData.split('\n');
+
+            // Format each license plate
+            const formattedData = licensePlates.map(plate => {
+                // Trim any leading/trailing spaces and format the license plate
+                return plate.trim().replace(/^(\w{1})(\d{4})(\w{3})$/, '$1 $2 $3');
+            }).join('\n'); // Join them back into a string with newlines
+
+            // Display the result in the formattedOutput textarea
+            const outputElement = document.getElementById('formattedOutput');
+            outputElement.value = formattedData; // Use 'value' to populate textarea content
+        });
+    </script>
+
+</body>
+
+</html>
