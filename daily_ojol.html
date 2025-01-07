@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Ojol</title>
+    <meta content="Daily Ojol" name="description" />
+    <meta content="Daily Ojol" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.5/css/buttons.dataTables.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .card-content {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5 mb-5">Daily Ojol</h1>
+
+        <div id="summarySection" class="mt-3 mb-5">
+            <h3>Summary</h3>
+            <div id="summaryCards" class="row g-3"></div>
+        </div>
+        <div class="mt-3 mb-5">
+            <h1>Kalkulator Persen</h1>
+            <div class="form-group">
+                <label for="totalPercent">Total Persen (%)</label>
+                <input type="number" id="totalPercent" value="90" placeholder="Masukkan total persen">
+            </div>
+            <div class="form-group">
+                <label for="totalNumber">Total Angka</label>
+                <input type="number" id="totalNumber" placeholder="Masukkan total angka">
+            </div>
+            <div class="result" id="result">Hasil akan muncul di sini...</div>
+
+        </div>
+
+        <div class="mb-5">
+            <h3 class="mt-5 mb-5">Data Table</h3>
+            <!-- Button to Open Modal -->
+            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#headerModal">
+            Header
+        </button>
+            <!-- Modal for Header Selection -->
+            <div class="modal fade" id="headerModal" tabindex="-1" aria-labelledby="headerModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="headerModalLabel">Choise Header</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="headerForm">
+                                <div id="headerCheckboxes" class="form-check"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table id="dataTable" class="display nowrap" style="width:100%">
+                <thead>
+                    <tr id="tableHeader"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
+        const spreadsheetId = '1UVOiYX3PEOgszcLEq2GLARaj7gkeYEHMHKNrSpTD6dk';
+        const range = 'view';
+
+        async function fetchData() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.values) {
+                    renderTable(data.values);
+                } else {
+                    console.error("No data found in the response.");
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function renderTable(data) {
+            const headerRow = data[0]; // Assume the first row contains headers
+            const bodyRows = data.slice(1); // Remaining rows are data
+
+            // Render table headers
+            const tableHeader = $("#tableHeader");
+            const headerCheckboxes = $("#headerCheckboxes");
+            tableHeader.empty();
+            headerCheckboxes.empty();
+
+            headerRow.forEach((header, index) => {
+                tableHeader.append(`<th data-index="${index}">${header}</th>`);
+                headerCheckboxes.append(`
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="header-${index}" data-index="${index}" checked>
+                        <label class="form-check-label" for="header-${index}">${header}</label>
+                    </div>
+                `);
+            });
+
+            // Render table body
+            const tableBody = $("#tableBody");
+            tableBody.empty();
+            bodyRows.forEach(row => {
+                const rowHtml = row.map(cell => `<td>${cell}</td>`).join('');
+                tableBody.append(`<tr>${rowHtml}</tr>`);
+            });
+
+            // Add event listener to header checkboxes
+            $(".form-check-input").on("change", function() {
+                const columnIndex = $(this).data("index");
+                const isChecked = $(this).is(":checked");
+                toggleColumnVisibility(columnIndex, isChecked);
+            });
+
+            // Initialize or Reinitialize DataTable
+            if ($.fn.DataTable.isDataTable("#dataTable")) {
+                $('#dataTable').DataTable().destroy(); // Destroy existing instance
+            }
+
+            // Initialize DataTable with required configurations
+            $('#dataTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                scrollX: true,
+                scrollY: 300,
+                fixedHeader: true,
+                dom: 'lBfrtip',
+                buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                lengthMenu: [10, 25, 50, 100, 500],
+                pageLength: 10
+            });
+        }
+
+        function toggleColumnVisibility(index, isVisible) {
+            const table = $('#dataTable').DataTable();
+            table.column(index).visible(isVisible); // DataTables API
+        }
+
+        // Fetch and display data on page load
+        $(document).ready(() => {
+            fetchData(); // Mengambil data tabel utama
+            fetchSummaryData(); // Mengambil data summary
+        });
+    </script>
+
+    <script>
+        const rangeSummary = 'summary'; // Range untuk summary
+
+        async function fetchSummaryData() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeSummary}?key=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.values) {
+                    renderSummary(data.values);
+                } else {
+                    console.error("No data found in summary range.");
+                }
+            } catch (error) {
+                console.error("Error fetching summary data:", error);
+            }
+        }
+
+        function renderSummary(data) {
+            const summaryCards = $("#summaryCards");
+            summaryCards.empty();
+
+            // Assume first row is headers
+            const headerRow = data[0];
+            const bodyRows = data.slice(1);
+
+            // Initialize content for a single card
+            let cardContent = '';
+
+            // Collect valid rows into card content
+            bodyRows.forEach(row => {
+                const col1 = row[0] || ''; // Default to empty string if undefined
+                const col2 = row[1] || '';
+
+                // If both col1 and col2 are empty, insert a new paragraph (line break)
+                if (!col1 && !col2) {
+                    cardContent += `<p class="mb-5"></p>`; // Empty line if both columns are empty
+                } else {
+                    // Otherwise, show the data in the row
+                    cardContent += `
+                <div class="row mb-2">
+                    <div class="col-6"><strong>${col1}</strong></div>
+                    <div class="col-6">${col2}</div>
+                </div>
+            `;
+                }
+            });
+
+            // Create a single card with all valid data
+            if (cardContent) {
+                const cardHtml = `
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-text">
+                            ${cardContent}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+                summaryCards.append(cardHtml);
+            }
+        }
+
+        $(document).ready(() => {
+            fetchData(); // Mengambil data tabel utama
+            fetchSummaryData(); // Mengambil data summary
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            function calculatePercentage() {
+                let totalPercent = parseFloat($("#totalPercent").val());
+                let totalNumber = parseFloat($("#totalNumber").val());
+
+                if (!isNaN(totalPercent) && !isNaN(totalNumber)) {
+                    let result = (totalPercent / 100) * totalNumber;
+                    $("#result").html(
+                        `${totalPercent}% dari ${totalNumber} adalah <strong>${result.toLocaleString()}</strong>`
+                    );
+                } else {
+                    $("#result").html("Harap masukkan nilai yang valid.");
+                }
+            }
+
+            $("#totalPercent, #totalNumber").on("input", function() {
+                calculatePercentage();
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+
+
+</html>
