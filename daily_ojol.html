@@ -23,34 +23,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.5/css/buttons.dataTables.min.css">
+
+    <!-- Select2 CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -67,83 +45,50 @@
             padding: 10px;
             text-align: left;
         }
-        
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-        }
-        
-        .card-title {
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-        
-        .card-content {
-            margin-top: 5px;
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1 class="mt-5 mb-5">Daily Ojol</h1>
+        <h1 class="mt-5 mb-3">Daily Ojol (<span id="display"></span>)</h1>
 
-        <div id="summarySection" class="mt-3 mb-5">
-            <h3>Summary</h3>
-            <div id="summaryCards" class="row g-3"></div>
-        </div>
-        <div class="mt-3 mb-5">
-            <h3>Kalkulator Persen</h3>
-            <div class="form-group">
-                <label for="totalPercent">Total Persen (%)</label>
-                <input type="number" id="totalPercent" value="90" placeholder="Masukkan total persen">
-            </div>
-            <div class="form-group">
-                <label for="totalNumber">Total Angka</label>
-                <input type="number" id="totalNumber" placeholder="Masukkan total angka">
-            </div>
-            <div class="result" id="result">Hasil akan muncul di sini...</div>
+        <div class="container py-5">
+            <div class="row">
 
-        </div>
+                <!-- Dropdown Select2 untuk Filter Kolom 1 -->
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown1" class="form-control" style="width: 100%;" multiple></select>
+                </div>
 
-        <div class="mb-5">
-            <h3 class="mt-5 mb-5">Data Table</h3>
-            <!-- Button to Open Modal -->
-            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#headerModal">
-            Header
-        </button>
-            <!-- Modal for Header Selection -->
-            <div class="modal fade" id="headerModal" tabindex="-1" aria-labelledby="headerModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="headerModalLabel">Choise Header</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="headerForm">
-                                <div id="headerCheckboxes" class="form-check"></div>
-                            </form>
-                        </div>
-                    </div>
+                <!-- Dropdown Select2 untuk Filter Kolom 2 -->
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown3" class="form-control" style="width: 100%;" multiple></select>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown4" class="form-control" style="width: 100%;" multiple></select>
                 </div>
             </div>
-            <table id="dataTable" class="display nowrap" style="width:100%">
-                <thead>
-                    <tr id="tableHeader"></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
         </div>
+        <div id="results" class="mt-4">
+            <p>Total Minus: 0</p>
+            <p>Total Non-Minus: 0</p>
+        </div>
+
+        <table id="dataTable" class="display nowrap" style="width:100%">
+            <thead>
+                <tr id="tableHeader"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 
     <script>
         const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
         const spreadsheetId = '1UVOiYX3PEOgszcLEq2GLARaj7gkeYEHMHKNrSpTD6dk';
-        const range = 'view';
+        const range = 'plt';
 
         async function fetchData() {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
@@ -153,6 +98,7 @@
 
                 if (data && data.values) {
                     renderTable(data.values);
+                    populateDropdowns(data.values);
                 } else {
                     console.error("No data found in the response.");
                 }
@@ -161,27 +107,71 @@
             }
         }
 
-        function renderTable(data) {
-            const headerRow = data[0]; // Assume the first row contains headers
-            const bodyRows = data.slice(1); // Remaining rows are data
+        function calculateColumn8Sums(data) {
+            let minusSum = 0;
+            let nonMinusSum = 0;
 
-            // Render table headers
-            const tableHeader = $("#tableHeader");
-            const headerCheckboxes = $("#headerCheckboxes");
-            tableHeader.empty();
-            headerCheckboxes.empty();
-
-            headerRow.forEach((header, index) => {
-                tableHeader.append(`<th data-index="${index}">${header}</th>`);
-                headerCheckboxes.append(`
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="header-${index}" data-index="${index}" checked>
-                        <label class="form-check-label" for="header-${index}">${header}</label>
-                    </div>
-                `);
+            data.forEach(row => {
+                const value = parseFloat(row[4]);
+                if (!isNaN(value)) {
+                    if (value < 0) {
+                        minusSum += value;
+                    } else {
+                        nonMinusSum += value;
+                    }
+                }
             });
 
-            // Render table body
+            // Tampilkan hasil
+            console.log("Total Minus:", minusSum);
+            console.log("Total Non-Minus:", nonMinusSum);
+
+            // Menampilkan hasil di HTML
+            const resultContainer = document.getElementById('results');
+            resultContainer.innerHTML = `
+        <p>Total Minus: ${minusSum.toLocaleString()}</p>
+        <p>Total Non-Minus: ${nonMinusSum.toLocaleString()}</p>
+    `;
+        }
+
+        function calculateFilteredNominal() {
+            const dataTable = $('#dataTable').DataTable();
+            const filteredData = dataTable.rows({
+                search: 'applied'
+            }).data();
+            let minusTotal = 0;
+            let nonMinusTotal = 0;
+
+            filteredData.each(function(row) {
+                const nominal = parseFloat(row[4]);
+                if (!isNaN(nominal)) {
+                    if (nominal < 0) {
+                        minusTotal += nominal;
+                    } else {
+                        nonMinusTotal += nominal;
+                    }
+                }
+            });
+
+            // Tampilkan hasil perhitungan di elemen HTML
+            $('#results').html(`
+            <p>Total Minus: ${minusTotal.toLocaleString()}</p>
+            <p>Total Non-Minus: ${nonMinusTotal.toLocaleString()}</p>
+        `);
+        }
+
+        function renderTable(data) {
+            const headerRow = data[0]; // Asumsi baris pertama adalah header
+            const bodyRows = data.slice(1); // Baris lainnya adalah data
+
+            // Render header tabel
+            const tableHeader = $("#tableHeader");
+            tableHeader.empty();
+            headerRow.forEach(header => {
+                tableHeader.append(`<th>${header}</th>`);
+            });
+
+            // Render isi tabel
             const tableBody = $("#tableBody");
             tableBody.empty();
             bodyRows.forEach(row => {
@@ -189,142 +179,138 @@
                 tableBody.append(`<tr>${rowHtml}</tr>`);
             });
 
-            // Add event listener to header checkboxes
-            $(".form-check-input").on("change", function() {
-                const columnIndex = $(this).data("index");
-                const isChecked = $(this).is(":checked");
-                toggleColumnVisibility(columnIndex, isChecked);
-            });
+            // Inisialisasi DataTable
+            $(document).ready(function() {
+                $('#dataTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    scrollX: true,
+                    scrollY: 300,
+                    dom: 'lBfrtip',
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                    lengthMenu: [10, 25, 50, 100],
+                    pageLength: 10
+                });
 
-            // Initialize or Reinitialize DataTable
-            if ($.fn.DataTable.isDataTable("#dataTable")) {
-                $('#dataTable').DataTable().destroy(); // Destroy existing instance
-            }
+                // Hitung nominal setelah render tabel selesai
+                calculateFilteredNominal();
 
-            // Initialize DataTable with required configurations
-            $('#dataTable').DataTable({
-                paging: true,
-                searching: true,
-                ordering: true,
-                scrollX: true,
-                scrollY: 300,
-                fixedHeader: true,
-                dom: 'lBfrtip',
-                buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-                lengthMenu: [10, 25, 50, 100, 500],
-                pageLength: 10
+                // Tambahkan event listener untuk perhitungan ulang nominal saat filter berubah
+                $('#dataTable').on('search.dt', calculateFilteredNominal);
             });
         }
 
-        function toggleColumnVisibility(index, isVisible) {
-            const table = $('#dataTable').DataTable();
-            table.column(index).visible(isVisible); // DataTables API
+
+        function populateDropdowns(data) {
+            const bodyRows = data.slice(1); // Skip headers
+
+            // Populate dropdown for column ke-1
+            const dropdown1 = $("#filterDropdown1");
+            dropdown1.empty();
+            const column1Values = [...new Set(bodyRows.map(row => row[0]))];
+            column1Values.forEach(value => {
+                dropdown1.append(`<option value="${value}">${value}</option>`);
+            });
+
+            // Populate dropdown for column ke-2
+            const dropdown2 = $("#filterDropdown2");
+            dropdown2.empty();
+            const column2Values = [...new Set(bodyRows.map(row => row[1]))];
+            column2Values.forEach(value => {
+                dropdown2.append(`<option value="${value}">${value}</option>`);
+            });
+            const dropdown3 = $("#filterDropdown3");
+            dropdown3.empty();
+            const column3Values = [...new Set(bodyRows.map(row => row[2]))];
+            column3Values.forEach(value => {
+                dropdown3.append(`<option value="${value}">${value}</option>`);
+            });
+            const dropdown4 = $("#filterDropdown4");
+            dropdown4.empty();
+            const column4Values = [...new Set(bodyRows.map(row => row[3]))];
+            column4Values.forEach(value => {
+                dropdown4.append(`<option value="${value}">${value}</option>`);
+            });
+
+            // Initialize Select2 with multiple select for both dropdowns
+            dropdown1.select2({
+                placeholder: "PIC",
+                allowClear: true
+            });
+            dropdown2.select2({
+                placeholder: "Type",
+                allowClear: true
+            });
+            dropdown3.select2({
+                placeholder: "Plate",
+                allowClear: true
+            });
+            dropdown4.select2({
+                placeholder: "User Name",
+                allowClear: true
+            });
+
+            dropdown1.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(0).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(0).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown2.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(1).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(1).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown3.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(2).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(2).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown4.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(3).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(3).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
         }
 
         // Fetch and display data on page load
         $(document).ready(() => {
-            fetchData(); // Mengambil data tabel utama
-            fetchSummaryData(); // Mengambil data summary
+            fetchData();
+
+            // Display current date
+            const today = new Date();
+            const currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+            $("#display").text(currentDate);
         });
     </script>
-
-    <script>
-        const rangeSummary = 'summary'; // Range untuk summary
-
-        async function fetchSummaryData() {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${rangeSummary}?key=${apiKey}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data && data.values) {
-                    renderSummary(data.values);
-                } else {
-                    console.error("No data found in summary range.");
-                }
-            } catch (error) {
-                console.error("Error fetching summary data:", error);
-            }
-        }
-
-        function renderSummary(data) {
-            const summaryCards = $("#summaryCards");
-            summaryCards.empty();
-
-            // Assume first row is headers
-            const headerRow = data[0];
-            const bodyRows = data.slice(1);
-
-            // Initialize content for a single card
-            let cardContent = '';
-
-            // Collect valid rows into card content
-            bodyRows.forEach(row => {
-                const col1 = row[0] || ''; // Default to empty string if undefined
-                const col2 = row[1] || '';
-
-                // If both col1 and col2 are empty, insert a new paragraph (line break)
-                if (!col1 && !col2) {
-                    cardContent += `<p class="mb-5"></p>`; // Empty line if both columns are empty
-                } else {
-                    // Otherwise, show the data in the row
-                    cardContent += `
-                <div class="row mb-2">
-                    <div class="col-6"><strong>${col1}</strong></div>
-                    <div class="col-6">${col2}</div>
-                </div>
-            `;
-                }
-            });
-
-            // Create a single card with all valid data
-            if (cardContent) {
-                const cardHtml = `
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <div class="card-text">
-                            ${cardContent}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-                summaryCards.append(cardHtml);
-            }
-        }
-
-        $(document).ready(() => {
-            fetchData(); // Mengambil data tabel utama
-            fetchSummaryData(); // Mengambil data summary
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            function calculatePercentage() {
-                let totalPercent = parseFloat($("#totalPercent").val());
-                let totalNumber = parseFloat($("#totalNumber").val());
-
-                if (!isNaN(totalPercent) && !isNaN(totalNumber)) {
-                    let result = (totalPercent / 100) * totalNumber;
-                    $("#result").html(
-                        `${totalPercent}% dari ${totalNumber} adalah <strong>${result.toLocaleString()}</strong>`
-                    );
-                } else {
-                    $("#result").html("Harap masukkan nilai yang valid.");
-                }
-            }
-
-            $("#totalPercent, #totalNumber").on("input", function() {
-                calculatePercentage();
-            });
-        });
-    </script>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-
 
 </html>
