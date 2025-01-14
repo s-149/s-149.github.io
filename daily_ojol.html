@@ -131,14 +131,22 @@
             });
 
             // Tampilkan hasil
-            console.log("Total Minus:", minusSum);
-            console.log("Total Non-Minus:", nonMinusSum);
+            console.log("Total Pembayaran Lebih:", minusSum);
+            console.log("Total Tagihan:", nonMinusSum);
 
             // Menampilkan hasil di HTML
             const resultContainer = document.getElementById('results');
             resultContainer.innerHTML = `
-        <p>Total Minus: ${minusSum.toLocaleString()}</p>
-        <p>Total Non-Minus: ${nonMinusSum.toLocaleString()}</p>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-text">
+                            <h3>Total Pembayaran Lebih: ${minusTotal.toLocaleString()}</h3>
+                            <h3>Total Tagihan: ${nonMinusTotal.toLocaleString()}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
     `;
         }
 
