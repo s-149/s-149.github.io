@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Ojol</title>
+    <meta content="Daily Ojol" name="description" />
+    <meta content="Daily Ojol" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.5/css/buttons.dataTables.min.css">
+
+    <!-- Select2 CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5 mb-3">Daily Ojol (<span id="display"></span>)</h1>
+
+        <div class="container py-5">
+            <div class="row">
+                <!-- Dropdown Select2 untuk Filter Kolom 2 -->
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown3" class="form-control" style="width: 100%;" multiple></select>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <select id="filterDropdown4" class="form-control" style="width: 100%;" multiple></select>
+                </div>
+            </div>
+        </div>
+        <div id="results" class="mt-4">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-text">
+                            <h3>Total Pembayaran Lebih: 0</h3>
+                            <h3>Total Tagihan: 0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table id="dataTable" class="display nowrap" style="width:100%">
+            <thead>
+                <tr id="tableHeader"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const hash = "S149XXXXBcvbvcHcvbDScvbcvbKcvbcvSJcvbcvcvbbLKSJcvbcvbcvxcvDLcSDSDvvcvcbKSJLKSDSDDJSKvvvvSDSDbbncvvbcbFNMFvbvbkcvbjdgfvbvbytewre@@#######&&&&&&^&NGjfhscnsxherkvgMnFjNUtHfEhRIkDjFDyKjDxwFbMCccMMcRIWdMCtbKLAsdPRjhytbvyKFMytyVWtygthghSD";
+        const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
+        const spreadsheetId = '1UVOiYX3PEOgszcLEq2GLARaj7gkeYEHMHKNrSpTD6dk';
+        const range = 'pic';
+
+        function decodeBase64(valueText) {
+            const inputText = valueText;
+            try {
+                const decoded = atob(valueText); // Decode the input text
+                return decoded.replace(hash, "");
+            } catch (error) {
+                alert("Error during decoding: " + error.message);
+            }
+        }
+
+        async function fetchData() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.values) {
+                    renderTable(data.values);
+                    populateDropdowns(data.values);
+                } else {
+                    console.error("No data found in the response.");
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramValue = urlParams.get(name);
+            console.log(paramValue); // Log nilai parameter untuk memeriksa apakah benar
+            return paramValue;
+        }
+
+        function applyUrlFilter() {
+            const urlHash = getUrlParameter('value');
+            const urlParam = decodeBase64(urlHash);
+            const dataTable = $('#dataTable').DataTable();
+
+            if (urlParam) {
+                // Jika parameter ada, filter DataTable sesuai dengan parameter
+                dataTable.column(0).search(urlParam, true, false).draw();
+                $('#display').text(urlParam); // Display the filtered value
+            } else {
+                // Jika tidak ada parameter, sembunyikan DataTable atau kosongkan
+                $('#dataTable').DataTable().clear().draw();
+                $('#display').text("No data available"); // Tampilkan pesan ketika tidak ada data
+            }
+        }
+
+        function calculateColumn8Sums(data) {
+            let minusSum = 0;
+            let nonMinusSum = 0;
+
+            data.forEach(row => {
+                const value = parseFloat(row[8]); // Kolom ke-8, dengan indeks 7 (0-based)
+                if (!isNaN(value)) {
+                    if (value < 0) {
+                        minusSum += value;
+                    } else {
+                        nonMinusSum += value;
+                    }
+                }
+            });
+
+            // Tampilkan hasil
+            console.log("Total Pembayaran Lebih:", minusSum);
+            console.log("Total Tagihan:", nonMinusSum);
+
+            // Menampilkan hasil di HTML
+            const resultContainer = document.getElementById('results');
+            resultContainer.innerHTML = `
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-text">
+                            <h3>Total Pembayaran Lebih: ${minusTotal.toLocaleString()}</h3>
+                            <h3>Total Tagihan: ${nonMinusTotal.toLocaleString()}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        function calculateFilteredNominal() {
+            const dataTable = $('#dataTable').DataTable();
+            const filteredData = dataTable.rows({
+                search: 'applied'
+            }).data();
+            let minusTotal = 0;
+            let nonMinusTotal = 0;
+
+            filteredData.each(function(row) {
+                const nominal = parseFloat(row[8]); // Kolom nominal di index ke-7 (0-based)
+                if (!isNaN(nominal)) {
+                    if (nominal < 0) {
+                        minusTotal += nominal;
+                    } else {
+                        nonMinusTotal += nominal;
+                    }
+                }
+            });
+
+            // Tampilkan hasil perhitungan di elemen HTML
+            $('#results').html(`
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="card-text">
+                            <h3>Total Pembayaran Lebih: ${minusTotal.toLocaleString()}</h3>
+                            <h3>Total Tagihan: ${nonMinusTotal.toLocaleString()}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+        }
+
+        function renderTable(data) {
+            const headerRow = data[0]; // Asumsi baris pertama adalah header
+            const bodyRows = data.slice(1); // Baris lainnya adalah data
+
+            // Render header tabel
+            const tableHeader = $("#tableHeader");
+            tableHeader.empty();
+            headerRow.forEach(header => {
+                tableHeader.append(`<th>${header}</th>`);
+            });
+
+            // Render isi tabel
+            const tableBody = $("#tableBody");
+            tableBody.empty();
+            bodyRows.forEach(row => {
+                const rowHtml = row.map(cell => `<td>${cell}</td>`).join('');
+                tableBody.append(`<tr>${rowHtml}</tr>`);
+            });
+
+            // Inisialisasi DataTable jika belum ada
+            if (!$.fn.dataTable.isDataTable('#dataTable')) {
+                $('#dataTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    scrollX: true,
+                    scrollY: 300,
+                    dom: 'lBfrtip',
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                    lengthMenu: [10, 25, 50, 100],
+                    pageLength: 10
+                });
+            }
+
+            // Hitung nominal setelah render tabel selesai
+            calculateFilteredNominal();
+
+            // Tambahkan event listener untuk perhitungan ulang nominal saat filter berubah
+            $('#dataTable').on('search.dt', calculateFilteredNominal);
+
+            // Panggil fungsi filter setelah tabel dirender
+            applyUrlFilter();
+        }
+
+        function populateDropdowns(data) {
+            const bodyRows = data.slice(1); // Skip headers
+
+            // Populate dropdown for column ke-1
+            const dropdown1 = $("#filterDropdown1");
+            dropdown1.empty();
+            const column1Values = [...new Set(bodyRows.map(row => row[0]))];
+            column1Values.forEach(value => {
+                dropdown1.append(`<option value="${value}">${value}</option>`);
+            });
+
+            // Populate dropdown for column ke-2
+            const dropdown2 = $("#filterDropdown2");
+            dropdown2.empty();
+            const column2Values = [...new Set(bodyRows.map(row => row[1]))];
+            column2Values.forEach(value => {
+                dropdown2.append(`<option value="${value}">${value}</option>`);
+            });
+
+            // Repeat similar process for other dropdowns
+            const dropdown3 = $("#filterDropdown3");
+            dropdown3.empty();
+            const column3Values = [...new Set(bodyRows.map(row => row[2]))];
+            column3Values.forEach(value => {
+                dropdown3.append(`<option value="${value}">${value}</option>`);
+            });
+
+            const dropdown4 = $("#filterDropdown4");
+            dropdown4.empty();
+            const column4Values = [...new Set(bodyRows.map(row => row[3]))];
+            column4Values.forEach(value => {
+                dropdown4.append(`<option value="${value}">${value}</option>`);
+            });
+
+            // Initialize Select2 with multiple select for both dropdowns
+            dropdown1.select2({
+                placeholder: "PIC",
+                allowClear: true
+            });
+            dropdown2.select2({
+                placeholder: "Type",
+                allowClear: true
+            });
+            dropdown3.select2({
+                placeholder: "Plate",
+                allowClear: true
+            });
+            dropdown4.select2({
+                placeholder: "User Name",
+                allowClear: true
+            });
+
+            dropdown1.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(0).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(0).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown2.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(1).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(1).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown3.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(2).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(2).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+
+            dropdown4.on('change', function() {
+                const selectedValues = $(this).val();
+                const dataTable = $('#dataTable').DataTable();
+                if (selectedValues && selectedValues.length > 0) {
+                    const searchValue = selectedValues.join('|');
+                    dataTable.column(3).search(searchValue, true, false).draw();
+                } else {
+                    dataTable.column(3).search('').draw();
+                }
+                calculateFilteredNominal(); // Panggil perhitungan ulang
+            });
+        }
+
+        // Fetch and display data on page load
+        $(document).ready(() => {
+            fetchData();
+
+            // Display current date
+            const today = new Date();
+            const currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+            $("#display").text(currentDate);
+        });
+    </script>
+</body>
+
+</html>
