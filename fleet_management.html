@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Management</title>
+    <meta content="Fleet Management" name="description" />
+    <meta content="Fleet Management, input, search, blitz, electric, mobility, molis, ev, EV" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.5/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.5/css/buttons.dataTables.min.css">
+
+    <!-- Select2 CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.print.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Plotly JS -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Add Font Awesome CDN in the <head> -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin: 0;
+            padding: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            /* Memberikan sudut yang lebih halus pada tabel */
+            overflow: hidden;
+            /* Untuk memotong elemen yang keluar dari border-radius */
+        }
+        
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+        /* Desain Header Tabel */
+        
+        th {
+            background-color: #007bff;
+            /* Warna latar belakang header */
+            color: white;
+            /* Warna teks header */
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        /* Desain Baris Tabel */
+        
+        td {
+            background-color: #f9f9f9;
+            /* Warna latar belakang baris tabel */
+            color: #333;
+            /* Warna teks baris tabel */
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            /* Efek transisi saat hover */
+        }
+        /* Efek Hover pada Baris */
+        
+        tr:hover td {
+            background-color: #e2e2e2;
+            /* Warna latar belakang saat hover */
+            cursor: pointer;
+        }
+        /* Border yang lebih halus pada sel */
+        
+        th,
+        td {
+            border: 1px solid #ddd;
+            /* Warna border yang lebih terang */
+        }
+        /* Menambahkan bayangan pada tabel */
+        
+        table {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        /* Desain untuk baris genap */
+        
+        tr:nth-child(even) td {
+            background-color: #fafafa;
+            /* Warna latar belakang untuk baris genap */
+        }
+        /* Tabel Responsif: Untuk tampilan di perangkat mobile */
+        
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                font-size: 0.9rem;
+            }
+            th,
+            td {
+                padding: 8px;
+            }
+        }
+        
+        .fullscreen-table {
+            width: 100% !important;
+            height: 100vh;
+            /* Menyesuaikan dengan tinggi layar */
+            overflow: auto;
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            /* Menggerakkan kartu sedikit ke atas saat hover */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            /* Menambahkan bayangan lebih besar */
+        }
+        /* Dark Mode Style */
+        
+        body.dark-mode {
+            background-color: #333;
+            /* color: #fff; */
+        }
+        
+        .btn-outline-dark {
+            border-color: #333;
+            color: #333;
+        }
+        
+        .btn-outline-dark:hover {
+            background-color: #333;
+            color: #fff;
+        }
+        
+        .header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            /* Background color dengan gradient biru muda */
+            background: linear-gradient(45deg, #a0c4f5, #88d3f4, #62b3f5);
+            background-size: 300% 300%;
+            /* Animasi untuk efek berkilauan */
+            animation: gradient-animation 5s ease infinite;
+            padding: 10px 20px;
+        }
+        /* Animasi untuk membuat efek gradient berkilau */
+        
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header col-12 mb-4">
+            <h1 class="mt-5 mb-3">Fleet Management<button id="dark-mode-toggle" class="btn btn-outline-dark btn-sm" style="float: right;"><i class="fas fa-moon"></i></button></h1>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div id="filterContainer" class="row d-flex"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row d-flex align-items-stretch">
+                            <!-- Dropdown Select -->
+                            <div class="col-6 mb-4">
+                                <select id="selectChart" class="form-control" onchange="calculateFilteredDataCount()">
+                                    <option value="bar">Bar</option>
+                                    <option value="line">Line</option>
+                                    <option value="pie">Pie</option>
+                                </select>
+                            </div>
+
+                            <!-- Results Card -->
+                            <div id="results" class="col-6 mb-4">
+                                <div class="card-text" style="float: right;">
+                                    <h3>Unit Total: 0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <button id="fullscreenToggle" class="btn btn-outline-secondary btn-sm mb-4" style="float: right;" onclick="toggleFullscreen()">
+                            <i id="fullscreenIcon" class="bi bi-arrows-fullscreen"></i>
+                        </button>
+                        <table id="dataTable" class="display nowrap" style="width:100%">
+                            <thead>
+                                <tr id="tableHeader"></tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
+            const spreadsheetId = '1WljzTJn7pVLD-jURpenbQI4XGL00_QGf51xKr19u9Rw';
+            const range = 'View';
+
+            let cachedData = null;
+            let currentChartType = 'bar'; // Default chart type
+
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const body = document.body;
+
+            darkModeToggle.addEventListener('click', function() {
+                // Toggle dark mode
+                body.classList.toggle('dark-mode');
+
+                // Ganti ikon berdasarkan mode
+                if (body.classList.contains('dark-mode')) {
+                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>'; // Ikon Matahari untuk Light Mode
+                } else {
+                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Ikon Bulan untuk Dark Mode
+                }
+            });
+
+            async function fetchData() {
+                if (cachedData) {
+                    renderTable(cachedData);
+                    return;
+                }
+
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data && data.values) {
+                        cachedData = data.values.filter(row =>
+                            row.some(cell => cell && cell.trim() !== "")
+                        );
+                        renderTable(cachedData);
+                    } else {
+                        console.error("No data found in the response.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            }
+
+            function renderTable(data) {
+                const headerRow = data[0];
+                const bodyRows = data.slice(1);
+
+                const tableHeader = $("#tableHeader");
+                tableHeader.empty();
+                headerRow.forEach((header, index) => {
+                    tableHeader.append(`<th>${header}</th>`);
+
+                    if ($(`#filterContainer select[data-column='${index}']`).length === 0) {
+                        const dropdownHTML = `<select class="filterDropdown" data-column="${index}"></select>`;
+                        $("#filterContainer").append(dropdownHTML);
+                    }
+                });
+
+                const tableBody = $("#tableBody");
+                tableBody.empty();
+                bodyRows.forEach(row => {
+                    const rowHtml = row.map(cell => `<td>${cell}</td>`).join('');
+                    tableBody.append(`<tr>${rowHtml}</tr>`);
+                });
+
+                $(document).ready(function() {
+                    if (!$.fn.dataTable.isDataTable('#dataTable')) {
+                        initializeDataTable(data);
+                    } else {
+                        const dataTable = $('#dataTable').DataTable();
+                        dataTable.clear().rows.add(bodyRows).draw();
+                        populateAllDropdowns(data);
+                    }
+
+                    calculateFilteredDataCount();
+                });
+            }
+
+            function initializeDataTable(data) {
+                $('#dataTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    scrollX: true,
+                    scrollY: 300,
+                    dom: 'lBfrtip',
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                    lengthMenu: [10, 25, 50, 100, 200, 500, 1000],
+                    pageLength: 20,
+                    deferRender: true,
+                    initComplete: function() {
+                        populateAllDropdowns(data);
+                    }
+                });
+            }
+
+            function populateAllDropdowns(data) {
+                const dataTable = $('#dataTable').DataTable();
+                const filteredData = dataTable.rows({
+                    search: 'applied'
+                }).data().toArray();
+
+                $('.filterDropdown').each(function() {
+                    const dropdown = $(this);
+                    const columnIndex = dropdown.data('column');
+                    const headerName = data[0][columnIndex];
+
+                    const uniqueValues = getUniqueValuesForColumn(columnIndex, filteredData);
+
+                    const wrapper = $(`<div class="col-md-2 mb-4"></div>`);
+                    dropdown.wrap(wrapper);
+
+                    dropdown.empty().append(`<option value="" disabled selected>${headerName}</option>`);
+
+                    uniqueValues.forEach(value => {
+                        if (value) {
+                            dropdown.append(`<option value="${value}">${value}</option>`);
+                        }
+                    });
+
+                    dropdown.addClass('form-control select2');
+
+                    dropdown.select2({
+                        placeholder: `${headerName}`,
+                        allowClear: true,
+                        multiple: true,
+                        width: '100%',
+                    });
+
+                    dropdown.on('change', function() {
+                        const selectedValues = $(this).val();
+                        const validValues = selectedValues ? selectedValues.filter(v => v !== "") : [];
+
+                        if (validValues.length > 0) {
+                            const searchValue = validValues.join('|');
+                            dataTable.column(columnIndex).search(searchValue, true, false).draw();
+                        } else {
+                            dataTable.column(columnIndex).search('').draw();
+                        }
+
+                        calculateFilteredDataCount();
+                    });
+                });
+            }
+
+            function getUniqueValuesForColumn(columnIndex, rows) {
+                const filteredValues = rows.map(row => row[columnIndex]);
+                return [...new Set(filteredValues)];
+            }
+
+            function calculateFilteredDataCount() {
+                const dataTable = $('#dataTable').DataTable();
+                const filteredDataCount = dataTable.rows({
+                    search: 'applied'
+                }).count();
+                const filteredData = dataTable.rows({
+                    search: 'applied'
+                }).data().toArray();
+
+                const columnIndex = 10; // Adjust index as needed (use the correct column for your data)
+                const uniqueData = getUniqueValuesForColumn(columnIndex, filteredData);
+
+                // Calculate frequency of each unique value
+                const dataFrequency = uniqueData.map(value => {
+                    return filteredData.filter(row => row[columnIndex] === value).length;
+                });
+
+                renderChart(uniqueData, dataFrequency); // Pass the unique data and its frequency to the chart rendering function
+
+                // Update the results section
+                $("#results").html(`
+                    <div style="float: right;">
+                        <h3>Unit Total: ${filteredDataCount}</h3>
+                    </div>`);
+            }
+
+            function renderChart(uniqueData, dataFrequency) {
+                // Get the selected chart type
+                const chartType = document.getElementById('selectChart').value;
+                console.log("Selected Chart Type: ", chartType); // For debugging
+
+                let chartData = {};
+
+                // Check if we have valid data
+                if (!uniqueData || !dataFrequency || uniqueData.length !== dataFrequency.length) {
+                    console.error("Data mismatch: Ensure uniqueData and dataFrequency arrays are of equal length");
+                    return;
+                }
+
+                // Switch case based on chart type
+                if (chartType === 'pie') {
+                    // Prepare data for Pie chart
+                    chartData = {
+                        labels: uniqueData, // Categories
+                        values: dataFrequency, // Frequencies
+                        type: 'pie' // Pie chart type
+                    };
+                } else if (chartType === 'bar' || chartType === 'line') {
+                    // Prepare data for Bar or Line chart
+                    chartData = {
+                        x: uniqueData, // Categories (X-axis)
+                        y: dataFrequency, // Frequencies (Y-axis)
+                        type: chartType // Bar or Line chart type
+                    };
+                }
+
+                // Layout configuration for the chart
+                const layout = {
+                    title: 'Stock Summary by Unit Type',
+                    xaxis: {
+                        title: 'Unit Type'
+                    },
+                    yaxis: {
+                        title: 'Quantity'
+                    }
+                };
+
+                // Render the chart using Plotly
+                Plotly.newPlot('chart', [chartData], layout)
+                    .then(function(response) {
+                        console.log('Chart rendered successfully');
+                    })
+                    .catch(function(error) {
+                        console.error('Error rendering chart:', error);
+                    });
+            }
+
+            // Dummy data for testing
+            const uniqueData = ['Category A', 'Category B', 'Category C'];
+            const dataFrequency = [30, 20, 50];
+
+            // Initial render on page load (optional)
+            renderChart(uniqueData, dataFrequency);
+
+            // Add event listener for chart type change
+            $('#chartType').on('change', function() {
+                currentChartType = $(this).val();
+                calculateFilteredDataCount(); // Re-render chart when type changes
+            });
+
+            function toggleFullscreen() {
+                var elem = document.getElementById("dataTable").parentElement;
+                var icon = document.getElementById("fullscreenIcon");
+
+                // Cek apakah fullscreen sudah aktif
+                if (!document.fullscreenElement) {
+                    // Aktifkan fullscreen
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen();
+                    } else if (elem.mozRequestFullScreen) { // Firefox
+                        elem.mozRequestFullScreen();
+                    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.msRequestFullscreen) { // IE/Edge
+                        elem.msRequestFullscreen();
+                    }
+                }
+
+            }
+
+            fetchData(); // Load data and render table
+        </script>
+</body>
+
+</html>
