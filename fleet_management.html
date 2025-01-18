@@ -50,6 +50,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -211,7 +214,10 @@
             </div>
             <div class="col-12 mb-4">
                 <div class="card shadow-sm">
-                    <div class="card-body">
+                    <div class="card-body" id="chartDiagram">
+                        <button id="fullscreenToggle" class="btn btn-outline-secondary btn-sm mb-4" style="float: right;" onclick="toggleFullscreen('chartDiagram')">
+                            <i id="fullscreenIcon" class="bi bi-arrows-fullscreen"></i>
+                        </button>
                         <div class="row d-flex align-items-stretch">
                             <!-- Dropdown Select -->
                             <div class="col-6 mb-4">
@@ -221,7 +227,6 @@
                                     <option value="pie">Pie</option>
                                 </select>
                             </div>
-
                             <!-- Results Card -->
                             <div id="results" class="col-6 mb-4">
                                 <div class="card-text" style="float: right;">
@@ -236,8 +241,8 @@
             </div>
             <div class="col-12 mb-4">
                 <div class="card shadow-sm">
-                    <div class="card-body">
-                        <button id="fullscreenToggle" class="btn btn-outline-secondary btn-sm mb-4" style="float: right;" onclick="toggleFullscreen()">
+                    <div class="card-body" id="dataTableFull">
+                        <button id="fullscreenToggle" class="btn btn-outline-secondary btn-sm mb-4" style="float: right;" onclick="toggleFullscreen('dataTableFull')">
                             <i id="fullscreenIcon" class="bi bi-arrows-fullscreen"></i>
                         </button>
                         <table id="dataTable" class="display nowrap" style="width:100%">
@@ -249,274 +254,400 @@
                     </div>
                 </div>
             </div>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFMCONTROLLER" aria-expanded="false" aria-controls="flush-collapseFMCONTROLLER">
+                                        FM CONTROLLER
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseFMCONTROLLER" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">FM CONTROLLER</div>
+                                    <ul>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#Form" aria-expanded="false" aria-controls="Form">
+                                                Form
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="Form">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">Form</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://forms.gle/CiDKo54tA5VkK9gW7" target="_blank">Rilis</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <a href="https://forms.gle/zEHK5btd6jVkMJ3t9" target="_blank">Pengembalian</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#Sheet" aria-expanded="false" aria-controls="Sheet">
+                                                Sheet
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="Sheet">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">Sheet</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/16CDsurxpbmXMQZPCkTtIVLiyFh2XJzT1myBVE7u4ca8/edit?usp=sharing" target="_blank">Stock Management</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/14SMOW-Ml9h-TfpCv9m3T8IaWmQXKEDefiLMPAig-O6c/edit?usp=sharing" target="_blank">Rilis</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/1I5GFzKKHlpciaSEqYCUVg49hGuGHkjMj4qM36taiBtI/edit?usp=sharing" target="_blank">Pengembalian</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFMAUTOMATION" aria-expanded="false" aria-controls="flush-collapseFMAUTOMATION">
+                                        FM AUTOMATION
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseFMAUTOMATION" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">FM AUTOMATION</div>
+                                    <ul>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#Model" aria-expanded="false" aria-controls="Model">
+                                                Model
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="Model">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">Model</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/1R0zwUse1Hh-3dDZ9rtlY1N4eFwIRJ9eIyLMjE2nLLQk/edit?usp=sharing" target="_blank">FM Model</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/forms/d/1Lf00oAv2OTIDgF5WxdsCkuvK4KBt3a6DJJCsIMUkhrk/edit" target="_blank">Form Rilis</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/forms/d/15cZoZCuiL0YJIuYpok5MCDdPxJXrEjtvX4j8ybTI2SI/edit" target="_blank">Form Pengembalian</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#View" aria-expanded="false" aria-controls="View">
+                                                View
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="View">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">View</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/1WljzTJn7pVLD-jURpenbQI4XGL00_QGf51xKr19u9Rw/edit?usp=sharing" target="_blank">FM View</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#Controller" aria-expanded="false" aria-controls="Controller">
+                                                Controller
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="Controller">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">Controller</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/1cbzpyAZfs3rjbXRLgTyZAs5yaJhmz9xoWSA6uv3VMdc/edit?usp=sharing" target="_blank">FM Controller</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <li>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#Log" aria-expanded="false" aria-controls="Log">
+                                                Log
+                                            </a>
+                                        </li>
+                                        <div class="collapse collapse-horizontal" id="Log">
+                                            <ul class="list-group">
+                                                <li class="list-group-item disabled" aria-disabled="true">Log</li>
+                                                <li class="list-group-item">
+                                                    <a href="https://docs.google.com/spreadsheets/d/1WtEcMURISGzySVSxbrH__20UE3dsyESE8aKbL0L8Jys/edit?usp=sharing" target="_blank">FM Log</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <script>
-            const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
-            const spreadsheetId = '1WljzTJn7pVLD-jURpenbQI4XGL00_QGf51xKr19u9Rw';
-            const range = 'View';
+    <script>
+        const apiKey = 'AIzaSyCLW9miHFxA3M9kZ2VuDn419_xEShpD28A';
+        const spreadsheetId = '1WljzTJn7pVLD-jURpenbQI4XGL00_QGf51xKr19u9Rw';
+        const range = 'View';
 
-            let cachedData = null;
-            let currentChartType = 'bar'; // Default chart type
+        let cachedData = null;
+        let currentChartType = 'bar'; // Default chart type
 
-            const darkModeToggle = document.getElementById('dark-mode-toggle');
-            const body = document.body;
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
 
-            darkModeToggle.addEventListener('click', function() {
-                // Toggle dark mode
-                body.classList.toggle('dark-mode');
+        darkModeToggle.addEventListener('click', function() {
+            // Toggle dark mode
+            body.classList.toggle('dark-mode');
 
-                // Ganti ikon berdasarkan mode
-                if (body.classList.contains('dark-mode')) {
-                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>'; // Ikon Matahari untuk Light Mode
+            // Ganti ikon berdasarkan mode
+            if (body.classList.contains('dark-mode')) {
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>'; // Ikon Matahari untuk Light Mode
+            } else {
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Ikon Bulan untuk Dark Mode
+            }
+        });
+
+        async function fetchData() {
+            if (cachedData) {
+                renderTable(cachedData);
+                return;
+            }
+
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.values) {
+                    cachedData = data.values.filter(row =>
+                        row.some(cell => cell && cell.trim() !== "")
+                    );
+                    renderTable(cachedData);
                 } else {
-                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Ikon Bulan untuk Dark Mode
+                    console.error("No data found in the response.");
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function renderTable(data) {
+            const headerRow = data[0];
+            const bodyRows = data.slice(1);
+
+            const tableHeader = $("#tableHeader");
+            tableHeader.empty();
+            headerRow.forEach((header, index) => {
+                tableHeader.append(`<th>${header}</th>`);
+
+                if ($(`#filterContainer select[data-column='${index}']`).length === 0) {
+                    const dropdownHTML = `<select class="filterDropdown" data-column="${index}"></select>`;
+                    $("#filterContainer").append(dropdownHTML);
                 }
             });
 
-            async function fetchData() {
-                if (cachedData) {
-                    renderTable(cachedData);
-                    return;
+            const tableBody = $("#tableBody");
+            tableBody.empty();
+            bodyRows.forEach(row => {
+                const rowHtml = row.map(cell => `<td>${cell}</td>`).join('');
+                tableBody.append(`<tr>${rowHtml}</tr>`);
+            });
+
+            $(document).ready(function() {
+                if (!$.fn.dataTable.isDataTable('#dataTable')) {
+                    initializeDataTable(data);
+                } else {
+                    const dataTable = $('#dataTable').DataTable();
+                    dataTable.clear().rows.add(bodyRows).draw();
+                    populateAllDropdowns(data);
                 }
 
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
+                calculateFilteredDataCount();
+            });
+        }
 
-                    if (data && data.values) {
-                        cachedData = data.values.filter(row =>
-                            row.some(cell => cell && cell.trim() !== "")
-                        );
-                        renderTable(cachedData);
-                    } else {
-                        console.error("No data found in the response.");
-                    }
-                } catch (error) {
-                    console.error("Error fetching data:", error);
+        function initializeDataTable(data) {
+            $('#dataTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                scrollX: true,
+                scrollY: 300,
+                dom: 'lBfrtip',
+                buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                lengthMenu: [10, 25, 50, 100, 200, 500, 1000],
+                pageLength: 20,
+                deferRender: true,
+                initComplete: function() {
+                    populateAllDropdowns(data);
                 }
-            }
+            });
+        }
 
-            function renderTable(data) {
-                const headerRow = data[0];
-                const bodyRows = data.slice(1);
+        function populateAllDropdowns(data) {
+            const dataTable = $('#dataTable').DataTable();
+            const filteredData = dataTable.rows({
+                search: 'applied'
+            }).data().toArray();
 
-                const tableHeader = $("#tableHeader");
-                tableHeader.empty();
-                headerRow.forEach((header, index) => {
-                    tableHeader.append(`<th>${header}</th>`);
+            $('.filterDropdown').each(function() {
+                const dropdown = $(this);
+                const columnIndex = dropdown.data('column');
+                const headerName = data[0][columnIndex];
 
-                    if ($(`#filterContainer select[data-column='${index}']`).length === 0) {
-                        const dropdownHTML = `<select class="filterDropdown" data-column="${index}"></select>`;
-                        $("#filterContainer").append(dropdownHTML);
+                const uniqueValues = getUniqueValuesForColumn(columnIndex, filteredData);
+
+                const wrapper = $(`<div class="col-md-2 mb-4"></div>`);
+                dropdown.wrap(wrapper);
+
+                dropdown.empty().append(`<option value="" disabled selected>${headerName}</option>`);
+
+                uniqueValues.forEach(value => {
+                    if (value) {
+                        dropdown.append(`<option value="${value}">${value}</option>`);
                     }
                 });
 
-                const tableBody = $("#tableBody");
-                tableBody.empty();
-                bodyRows.forEach(row => {
-                    const rowHtml = row.map(cell => `<td>${cell}</td>`).join('');
-                    tableBody.append(`<tr>${rowHtml}</tr>`);
+                dropdown.addClass('form-control select2');
+
+                dropdown.select2({
+                    placeholder: `${headerName}`,
+                    allowClear: true,
+                    multiple: true,
+                    width: '100%',
                 });
 
-                $(document).ready(function() {
-                    if (!$.fn.dataTable.isDataTable('#dataTable')) {
-                        initializeDataTable(data);
+                dropdown.on('change', function() {
+                    const selectedValues = $(this).val();
+                    const validValues = selectedValues ? selectedValues.filter(v => v !== "") : [];
+
+                    if (validValues.length > 0) {
+                        const searchValue = validValues.join('|');
+                        dataTable.column(columnIndex).search(searchValue, true, false).draw();
                     } else {
-                        const dataTable = $('#dataTable').DataTable();
-                        dataTable.clear().rows.add(bodyRows).draw();
-                        populateAllDropdowns(data);
+                        dataTable.column(columnIndex).search('').draw();
                     }
 
                     calculateFilteredDataCount();
                 });
-            }
+            });
+        }
 
-            function initializeDataTable(data) {
-                $('#dataTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    scrollX: true,
-                    scrollY: 300,
-                    dom: 'lBfrtip',
-                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-                    lengthMenu: [10, 25, 50, 100, 200, 500, 1000],
-                    pageLength: 20,
-                    deferRender: true,
-                    initComplete: function() {
-                        populateAllDropdowns(data);
-                    }
-                });
-            }
+        function getUniqueValuesForColumn(columnIndex, rows) {
+            const filteredValues = rows.map(row => row[columnIndex]);
+            return [...new Set(filteredValues)];
+        }
 
-            function populateAllDropdowns(data) {
-                const dataTable = $('#dataTable').DataTable();
-                const filteredData = dataTable.rows({
-                    search: 'applied'
-                }).data().toArray();
+        function calculateFilteredDataCount() {
+            const dataTable = $('#dataTable').DataTable();
+            const filteredDataCount = dataTable.rows({
+                search: 'applied'
+            }).count();
+            const filteredData = dataTable.rows({
+                search: 'applied'
+            }).data().toArray();
 
-                $('.filterDropdown').each(function() {
-                    const dropdown = $(this);
-                    const columnIndex = dropdown.data('column');
-                    const headerName = data[0][columnIndex];
+            const columnIndex = 10; // Adjust index as needed (use the correct column for your data)
+            const uniqueData = getUniqueValuesForColumn(columnIndex, filteredData);
 
-                    const uniqueValues = getUniqueValuesForColumn(columnIndex, filteredData);
+            // Calculate frequency of each unique value
+            const dataFrequency = uniqueData.map(value => {
+                return filteredData.filter(row => row[columnIndex] === value).length;
+            });
 
-                    const wrapper = $(`<div class="col-md-2 mb-4"></div>`);
-                    dropdown.wrap(wrapper);
+            renderChart(uniqueData, dataFrequency); // Pass the unique data and its frequency to the chart rendering function
 
-                    dropdown.empty().append(`<option value="" disabled selected>${headerName}</option>`);
-
-                    uniqueValues.forEach(value => {
-                        if (value) {
-                            dropdown.append(`<option value="${value}">${value}</option>`);
-                        }
-                    });
-
-                    dropdown.addClass('form-control select2');
-
-                    dropdown.select2({
-                        placeholder: `${headerName}`,
-                        allowClear: true,
-                        multiple: true,
-                        width: '100%',
-                    });
-
-                    dropdown.on('change', function() {
-                        const selectedValues = $(this).val();
-                        const validValues = selectedValues ? selectedValues.filter(v => v !== "") : [];
-
-                        if (validValues.length > 0) {
-                            const searchValue = validValues.join('|');
-                            dataTable.column(columnIndex).search(searchValue, true, false).draw();
-                        } else {
-                            dataTable.column(columnIndex).search('').draw();
-                        }
-
-                        calculateFilteredDataCount();
-                    });
-                });
-            }
-
-            function getUniqueValuesForColumn(columnIndex, rows) {
-                const filteredValues = rows.map(row => row[columnIndex]);
-                return [...new Set(filteredValues)];
-            }
-
-            function calculateFilteredDataCount() {
-                const dataTable = $('#dataTable').DataTable();
-                const filteredDataCount = dataTable.rows({
-                    search: 'applied'
-                }).count();
-                const filteredData = dataTable.rows({
-                    search: 'applied'
-                }).data().toArray();
-
-                const columnIndex = 10; // Adjust index as needed (use the correct column for your data)
-                const uniqueData = getUniqueValuesForColumn(columnIndex, filteredData);
-
-                // Calculate frequency of each unique value
-                const dataFrequency = uniqueData.map(value => {
-                    return filteredData.filter(row => row[columnIndex] === value).length;
-                });
-
-                renderChart(uniqueData, dataFrequency); // Pass the unique data and its frequency to the chart rendering function
-
-                // Update the results section
-                $("#results").html(`
+            // Update the results section
+            $("#results").html(`
                     <div style="float: right;">
                         <h3>Unit Total: ${filteredDataCount}</h3>
                     </div>`);
+        }
+
+        function renderChart(uniqueData, dataFrequency) {
+            // Get the selected chart type
+            const chartType = document.getElementById('selectChart').value;
+            console.log("Selected Chart Type: ", chartType); // For debugging
+
+            let chartData = {};
+
+            // Check if we have valid data
+            if (!uniqueData || !dataFrequency || uniqueData.length !== dataFrequency.length) {
+                console.error("Data mismatch: Ensure uniqueData and dataFrequency arrays are of equal length");
+                return;
             }
 
-            function renderChart(uniqueData, dataFrequency) {
-                // Get the selected chart type
-                const chartType = document.getElementById('selectChart').value;
-                console.log("Selected Chart Type: ", chartType); // For debugging
-
-                let chartData = {};
-
-                // Check if we have valid data
-                if (!uniqueData || !dataFrequency || uniqueData.length !== dataFrequency.length) {
-                    console.error("Data mismatch: Ensure uniqueData and dataFrequency arrays are of equal length");
-                    return;
-                }
-
-                // Switch case based on chart type
-                if (chartType === 'pie') {
-                    // Prepare data for Pie chart
-                    chartData = {
-                        labels: uniqueData, // Categories
-                        values: dataFrequency, // Frequencies
-                        type: 'pie' // Pie chart type
-                    };
-                } else if (chartType === 'bar' || chartType === 'line') {
-                    // Prepare data for Bar or Line chart
-                    chartData = {
-                        x: uniqueData, // Categories (X-axis)
-                        y: dataFrequency, // Frequencies (Y-axis)
-                        type: chartType // Bar or Line chart type
-                    };
-                }
-
-                // Layout configuration for the chart
-                const layout = {
-                    title: 'Stock Summary by Unit Type',
-                    xaxis: {
-                        title: 'Unit Type'
-                    },
-                    yaxis: {
-                        title: 'Quantity'
-                    }
+            // Switch case based on chart type
+            if (chartType === 'pie') {
+                // Prepare data for Pie chart
+                chartData = {
+                    labels: uniqueData, // Categories
+                    values: dataFrequency, // Frequencies
+                    type: 'pie' // Pie chart type
                 };
-
-                // Render the chart using Plotly
-                Plotly.newPlot('chart', [chartData], layout)
-                    .then(function(response) {
-                        console.log('Chart rendered successfully');
-                    })
-                    .catch(function(error) {
-                        console.error('Error rendering chart:', error);
-                    });
+            } else if (chartType === 'bar' || chartType === 'line') {
+                // Prepare data for Bar or Line chart
+                chartData = {
+                    x: uniqueData, // Categories (X-axis)
+                    y: dataFrequency, // Frequencies (Y-axis)
+                    type: chartType // Bar or Line chart type
+                };
             }
 
-            // Dummy data for testing
-            const uniqueData = ['Category A', 'Category B', 'Category C'];
-            const dataFrequency = [30, 20, 50];
-
-            // Initial render on page load (optional)
-            renderChart(uniqueData, dataFrequency);
-
-            // Add event listener for chart type change
-            $('#chartType').on('change', function() {
-                currentChartType = $(this).val();
-                calculateFilteredDataCount(); // Re-render chart when type changes
-            });
-
-            function toggleFullscreen() {
-                var elem = document.getElementById("dataTable").parentElement;
-                var icon = document.getElementById("fullscreenIcon");
-
-                // Cek apakah fullscreen sudah aktif
-                if (!document.fullscreenElement) {
-                    // Aktifkan fullscreen
-                    if (elem.requestFullscreen) {
-                        elem.requestFullscreen();
-                    } else if (elem.mozRequestFullScreen) { // Firefox
-                        elem.mozRequestFullScreen();
-                    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                        elem.webkitRequestFullscreen();
-                    } else if (elem.msRequestFullscreen) { // IE/Edge
-                        elem.msRequestFullscreen();
-                    }
+            // Layout configuration for the chart
+            const layout = {
+                title: 'Stock Summary by Unit Type',
+                xaxis: {
+                    title: 'Unit Type'
+                },
+                yaxis: {
+                    title: 'Quantity'
                 }
+            };
 
+            // Render the chart using Plotly
+            Plotly.newPlot('chart', [chartData], layout)
+                .then(function(response) {
+                    console.log('Chart rendered successfully');
+                })
+                .catch(function(error) {
+                    console.error('Error rendering chart:', error);
+                });
+        }
+
+        // Dummy data for testing
+        const uniqueData = ['Category A', 'Category B', 'Category C'];
+        const dataFrequency = [30, 20, 50];
+
+        // Initial render on page load (optional)
+        renderChart(uniqueData, dataFrequency);
+
+        // Add event listener for chart type change
+        $('#chartType').on('change', function() {
+            currentChartType = $(this).val();
+            calculateFilteredDataCount(); // Re-render chart when type changes
+        });
+
+        function toggleFullscreen(iframeId) {
+            var elem = document.getElementById(iframeId).parentElement;
+            var icon = document.getElementById("fullscreenIcon");
+
+            // Cek apakah fullscreen sudah aktif
+            if (!document.fullscreenElement) {
+                // Aktifkan fullscreen
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.mozRequestFullScreen) { // Firefox
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { // IE/Edge
+                    elem.msRequestFullscreen();
+                }
             }
 
-            fetchData(); // Load data and render table
-        </script>
+        }
+
+        fetchData(); // Load data and render table
+    </script>
 </body>
 
 </html>
