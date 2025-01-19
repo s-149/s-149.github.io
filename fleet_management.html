@@ -170,20 +170,31 @@
             background-color: #333;
             color: #fff;
         }
+        /* Style untuk header */
         
         .header {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: white;
-            text-transform: uppercase;
-            /* Background color dengan gradient biru muda */
             background: linear-gradient(45deg, #a0c4f5, #88d3f4, #62b3f5);
+            /* Gradient latar belakang */
             background-size: 300% 300%;
-            /* Animasi untuk efek berkilauan */
             animation: gradient-animation 5s ease infinite;
-            padding: 10px 20px;
+            /* Animasi gradient */
+            padding: 10px;
+            color: white;
+            /* Memberikan ruang dalam */
         }
-        /* Animasi untuk membuat efek gradient berkilau */
+        /* Wrapper untuk konten dalam header */
+        
+        .content-wrapper {
+            display: flex;
+            /* Menggunakan flexbox */
+            align-items: center;
+            /* Simetris vertikal */
+            justify-content: space-between;
+            /* Jarak antar elemen di kiri dan kanan */
+            width: 100%;
+            /* Pastikan lebar penuh */
+        }
+        /* Style untuk animasi gradient */
         
         @keyframes gradient-animation {
             0% {
@@ -196,13 +207,49 @@
                 background-position: 0% 50%;
             }
         }
+        /* Responsivitas */
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 5px;
+                /* Kurangi padding untuk tablet */
+            }
+            .content-wrapper h1 {
+                font-size: 1.8rem;
+                /* Ukuran teks lebih kecil */
+            }
+            #dark-mode-toggle {
+                font-size: 0.9rem;
+                /* Ukuran tombol lebih kecil */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 5px;
+                /* Kurangi padding untuk ponsel */
+            }
+            .content-wrapper h1 {
+                font-size: 1.5rem;
+                /* Ukuran teks lebih kecil lagi */
+            }
+            #dark-mode-toggle {
+                font-size: 0.8rem;
+                /* Ukuran tombol lebih kecil lagi */
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header col-12 mb-4">
-            <h1 class="mt-5 mb-3">Fleet Management<button id="dark-mode-toggle" class="btn btn-outline-dark btn-sm" style="float: right;"><i class="fas fa-moon"></i></button></h1>
+            <div class="content-wrapper d-flex align-items-center justify-content-between" style="padding-left: 10px; padding-right: 10px;">
+                <h1 class="mt-5 mb-3">Fleet Management</h1>
+                <button id="dark-mode-toggle" class="btn btn-outline-dark btn-sm">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
         <div class="row">
             <div class="col-12 mb-4">
