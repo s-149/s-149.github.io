@@ -18,14 +18,81 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="cv/css/main.css?ver=1.1.0" rel="stylesheet" />
     <style>
         body {
-            background: linear-gradient(45deg, #ae0bfa, #f404f4, #f91e84);
+            background: linear-gradient(45deg, #ae0bfa, #f404f4), black;
             background-size: 400% 400%;
-            color: rgb(167, 168, 222);
-            font-family: Arial, Helvetica, sans-serif;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: bold;
             animation: kilauan 8s ease infinite;
+        }
+        
+        body.dark {
+            background: #121212;
+            color: #eee;
+        }
+        /* Container tombol di kanan atas (floating) */
+        
+        .toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        /* Style tombol modern */
+        
+        #toggleDark {
+            background: transparent;
+            border: 2px solid #444;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            color: #444;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+        }
+        
+        #toggleDark:hover {
+            background-color: #444;
+            color: white;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.3);
+        }
+        
+        body.dark #toggleDark {
+            border-color: #ddd;
+            color: #ddd;
+        }
+        
+        body.dark #toggleDark:hover {
+            background-color: #ddd;
+            color: #121212;
+        }
+        /* Animasi icon saat toggle */
+        
+        #toggleDark .fa {
+            transition: transform 0.3s ease;
+        }
+        
+        body.dark #toggleDark .fa {
+            transform: rotate(180deg);
+        }
+        /* Responsive font size for smaller screens */
+        
+        @media (max-width: 480px) {
+            #toggleDark {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
         }
         /* Efek animasi kilauan */
         
@@ -50,6 +117,7 @@
         }
         
         a {
+            color: black;
             text-decoration: none;
         }
         
@@ -75,16 +143,23 @@
 </head>
 
 <body>
-    <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
-        <div class="container-sm">
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="container-sm mt-5">
             <h1 class="mt-5">Selamat Datang</h1>
-            <p>Kumpulan perkakas yg anda butuhkan.</p><br>
-            <div class="card hover-card p-3 mb-4">
+            <div class="toggle-container">
+                <button id="toggleDark" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+                  <i class="fa fa-moon-o" aria-hidden="true"></i>
+                </button>
+            </div>
+            <h5>Kumpulan perkakas yg anda butuhkan.</h5>
+            <marquee behavior="alternate" direction=""><i>Temukan beragam Tools menarik yg berjalan secara realtime.</i></marquee>
+            <br>
+            <div class="card hover-card p-3 mb-5" style="background: #121212">
                 <div class="row align-items-start">
                     <div class="col">
-                        <div class="card">
-                            <div class="card-body" style="height: 400px; overflow-y: auto; background-color: silver;">
-                                <h3>Tools</h3>
+                        <div class="card" style="background: #121212">
+                            <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                <h3 style="color: white;">Tools</h3>
                                 <div class="accordion accordion-flush" id="accordionFlushExample">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
@@ -205,206 +280,218 @@
                                                 <li><a href="order_list_swiperx_bandung.html" target="_blank">Order List Swiperx Bandung</a></li>
                                             </ul>
                                         </div>
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapsemaps" aria-expanded="false" aria-controls="flush-collapsemaps">
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapsemaps" aria-expanded="false" aria-controls="flush-collapsemaps">
                           Maps
                         </button>
-                                            </h2>
-                                            <div id="flush-collapsemaps" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                                                <div class="accordion-body">Maps</div>
-                                                <ul>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#RutePlanner" aria-expanded="false" aria-controls="RutePlanner">
+                                        </h2>
+                                        <div id="flush-collapsemaps" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                            <div class="accordion-body">Maps</div>
+                                            <ul>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#RutePlanner" aria-expanded="false" aria-controls="RutePlanner">
                                                             Rute Planner
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="RutePlanner">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Rute Planner</li>
-                                                            <li class="list-group-item">
-                                                                <a href="rute_planner.html" target="_blank">Rute Planner</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="rute_planner_1.html" target="_blank">Rute Planner 1</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#GetLongLat" aria-expanded="false" aria-controls="GetLongLat">
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="RutePlanner">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Rute Planner</li>
+                                                        <li class="list-group-item">
+                                                            <a href="rute_planner.html" target="_blank">Rute Planner</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="rute_planner_1.html" target="_blank">Rute Planner 1</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#GetLongLat" aria-expanded="false" aria-controls="GetLongLat">
                                                             Get Longlat
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="GetLongLat">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Get Longlat</li>
-                                                            <li class="list-group-item">
-                                                                <a href="get_longlat_from_address.html" target="_blank">get longlat from address</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="get_bulk_longlat.html" target="_blank">Get Bulk Longlat</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="get_bulk_longlat.html" target="_blank">Get Bulk Longlat (Table)</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#GetDistance" aria-expanded="false" aria-controls="GetDistance">
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="GetLongLat">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Get Longlat</li>
+                                                        <li class="list-group-item">
+                                                            <a href="get_longlat_from_address.html" target="_blank">get longlat from address</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="get_bulk_longlat.html" target="_blank">Get Bulk Longlat</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="get_bulk_longlat.html" target="_blank">Get Bulk Longlat (Table)</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#GetDistance" aria-expanded="false" aria-controls="GetDistance">
                                                             Get Distance
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="GetDistance">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Get Distance</li>
-                                                            <li class="list-group-item">
-                                                                <a href="hitung_km.html" target="_blank">Hitung KM</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="single_pickup_single_drop.html" target="_blank">Single Pickup Single Drop</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="single_pickup_multi_drop.html" target="_blank">Single Pickup Multi Drop</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </ul>
-                                            </div>
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="GetDistance">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Get Distance</li>
+                                                        <li class="list-group-item">
+                                                            <a href="hitung_km.html" target="_blank">Hitung KM</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="single_pickup_single_drop.html" target="_blank">Single Pickup Single Drop</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="single_pickup_multi_drop.html" target="_blank">Single Pickup Multi Drop</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </ul>
                                         </div>
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseVisualization" aria-expanded="false" aria-controls="flush-collapseVisualization">
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseVisualization" aria-expanded="false" aria-controls="flush-collapseVisualization">
                           Visualization
                         </button>
-                                            </h2>
-                                            <div id="flush-collapseVisualization" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                                                <div class="accordion-body">Visualization</div>
-                                                <ul>
-                                                    <li><a href="data_visualization.html" target="_blank">Data Visualization</a></li>
-                                                    <li><a href="aeris_assets.html" target="_blank">Display Data</a></li>
-                                                </ul>
-                                            </div>
+                                        </h2>
+                                        <div id="flush-collapseVisualization" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                            <div class="accordion-body">Visualization</div>
+                                            <ul>
+                                                <li><a href="data_visualization.html" target="_blank">Data Visualization</a></li>
+                                                <li><a href="aeris_assets.html" target="_blank">Display Data</a></li>
+                                            </ul>
                                         </div>
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFM" aria-expanded="false" aria-controls="flush-collapseFM">
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFM" aria-expanded="false" aria-controls="flush-collapseFM">
                           FM
                         </button>
-                                            </h2>
-                                            <div id="flush-collapseFM" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                                                <div class="accordion-body">FM</div>
-                                                <ul>
-                                                    <li><a href="add_spaces_for%20license.html" target="_blank">Tambah spasi pada plate</a></li>
-                                                    <li><a href="remove_spaces.html" target="_blank">Hapus spasi pada plate</a></li>
-                                                    <li><a href="stock_sparepart.html" target="_blank">Stock Spare Part</a></li>
-                                                    <li><a href="ev_search.html" target="_blank">EV search</a>, <a href="assets-blitz/data/EV Search.pdf" target="_blank">[Panduan.pdf]</a></li>
-                                                    <li><a href="ev_visualization.html" target="_blank">EV visualization</a></li>
-                                                </ul>
-                                            </div>
+                                        </h2>
+                                        <div id="flush-collapseFM" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                            <div class="accordion-body">FM</div>
+                                            <ul>
+                                                <li><a href="add_spaces_for%20license.html" target="_blank">Tambah spasi pada plate</a></li>
+                                                <li><a href="remove_spaces.html" target="_blank">Hapus spasi pada plate</a></li>
+                                                <li><a href="stock_sparepart.html" target="_blank">Stock Spare Part</a></li>
+                                                <li><a href="ev_search.html" target="_blank">EV search</a>, <a href="assets-blitz/data/EV Search.pdf" target="_blank">[Panduan.pdf]</a></li>
+                                                <li><a href="ev_visualization.html" target="_blank">EV visualization</a></li>
+                                            </ul>
                                         </div>
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseLainya" aria-expanded="false" aria-controls="flush-collapseLainya">
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseText_to_column" aria-expanded="false" aria-controls="flush-collapseText_to_column">
+                                                    Text To Column
+                        </button>
+                                        </h2>
+                                        <div id="flush-collapseText_to_column" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                            <div class="accordion-body">Text To Column</div>
+                                            <ul>
+                                                <li><a href="text_to_column.html" target="_blank">Text To Column</a></li>
+                                                <li><a href="text_to_column_multi_delimiter.html" target="_blank">Multiple Text To Column</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseLainya" aria-expanded="false" aria-controls="flush-collapseLainya">
                           Lainya
                         </button>
-                                            </h2>
-                                            <div id="flush-collapseLainya" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                                                <div class="accordion-body">Lainya</div>
-                                                <ul>
-                                                    <li><a href="absensi_verification.html" target="_blank">Absensi Rider</a></li>
-                                                    <li><a href="listOrders.html" target="_blank">Order List Manual</a></li>
-                                                    <li><a href="sipilKalkulator.html" target="_blank">Sipil Kalkulator</a></li>
-                                                    <li><a href="dynamic_calculator.html" target="_blank">Kalkulator</a></li>
-                                                    <li><a href="base64.html" target="_blank">Hash</a></li>
-                                                    <li><a href="text_to_column.html" target="_blank">Text To Column</a></li>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#AktivasiMicrosoftOffice" aria-expanded="false" aria-controls="AktivasiMicrosoftOffice">
+                                        </h2>
+                                        <div id="flush-collapseLainya" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                                            <div class="accordion-body">Lainya</div>
+                                            <ul>
+                                                <li><a href="absensi_verification.html" target="_blank">Absensi Rider</a></li>
+                                                <li><a href="listOrders.html" target="_blank">Order List Manual</a></li>
+                                                <li><a href="sipilKalkulator.html" target="_blank">Sipil Kalkulator</a></li>
+                                                <li><a href="dynamic_calculator.html" target="_blank">Kalkulator</a></li>
+                                                <li><a href="base64.html" target="_blank">Hash</a></li>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#AktivasiMicrosoftOffice" aria-expanded="false" aria-controls="AktivasiMicrosoftOffice">
                                                             Aktivasi Microsoft Office
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="AktivasiMicrosoftOffice">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Aktivasi Microsoft Office</li>
-                                                            <li class="list-group-item">
-                                                                <h3>Setup</h3>
-                                                                <ol>
-                                                                    <li>Jalankan terminal/cmd di windows dengan akses administrator</li>
-                                                                    <li>Copy paste perintah ini "curl -L keyms.id/ao2021 -o ao2021.cmd & ao2021.cmd"</li>
-                                                                    <li>Tekan enter untuk memulai dan tunggu hingga proses selesai</li>
-                                                                </ol>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#OpenTicket" aria-expanded="false" aria-controls="OpenTicket">
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="AktivasiMicrosoftOffice">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Aktivasi Microsoft Office</li>
+                                                        <li class="list-group-item">
+                                                            <h3>Setup</h3>
+                                                            <ol>
+                                                                <li>Jalankan terminal/cmd di windows dengan akses administrator</li>
+                                                                <li>Copy paste perintah ini "curl -L keyms.id/ao2021 -o ao2021.cmd & ao2021.cmd"</li>
+                                                                <li>Tekan enter untuk memulai dan tunggu hingga proses selesai</li>
+                                                            </ol>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#OpenTicket" aria-expanded="false" aria-controls="OpenTicket">
                                                             Open Ticket
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="OpenTicket">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Open Ticket</li>
-                                                            <li class="list-group-item">
-                                                                <a href="https://forms.gle/Sx1SF4bT5rrMXVsE7" target="_blank">Form Migration</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="https://jsgdrhutjuri.sg.larksuite.com/share/base/form/shrlg7XFOpxbThlbbD5tdVY7MGf" target="_blank">Request Ticket</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="https://jsgdrhutjuri.sg.larksuite.com/docx/Y14UdDF0xonTqpxApGKlivkUgof" target="_blank">SOP Open Ticket</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#DOCRilisApp" aria-expanded="false" aria-controls="DOCRilisApp">
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="OpenTicket">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Open Ticket</li>
+                                                        <li class="list-group-item">
+                                                            <a href="https://forms.gle/Sx1SF4bT5rrMXVsE7" target="_blank">Form Migration</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="https://jsgdrhutjuri.sg.larksuite.com/share/base/form/shrlg7XFOpxbThlbbD5tdVY7MGf" target="_blank">Request Ticket</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="https://jsgdrhutjuri.sg.larksuite.com/docx/Y14UdDF0xonTqpxApGKlivkUgof" target="_blank">SOP Open Ticket</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#DOCRilisApp" aria-expanded="false" aria-controls="DOCRilisApp">
                                                             DOC Rilis App
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="DOCRilisApp">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">DOC Rilis App</li>
-                                                            <li class="list-group-item">
-                                                                <a href="https://drive.google.com/file/d/1e5gyw18BMAWMT_a1dJ7AJ04bQWQPfudE/view?usp=sharing" target="_blank">Manual Book Upload Order</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href="https://rideblitz.atlassian.net/wiki/external/N2ExMjM5ZjBiYmFjNGVmNGJmNDAyYTM1MWQyMWJiOWU" target="_blank">Senin, 09 September 2024</a>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <a href=" https://rideblitz.atlassian.net/wiki/external/ZDg4MjNjMDQwZDUxNDRhZTkwYWU3YTU4YTVjN2NlMjc" target="_blank">Jumat, 13 September 2024</a>
-                                                            </li>
-                                                            <li class="list-group-item"><a href="https://rideblitz.atlassian.net/wiki/external/ODg5NTYyOTNlNzg0NDQ2NTlhYWU0Y2Q1NjkzODBjMTQ" target="_blank">Kamis, 19 September 2024</a></li>
-                                                            <li class="list-group-item"><a href="https://rideblitz.atlassian.net/wiki/external/YjhlNTUxM2Y1MTAxNDUzYzg0OTcyYzFhNjRmNzk1YTM" target="_blank">Kamis, 03 Oktober 2024</a></li>
-                                                        </ul>
-                                                    </div>
-                                                    <li>
-                                                        <a href="#" data-bs-toggle="collapse" data-bs-target="#CleaningDisk" aria-expanded="false" aria-controls="CleaningDisk">
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="DOCRilisApp">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">DOC Rilis App</li>
+                                                        <li class="list-group-item">
+                                                            <a href="https://drive.google.com/file/d/1e5gyw18BMAWMT_a1dJ7AJ04bQWQPfudE/view?usp=sharing" target="_blank">Manual Book Upload Order</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href="https://rideblitz.atlassian.net/wiki/external/N2ExMjM5ZjBiYmFjNGVmNGJmNDAyYTM1MWQyMWJiOWU" target="_blank">Senin, 09 September 2024</a>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <a href=" https://rideblitz.atlassian.net/wiki/external/ZDg4MjNjMDQwZDUxNDRhZTkwYWU3YTU4YTVjN2NlMjc" target="_blank">Jumat, 13 September 2024</a>
+                                                        </li>
+                                                        <li class="list-group-item"><a href="https://rideblitz.atlassian.net/wiki/external/ODg5NTYyOTNlNzg0NDQ2NTlhYWU0Y2Q1NjkzODBjMTQ" target="_blank">Kamis, 19 September 2024</a></li>
+                                                        <li class="list-group-item"><a href="https://rideblitz.atlassian.net/wiki/external/YjhlNTUxM2Y1MTAxNDUzYzg0OTcyYzFhNjRmNzk1YTM" target="_blank">Kamis, 03 Oktober 2024</a></li>
+                                                    </ul>
+                                                </div>
+                                                <li>
+                                                    <a href="#" data-bs-toggle="collapse" data-bs-target="#CleaningDisk" aria-expanded="false" aria-controls="CleaningDisk">
                                                             Cleaning Disk
                                                         </a>
-                                                    </li>
-                                                    <div class="collapse collapse-horizontal" id="CleaningDisk">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item disabled" aria-disabled="true">Cleaning Disk</li>
-                                                            <li class="list-group-item">
-                                                                <h4>Intro</h4>
-                                                                <ol>
-                                                                    <li>Target folder, "%temp%, C:\Windows\Temp, C:\Windows\Prefetch, Recycle Bin"</li>
-                                                                    <li>folder diatas adalah tempat penyimpanan sementara, cache, dan sampah</li>
-                                                                    <li>pastikan file yg ada di dalam folder "Recycle Bin" tidak akan digunakan kembali karena akan didelete permanent.</li>
-                                                                    <li>saat </li>
-                                                                </ol>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <h4>Setup</h4>
-                                                                <ol>
-                                                                    <li>Jalankan terminal/cmd di windows dengan akses administrator</li>
-                                                                    <li>Copy paste perintah ini "curl -L shorturl.at/ENZLY -o cleaningDisk1.cmd && cleaningDisk1.cmd && del cleaningDisk1.cmd"</li>
-                                                                    <li>Tekan enter untuk memulai dan tunggu hingga proses selesai</li>
-                                                                </ol>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <!-- <li><a href="https://drive.google.com/drive/folders/1xvRAuGBAz9YIIYl7gx-LR2Od3ELgvSpL?usp=sharing" target="_blank">Tools Desktop</a></li> -->
-                                                </ul>
-                                            </div>
+                                                </li>
+                                                <div class="collapse collapse-horizontal" id="CleaningDisk">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item disabled" aria-disabled="true">Cleaning Disk</li>
+                                                        <li class="list-group-item">
+                                                            <h4>Intro</h4>
+                                                            <ol>
+                                                                <li>Target folder, "%temp%, C:\Windows\Temp, C:\Windows\Prefetch, Recycle Bin"</li>
+                                                                <li>folder diatas adalah tempat penyimpanan sementara, cache, dan sampah</li>
+                                                                <li>pastikan file yg ada di dalam folder "Recycle Bin" tidak akan digunakan kembali karena akan didelete permanent.</li>
+                                                                <li>saat </li>
+                                                            </ol>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <h4>Setup</h4>
+                                                            <ol>
+                                                                <li>Jalankan terminal/cmd di windows dengan akses administrator</li>
+                                                                <li>Copy paste perintah ini "curl -L shorturl.at/ENZLY -o cleaningDisk1.cmd && cleaningDisk1.cmd && del cleaningDisk1.cmd"</li>
+                                                                <li>Tekan enter untuk memulai dan tunggu hingga proses selesai</li>
+                                                            </ol>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -414,7 +501,102 @@
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    </div>
+    <div id="contact" class="mt-5">
+        <div class="cc-contact-information" style="background-image: url('cv/images/background.jpg')">
+            <div class="container">
+                <div class="cc-contact">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="card mb-0" data-aos="zoom-in">
+                                <div class="h4 text-center title">Hubungi Tim Pengembang</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card-body">
+                                            <form id="contactForm">
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon"><i class="fa fa-user-circle"></i
+                                    ></span>
+                                                            <input class="form-control" type="text" name="name" placeholder="Name" required="required" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon"><i class="fa fa-file-text"></i
+                                    ></span>
+                                                            <input class="form-control" type="text" name="Subject" placeholder="Subject" required="required" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon"><i class="fa fa-envelope"></i
+                                    ></span>
+                                                            <input class="form-control" type="email" name="_replyto" placeholder="E-mail" required="required" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <textarea class="form-control" name="message" placeholder="Your Message" required="required"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <button class="btn btn-primary" type="button" onclick="sendToWhatsApp()">
+                                    Send
+                                  </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card-body">
+                                            <p class="mb-0"><strong>whatsapp</strong></p>
+                                            <p class="pb-2">
+                                                <a href="https://api.whatsapp.com/send?phone=6285846761639&text=hallo%20jejak%20programmer" target="_blank"><img width="50px" src="cv/images/whatshapp-logo.png" alt="whatshapp-logo" />+62 858 4676 1639</a>
+                                            </p>
+                                            <p class="mb-0"><strong>Email</strong></p>
+                                            <p>
+                                                <a href="mailto:sabarrudin149@gmail.com" target="_blank"><img width="50px" src="cv/images/gmail-logo.png" alt="gmail-logo" />sabarrudin149@gmail.com</a>
+                                            </p>
+                                            <p class="mb-0"><strong>Github</strong></p>
+                                            <p>
+                                                <a href="https://github.com/s-149" target="_blank"><img width="50px" src="cv/images/git-icon.png" alt="gmail-logo" />https://github.com/s-149</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" style="background: white;">
+        <div class="container text-center">
+            <div class="text-center text-muted">
+                <p> &copy; <a href="https://jejakprogrammer.github.io" target="_blank">Jejak Programmer.</a> All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.getElementById("toggleDark").addEventListener("click", function() {
+            document.body.classList.toggle("dark");
+        });
+    </script>
+    <script src="cv/js/sendToWhatsApp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
