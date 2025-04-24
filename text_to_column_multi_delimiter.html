@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Text to Column Multi Delimiter</title>
+
+    <meta content="Text to Column Multi Delimiter" name="description" />
+    <meta content="Text to Column Multi Delimiter, Blitz" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <!-- Choices.js CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- DataTables CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- DataTables Buttons CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            padding: 20px;
+            color: #374151;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            margin-bottom: 15px;
+            color: #1e3a8a;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        textarea {
+            width: 100%;
+            max-width: 650px;
+            height: 120px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+        
+        .choices__inner {
+            max-width: 650px;
+            margin-bottom: 20px;
+        }
+        
+        #outputWrapper {
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        /* DataTables buttons custom */
+        
+        .dt-button {
+            background-color: #2563eb !important;
+            border: none !important;
+            color: white !important;
+            padding: 6px 12px !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            margin-left: 8px !important;
+        }
+        
+        .dt-button:hover {
+            background-color: #1e40af !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Text to Column Multi Delimiter</h1>
+
+    <textarea id="inputText" placeholder="Masukkan data di sini... Contoh:
+B4171XXX|B4444XXX;B4175XXX	B4226XXX"></textarea>
+
+    <select id="delimiterSelect" multiple></select>
+
+    <div id="outputWrapper">
+        <table id="outputTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th><i style="color: silver;">Data not found....</i></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const delimiterSelect = document.getElementById('delimiterSelect');
+        let dataTable;
+
+        // Setup Choices.js for multi-select
+        const choices = new Choices(delimiterSelect, {
+            removeItemButton: true,
+            placeholderValue: 'Pilih delimiter (spasi, koma, dll)...',
+            searchEnabled: false,
+            shouldSort: false,
+            maxItemCount: 5,
+        });
+
+        // Add delimiter options
+        const delimiterOptions = [{
+                value: ' ',
+                label: 'Spasi (space)'
+            }, {
+                value: ',',
+                label: 'Koma (,)'
+            }, {
+                value: ';',
+                label: 'Titik koma (;)'
+            }, {
+                value: '|',
+                label: 'Pipe (|)'
+            }, {
+                value: '-',
+                label: 'Strip (-)'
+            }, {
+                value: '_',
+                label: 'Underscore (_)'
+            },
+            // Bisa ditambah lagi
+        ];
+
+        delimiterOptions.forEach(opt => {
+            choices.setChoices([opt], 'value', 'label', false);
+        });
+
+        // Escape special regex chars
+        function escapeRegex(text) {
+            return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        }
+
+        // Process input text & delimiters, tab always included
+        function processInput() {
+            const input = inputText.value.trim();
+            let selectedDelimiters = choices.getValue(true);
+
+            // Pastikan tab included
+            if (!selectedDelimiters.includes('\t')) {
+                selectedDelimiters.push('\t');
+            }
+
+            // Build regex for split
+            const regexPattern = new RegExp(selectedDelimiters.map(d => {
+                if (d === '\t') return '\t';
+                if (d === ' ') return '\\s+';
+                return escapeRegex(d);
+            }).join('|'), 'g');
+
+            if (!input) {
+                if (dataTable) {
+                    dataTable.clear().draw();
+                }
+                return;
+            }
+
+            const rows = input.split(/\r?\n/);
+            const allItems = [];
+
+            rows.forEach(row => {
+                const items = row.split(regexPattern).filter(Boolean);
+                allItems.push(...items);
+            });
+
+            // Update datatable
+            if (dataTable) {
+                dataTable.clear();
+                dataTable.rows.add(allItems.map(i => [i]));
+                dataTable.draw();
+            } else {
+                dataTable = $('#outputTable').DataTable({
+                    data: allItems.map(i => [i]),
+                    columns: [{
+                        title: 'Data Found'
+                    }],
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    lengthChange: true,
+                    pageLength: 10,
+                    dom: 'Bfrtip', // show Buttons, filter, table, info, paging
+                    buttons: [{
+                        extend: 'copyHtml5',
+                        text: 'Copy Data',
+                        titleAttr: 'Copy semua data ke clipboard',
+                        className: 'dt-button'
+                    }, {
+                        extend: 'csvHtml5',
+                        text: 'Export',
+                        titleAttr: 'Export data ke CSV',
+                        className: 'dt-button'
+                    }, {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print tabel',
+                        className: 'dt-button'
+                    }],
+                    language: {
+                        emptyTable: "Tidak ada data untuk ditampilkan",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                        lengthMenu: "Tampilkan _MENU_ data",
+                        search: "Cari:",
+                        paginate: {
+                            first: "Awal",
+                            last: "Akhir",
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        }
+                    }
+                });
+            }
+        }
+
+        // Event listener input & select
+        inputText.addEventListener('input', processInput);
+        delimiterSelect.addEventListener('change', processInput);
+
+        // Init once
+        processInput();
+    </script>
+
+</body>
+
+</html>
