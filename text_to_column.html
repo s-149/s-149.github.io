@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Text to Column Dinamis + Copy + Clean</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        select,
+        input[type="text"],
+        button {
+            margin-top: 5px;
+        }
+        
+        #copyBtn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Text to Column Dinamis + Copy + Clean</h2>
+
+    <label>Masukkan Data:</label><br>
+    <textarea id="inputText" placeholder="Contoh: B4118SVH	B4921SVG	B4447SVH	B4180SWW	B4526SVK	B4173SVJ"></textarea>
+
+    <label>Pilih Delimiter:</label><br>
+    <select id="delimiterSelect">
+    <option value="\t">Tab</option>
+    <option value=",">Koma (,)</option>
+    <option value=" ">Spasi</option>
+    <option value="|">Pipe (|)</option>
+    <option value="custom">Custom</option>
+  </select>
+    <input type="text" id="customDelimiter" placeholder="Delimiter custom" style="display:none; width: 100px;">
+
+    <br><br>
+    <label>Mode Output:</label><br>
+    <select id="outputMode">
+    <option value="default">Sesuai Data Input</option>
+    <option value="single-column">Jadikan Satu Kolom</option>
+  </select>
+
+    <br><label><input type="checkbox" id="removeEmptyRows"> Hapus Baris Kosong</label>
+
+    <br><button id="copyBtn">📋 Copy Hasil</button>
+
+    <div id="outputTable"></div>
+
+    <script>
+        const input = document.getElementById("inputText");
+        const delimiterSelect = document.getElementById("delimiterSelect");
+        const customInput = document.getElementById("customDelimiter");
+        const output = document.getElementById("outputTable");
+        const outputMode = document.getElementById("outputMode");
+        const copyBtn = document.getElementById("copyBtn");
+        const removeEmptyRows = document.getElementById("removeEmptyRows");
+
+        let latestTableData = "";
+
+        function renderTable() {
+            let text = input.value.trim();
+            let delimiter = delimiterSelect.value === "custom" ? customInput.value : delimiterSelect.value;
+            if (!delimiter) return;
+
+            let rawRows = text.split("\n");
+            if (removeEmptyRows.checked) {
+                rawRows = rawRows.filter(row => row.trim() !== "");
+            }
+
+            const rows = rawRows.map(row => row.split(delimiter).map(cell => cell.trim()));
+
+            if (rows.length === 0 || (rows.length === 1 && rows[0].length === 1 && rows[0][0] === "")) {
+                output.innerHTML = "<p><i>Tidak ada data untuk ditampilkan</i></p>";
+                latestTableData = "";
+                return;
+            }
+
+            let tableHTML = "<table>";
+            let dataText = "";
+
+            if (outputMode.value === "single-column") {
+                tableHTML += "<tr><th>Kolom</th></tr>";
+                rows.flat().forEach(item => {
+                    if (item !== "") {
+                        tableHTML += `<tr><td>${item}</td></tr>`;
+                        dataText += item + "\n";
+                    }
+                });
+            } else {
+                tableHTML += "<tr>";
+                rows[0].forEach((_, i) => tableHTML += `<th>Kolom ${i + 1}</th>`);
+                tableHTML += "</tr>";
+                rows.forEach(row => {
+                    tableHTML += "<tr>";
+                    row.forEach(cell => {
+                        tableHTML += `<td>${cell}</td>`;
+                    });
+                    tableHTML += "</tr>";
+                    dataText += row.join("\t") + "\n";
+                });
+            }
+
+            tableHTML += "</table>";
+            output.innerHTML = tableHTML;
+            latestTableData = dataText.trim();
+        }
+
+        copyBtn.addEventListener("click", () => {
+            if (!latestTableData) return;
+            navigator.clipboard.writeText(latestTableData)
+                .then(() => alert("✅ Hasil berhasil disalin ke clipboard!"))
+                .catch(() => alert("❌ Gagal menyalin!"));
+        });
+
+        input.addEventListener("input", renderTable);
+        delimiterSelect.addEventListener("change", () => {
+            customInput.style.display = delimiterSelect.value === "custom" ? "inline-block" : "none";
+            renderTable();
+        });
+        customInput.addEventListener("input", renderTable);
+        outputMode.addEventListener("change", renderTable);
+        removeEmptyRows.addEventListener("change", renderTable);
+    </script>
+
+</body>
+
+</html>
