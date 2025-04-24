@@ -2,153 +2,303 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Text to Column Dinamis + Copy + Clean</title>
+    <meta charset="UTF-8" />
+    <title>Text to Column Modern</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta content="Text to Column Multi Delimiter" name="description" />
+    <meta content="Text to Column Multi Delimiter, Blitz" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet" />
     <style>
         body {
-            font-family: sans-serif;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+        
+        h2 {
+            margin-bottom: 30px;
+            font-weight: 700;
+            color: #343a40;
         }
         
         textarea {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+            font-size: 0.9rem;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        label {
+            font-weight: 600;
+            margin-top: 15px;
         }
         
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
+        #customDelimiter {
+            max-width: 120px;
         }
         
-        select,
-        input[type="text"],
-        button {
-            margin-top: 5px;
+        .form-check {
+            margin-top: 20px;
         }
         
         #copyBtn {
-            margin-top: 15px;
-            padding: 8px 16px;
-            cursor: pointer;
+            margin-top: 25px;
+            min-width: 130px;
+        }
+        /* Responsive tweaks */
+        
+        @media (max-width: 575.98px) {
+            #customDelimiter {
+                max-width: 100%;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <h2 class="text-center">Text to Column</h2>
 
-    <h2>Text to Column Dinamis + Copy + Clean</h2>
+        <div class="mb-3">
+            <label for="inputText" class="form-label">Masukkan Data:</label>
+            <textarea id="inputText" class="form-control" placeholder="Masukkan data di sini... Contoh:
+            B4171XXX|B4444XXX;B4175XXX	B4226XXX"></textarea>
+        </div>
 
-    <label>Masukkan Data:</label><br>
-    <textarea id="inputText" placeholder="Contoh: B4118SVH	B4921SVG	B4447SVH	B4180SWW	B4526SVK	B4173SVJ"></textarea>
+        <div class="row g-3 align-items-center">
+            <div class="col-sm-4 col-6">
+                <label for="delimiterSelect" class="form-label">Pilih Delimiter:</label>
+                <select id="delimiterSelect" class="form-select">
+                    <option value="\t">Tab</option>
+                    <option value=",">Koma (,)</option>
+                    <option value=" ">Spasi</option>
+                    <option value="|">Pipe (|)</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-6" id="customDelimiterWrapper" style="display:none;">
+                <label for="customDelimiter" class="form-label">Delimiter custom:</label>
+                <input type="text" id="customDelimiter" class="form-control" maxlength="2" placeholder="Masukkan delimiter" />
+            </div>
+            <div class="col-sm-4 col-6">
+                <label for="outputMode" class="form-label">Mode Output:</label>
+                <select id="outputMode" class="form-select">
+                    <option value="default">Sesuai Data Input</option>
+                    <option value="single-column">Jadikan Satu Kolom</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-6 d-flex align-items-end">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="removeEmptyRows" />
+                    <label class="form-check-label" for="removeEmptyRows">Hapus Baris Kosong</label>
+                </div>
+            </div>
+        </div>
 
-    <label>Pilih Delimiter:</label><br>
-    <select id="delimiterSelect">
-    <option value="\t">Tab</option>
-    <option value=",">Koma (,)</option>
-    <option value=" ">Spasi</option>
-    <option value="|">Pipe (|)</option>
-    <option value="custom">Custom</option>
-  </select>
-    <input type="text" id="customDelimiter" placeholder="Delimiter custom" style="display:none; width: 100px;">
+        <!-- <div class="mt-3 d-flex justify-content-end">
+            <button id="copyBtn" class="btn btn-primary">
+                📋 Copy Hasil
+            </button>
+        </div> -->
 
-    <br><br>
-    <label>Mode Output:</label><br>
-    <select id="outputMode">
-    <option value="default">Sesuai Data Input</option>
-    <option value="single-column">Jadikan Satu Kolom</option>
-  </select>
+        <div class="table-responsive mt-4">
+            <table id="outputTable" class="table table-striped table-bordered" style="width:100%"></table>
+        </div>
+    </div>
 
-    <br><label><input type="checkbox" id="removeEmptyRows"> Hapus Baris Kosong</label>
-
-    <br><button id="copyBtn">📋 Copy Hasil</button>
-
-    <div id="outputTable"></div>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <!-- DataTables Buttons -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
         const input = document.getElementById("inputText");
         const delimiterSelect = document.getElementById("delimiterSelect");
         const customInput = document.getElementById("customDelimiter");
-        const output = document.getElementById("outputTable");
+        const customWrapper = document.getElementById("customDelimiterWrapper");
         const outputMode = document.getElementById("outputMode");
-        const copyBtn = document.getElementById("copyBtn");
         const removeEmptyRows = document.getElementById("removeEmptyRows");
-
+        const copyBtn = document.getElementById("copyBtn");
+        let dataTableInstance = null;
         let latestTableData = "";
+
+        // Show/hide custom delimiter input
+        delimiterSelect.addEventListener("change", () => {
+            if (delimiterSelect.value === "custom") {
+                customWrapper.style.display = "block";
+            } else {
+                customWrapper.style.display = "none";
+                customInput.value = "";
+            }
+            renderTable();
+        });
+
+        customInput.addEventListener("input", renderTable);
+        input.addEventListener("input", renderTable);
+        outputMode.addEventListener("change", renderTable);
+        removeEmptyRows.addEventListener("change", renderTable);
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
         function renderTable() {
             let text = input.value.trim();
             let delimiter = delimiterSelect.value === "custom" ? customInput.value : delimiterSelect.value;
-            if (!delimiter) return;
-
-            let rawRows = text.split("\n");
-            if (removeEmptyRows.checked) {
-                rawRows = rawRows.filter(row => row.trim() !== "");
-            }
-
-            const rows = rawRows.map(row => row.split(delimiter).map(cell => cell.trim()));
-
-            if (rows.length === 0 || (rows.length === 1 && rows[0].length === 1 && rows[0][0] === "")) {
-                output.innerHTML = "<p><i>Tidak ada data untuk ditampilkan</i></p>";
-                latestTableData = "";
+            if (!delimiter) {
+                clearTable();
                 return;
             }
 
-            let tableHTML = "<table>";
-            let dataText = "";
-
-            if (outputMode.value === "single-column") {
-                tableHTML += "<tr><th>Kolom</th></tr>";
-                rows.flat().forEach(item => {
-                    if (item !== "") {
-                        tableHTML += `<tr><td>${item}</td></tr>`;
-                        dataText += item + "\n";
-                    }
-                });
-            } else {
-                tableHTML += "<tr>";
-                rows[0].forEach((_, i) => tableHTML += `<th>Kolom ${i + 1}</th>`);
-                tableHTML += "</tr>";
-                rows.forEach(row => {
-                    tableHTML += "<tr>";
-                    row.forEach(cell => {
-                        tableHTML += `<td>${cell}</td>`;
-                    });
-                    tableHTML += "</tr>";
-                    dataText += row.join("\t") + "\n";
-                });
+            let rows = text.split("\n");
+            if (removeEmptyRows.checked) {
+                rows = rows.filter(row => row.trim() !== "");
             }
 
-            tableHTML += "</table>";
-            output.innerHTML = tableHTML;
-            latestTableData = dataText.trim();
+            // Build regex for splitting if delimiter is tab or space or single char
+            let splitRegex;
+            if (delimiter === "\\t") {
+                splitRegex = /\t/;
+            } else if (delimiter === " ") {
+                splitRegex = / +/;
+            } else {
+                splitRegex = new RegExp(escapeRegex(delimiter));
+            }
+
+            let dataRows = rows.map(row => row.split(splitRegex).map(cell => cell.trim()));
+
+            // If output mode single-column, flatten data
+            if (outputMode.value === "single-column") {
+                let flattened = [];
+                dataRows.forEach(row => {
+                    row.forEach(cell => {
+                        if (cell !== "") flattened.push(cell);
+                    });
+                });
+                if (flattened.length === 0) {
+                    clearTable();
+                    return;
+                }
+                renderDataTableSingleColumn(flattened);
+                latestTableData = flattened.join("\n");
+            } else {
+                // Default mode: render as table with columns
+                // Find max columns in rows
+                let maxCols = Math.max(...dataRows.map(r => r.length));
+                if (maxCols === 0) {
+                    clearTable();
+                    return;
+                }
+                renderDataTableMultiColumn(dataRows, maxCols);
+                // Prepare tab-separated text for copy
+                latestTableData = dataRows.map(r => r.join("\t")).join("\n");
+            }
+        }
+
+        function clearTable() {
+            if (dataTableInstance) {
+                dataTableInstance.clear().destroy();
+                dataTableInstance = null;
+            }
+            $("#outputTable").empty();
+            latestTableData = "";
+        }
+
+        function renderDataTableSingleColumn(data) {
+            if (dataTableInstance) {
+                dataTableInstance.clear().destroy();
+                dataTableInstance = null;
+            }
+            let html = `<thead><tr><th>Data</th></tr></thead><tbody>`;
+            data.forEach(cell => {
+                html += `<tr><td>${cell}</td></tr>`;
+            });
+            html += `</tbody>`;
+            $("#outputTable").html(html);
+            dataTableInstance = $("#outputTable").DataTable({
+                paging: true,
+                searching: true,
+                lengthChange: true,
+                pageLength: 10,
+                dom: 'Bfrtip',
+                buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                columnDefs: [{
+                    targets: 0,
+                    className: "text-center"
+                }],
+                language: {
+                    emptyTable: "Tidak ada data untuk ditampilkan"
+                }
+            });
+        }
+
+        function renderDataTableMultiColumn(dataRows, maxCols) {
+            if (dataTableInstance) {
+                dataTableInstance.clear().destroy();
+                dataTableInstance = null;
+            }
+
+            // Build header
+            let thead = "<thead><tr>";
+            for (let i = 0; i < maxCols; i++) {
+                thead += `<th>Kolom ${i + 1}</th>`;
+            }
+            thead += "</tr></thead>";
+
+            // Build body
+            let tbody = "<tbody>";
+            dataRows.forEach(row => {
+                tbody += "<tr>";
+                for (let i = 0; i < maxCols; i++) {
+                    tbody += `<td>${row[i] !== undefined ? row[i] : ""}</td>`;
+                }
+                tbody += "</tr>";
+            });
+            tbody += "</tbody>";
+
+            $("#outputTable").html(thead + tbody);
+            dataTableInstance = $("#outputTable").DataTable({
+                paging: true,
+                searching: true,
+                lengthChange: true,
+                pageLength: 10,
+                dom: 'Bfrtip',
+                buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                language: {
+                    emptyTable: "Tidak ada data untuk ditampilkan"
+                }
+            });
         }
 
         copyBtn.addEventListener("click", () => {
-            if (!latestTableData) return;
+            if (!latestTableData) return alert("Data kosong, tidak ada yang disalin!");
             navigator.clipboard.writeText(latestTableData)
                 .then(() => alert("✅ Hasil berhasil disalin ke clipboard!"))
                 .catch(() => alert("❌ Gagal menyalin!"));
         });
 
-        input.addEventListener("input", renderTable);
-        delimiterSelect.addEventListener("change", () => {
-            customInput.style.display = delimiterSelect.value === "custom" ? "inline-block" : "none";
-            renderTable();
-        });
-        customInput.addEventListener("input", renderTable);
-        outputMode.addEventListener("change", renderTable);
-        removeEmptyRows.addEventListener("change", renderTable);
+        // Inisialisasi awal
+        renderTable();
     </script>
-
 </body>
 
 </html>
