@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Week Generator</title>
+    <meta content="Week Generator" name="description" />
+    <meta content="Week Generator" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ical.js/build/ical.min.js"></script>
+</head>
+
+<body>
+    <div class="container py-4">
+        <h2 class="mb-4">Week Generator Advanced</h2>
+
+        <div class="row align-items-end g-3">
+            <div class="col-md-6">
+                <label for="endDate" class="form-label">End Date (YYYY-MM-DD):</label>
+                <input type="date" class="form-control" id="endDate" required autofocus/>
+            </div>
+            <div class="col-md-6">
+                <label for="jumlahWeekYear" class="form-label">Week Year Amount:</label>
+                <input type="number" class="form-control" id="jumlahWeekYear" placeholder="Masukkan jumlah week" min="1" required autofocus/>
+            </div>
+            <div class="text-end">
+                <button id="generateBtn" class="btn btn-primary mb-3">Generate Weeks</button>
+                <button id="copyBtn" class="btn btn-success mb-3" style="display:none;">Copy</button>
+            </div>
+            <pre id="infoPenyesuaian" class="text-info"></pre>
+        </div>
+        <div class="col-md-12 d-grid mb-4">
+            <div class="table-responsive">
+                <div id="hasil"></div>
+            </div>
+        </div>
+        <div class="col-md-12 d-grid">
+            <h5>Agar tgl merahnya muncul, silahkan ikuti langkah dibawah ya.....</h5>
+            <img src="cors.png" width="100%" alt="step">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        let holidays = [];
+        let hariLiburID = {};
+
+        async function loadHariLiburID() {
+            try {
+                const res = await fetch('hariLiburID.json');
+                if (!res.ok) throw new Error('Gagal load hariLiburID.json');
+                hariLiburID = await res.json();
+                console.log('hariLiburID loaded:', hariLiburID);
+            } catch (error) {
+                console.error('Error loading hariLiburID:', error);
+                hariLiburID = {};
+            }
+        }
+
+        function parseICALDateToDateOnly(icalTime) {
+            let dt = icalTime.toJSDate();
+            dt.setDate(dt.getDate() + 1);
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        }
+
+        async function fetchPublicHolidays() {
+            try {
+                const url = 'https://calendar.google.com/calendar/ical/en.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics';
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Gagal fetch kalender publik');
+                const icsText = await res.text();
+
+                const jcalData = ICAL.parse(icsText);
+                const comp = new ICAL.Component(jcalData);
+                const vevents = comp.getAllSubcomponents('vevent');
+
+                holidays = vevents.map(event => {
+                    const e = new ICAL.Event(event);
+                    const dateFixed = parseICALDateToDateOnly(e.startDate);
+                    const liburInggris = e.summary;
+                    const liburID = hariLiburID[liburInggris] || liburInggris;
+                    return {
+                        date: dateFixed,
+                        name: liburID
+                    };
+                });
+
+                console.log('Tanggal merah yang didapat:', holidays);
+            } catch (err) {
+                console.error('Error ambil kalender publik:', err);
+                holidays = [];
+            }
+        }
+
+        function generateWeeks() {
+            const endInput = document.getElementById('endDate').value;
+            const jumlahWeekYear = parseInt(document.getElementById('jumlahWeekYear').value);
+
+            if (!endInput || !jumlahWeekYear) {
+                alert('Isi tanggal akhir dan jumlah minggu!');
+                return;
+            }
+
+            let endDate = new Date(endInput);
+            let infoPenyesuaian = '';
+
+            let endDay = endDate.getDay();
+            if (endDay !== 0) {
+                endDate.setDate(endDate.getDate() + (7 - endDay));
+                infoPenyesuaian += `Tanggal akhir disesuaikan ke hari Minggu: ${endDate.toISOString().slice(0, 10)}\n`;
+            }
+
+            let startDate = new Date(endDate);
+            startDate.setDate(endDate.getDate() - (7 * (jumlahWeekYear - 1)) - 6);
+
+            let startDay = startDate.getDay();
+            if (startDay !== 1) {
+                startDate.setDate(startDate.getDate() - (startDay === 0 ? 6 : (startDay - 1)));
+                infoPenyesuaian += `Tanggal mulai disesuaikan ke hari Senin: ${startDate.toISOString().slice(0, 10)}\n`;
+            }
+
+            document.getElementById('infoPenyesuaian').innerText = infoPenyesuaian;
+
+            let current = new Date(startDate);
+            let data = [];
+
+            let weekCountInMonth = 1;
+            let currentMonth = current.getMonth();
+            let currentYear = current.getFullYear();
+
+            while (current <= endDate) {
+                let startOfWeek = new Date(current);
+                let endOfWeek = new Date(current);
+                endOfWeek.setDate(current.getDate() + 6);
+
+                if (startOfWeek.getMonth() !== currentMonth) {
+                    weekCountInMonth = 1;
+                    currentMonth = startOfWeek.getMonth();
+                    currentYear = startOfWeek.getFullYear();
+                }
+
+                let notes = holidays
+                    .filter(h => {
+                        let hDate = new Date(h.date.getFullYear(), h.date.getMonth(), h.date.getDate());
+                        return hDate >= startOfWeek && hDate <= endOfWeek;
+                    })
+                    .map(h => {
+                        let d = h.date.toISOString().slice(0, 10);
+                        return `${d} (${h.name})`;
+                    })
+                    .join(', ');
+
+                data.push({
+                    year: currentYear,
+                    week: weekCountInMonth,
+                    start: startOfWeek.toISOString().slice(0, 10),
+                    end: endOfWeek.toISOString().slice(0, 10),
+                    note: notes || ''
+                });
+
+                current.setDate(current.getDate() + 7);
+                weekCountInMonth++;
+            }
+
+            data.sort((a, b) => new Date(b.start) - new Date(a.start));
+
+            let totalWeeks = data.length;
+            data = data.map((row, index) => ({
+                weekYear: totalWeeks - index,
+                ...row,
+            }));
+
+            function getMonthName(monthIndex) {
+                const monthNames = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                ];
+                return monthNames[monthIndex];
+            }
+
+            data = data.map(row => {
+                let startMonth = new Date(row.start).getMonth();
+                let endMonth = new Date(row.end).getMonth();
+                let monthName = (startMonth === endMonth) ?
+                    getMonthName(startMonth) :
+                    `${getMonthName(startMonth)} - ${getMonthName(endMonth)}`;
+                return {
+                    ...row,
+                    monthName
+                };
+            });
+
+            let hasilHTML = `<table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Year</th>
+                    <th>Month</th>
+                    <th>Week (Year)</th>
+                    <th>Week (Month)</th>
+                    <th>Periode</th>
+                    <th>Note (Tanggal Merah)</th>
+                </tr>
+            </thead><tbody>`;
+
+            data.forEach((row) => {
+                hasilHTML += `<tr>
+                <td>${row.year}</td>
+                <td>${row.monthName}</td>
+                <td>${row.weekYear}</td>
+                <td>${row.week}</td>
+                <td>${row.start} - ${row.end}</td>
+                <td>${row.note}</td>
+            </tr>`;
+            });
+
+            hasilHTML += '</tbody></table>';
+            document.getElementById('hasil').innerHTML = hasilHTML;
+
+            document.getElementById('copyBtn').style.display = 'inline-block';
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async() => {
+            await fetchPublicHolidays();
+            generateWeeks();
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const table = document.querySelector('#hasil table');
+            if (!table) return;
+
+            const range = document.createRange();
+            range.selectNode(table);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            try {
+                const successful = document.execCommand('copy');
+                selection.removeAllRanges();
+                if (successful) {
+                    Toastify({
+                        text: "Copied to clipboard!",
+                        duration: 2500,
+                        close: true,
+                        gravity: "bottom",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        stopOnFocus: true,
+                    }).showToast();
+                } else {
+                    alert('Gagal copy!');
+                }
+            } catch (err) {
+                alert('Browser tidak mendukung fitur copy');
+            }
+        });
+
+        // Auto-load hariLiburID saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', loadHariLiburID);
+    </script>
+</body>
+
+</html>
