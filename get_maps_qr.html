@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Alamat ke Maps + QR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <style>
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #00ffc3;
+        }
+        
+        input[type="file"],
+        button {
+            margin: 10px 5px;
+            padding: 10px;
+            background-color: #00ffc3;
+            color: #121212;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #map {
+            height: 400px;
+            margin-top: 20px;
+            border: 2px solid #00ffc3;
+            border-radius: 10px;
+        }
+        
+        #loader {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 6px solid #1e1e1e;
+            border-top: 6px solid #00ffc3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .qr {
+            width: 60px;
+            height: 60px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📍 Alamat ke Google Maps + QR Code</h2>
+    <p>Nama header di isi "Alamat", kemudian isi dengan Alamat</p>
+
+    <input type="file" id="fileInput" accept=".xlsx" />
+    <button onclick="exportToExcel()">⬇️ Export ke Excel</button>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p id="progressText">Memproses alamat...</p>
+    </div>
+
+    <div id="map"></div><br><br>
+
+    <table id="alamatTable" class="display">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Alamat</th>
+                <th>Kota</th>
+                <th>Kecamatan</th>
+                <th>Provinsi</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Link Maps</th>
+                <th>QR</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8";
+        let alamatData = [];
+        let cache = {};
+        let map;
+        let markers = [];
+
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+
+        async function handleFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1
+                });
+
+                const rows = json.slice(1).filter(row => row[0]); // Skip header
+
+                alamatData = [];
+
+                $('#loader').show();
+                document.getElementById("progressText").innerText = `Memproses 0 dari ${rows.length}...`;
+
+                await batchProcess(rows, 10, 1000);
+
+                $('#loader').hide();
+                tampilkanTabel(alamatData);
+                tampilkanPeta(alamatData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function batchProcess(rows, batchSize = 10, delayMs = 1000) {
+            for (let i = 0; i < rows.length; i += batchSize) {
+                const batch = rows.slice(i, i + batchSize);
+
+                const batchResults = await Promise.all(
+                    batch.map(async(row, idx) => {
+                        const alamat = row[0];
+                        const wilayah = await ambilWilayahDariAlamat(alamat);
+                        const link = `https://www.google.com/maps/search/?api=1&query=${wilayah.lat},${wilayah.lng}`;
+                        return {
+                            no: i + idx + 1,
+                            alamat,
+                            kota: wilayah.kota,
+                            kecamatan: wilayah.kecamatan,
+                            provinsi: wilayah.provinsi,
+                            lat: wilayah.lat,
+                            lng: wilayah.lng,
+                            link
+                        };
+                    })
+                );
+
+                alamatData.push(...batchResults);
+                document.getElementById("progressText").innerText = `Memproses ${Math.min(i + batchSize, rows.length)} dari ${rows.length}...`;
+
+                if (i + batchSize < rows.length) {
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+        }
+
+        async function ambilWilayahDariAlamat(alamat) {
+            if (cache[alamat]) return cache[alamat];
+
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(alamat)}&key=${apiKey}`);
+                const data = await response.json();
+
+                if (data.status === "OK") {
+                    const components = data.results[0].address_components;
+                    const location = data.results[0].geometry.location;
+
+                    const kota = cariKomponen(components, ["administrative_area_level_2", "locality"]);
+                    const kecamatan = cariKomponen(components, ["administrative_area_level_3", "sublocality"]);
+                    const provinsi = cariKomponen(components, ["administrative_area_level_1"]);
+
+                    const result = {
+                        kota: kota || "-",
+                        kecamatan: kecamatan || "-",
+                        provinsi: provinsi || "-",
+                        lat: location.lat,
+                        lng: location.lng
+                    };
+
+                    cache[alamat] = result;
+                    return result;
+                } else {
+                    return {
+                        kota: "-",
+                        kecamatan: "-",
+                        provinsi: "-",
+                        lat: "",
+                        lng: ""
+                    };
+                }
+            } catch {
+                return {
+                    kota: "-",
+                    kecamatan: "-",
+                    provinsi: "-",
+                    lat: "",
+                    lng: ""
+                };
+            }
+        }
+
+        function cariKomponen(components, types) {
+            const item = components.find(c => c.types.some(t => types.includes(t)));
+            return item ? item.long_name : null;
+        }
+
+        function tampilkanTabel(data) {
+            $('#alamatTable').DataTable().clear().destroy();
+            const tbody = document.querySelector('#alamatTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${row.no}</td>
+          <td>${row.alamat}</td>
+          <td>${row.kota}</td>
+          <td>${row.kecamatan}</td>
+          <td>${row.provinsi}</td>
+          <td>${row.lat}</td>
+          <td>${row.lng}</td>
+          <td><a href="${row.link}" target="_blank">📍 Open</a></td>
+          <td><div id="qr-${row.no}" class="qr"></div></td>
+        `;
+                tbody.appendChild(tr);
+
+                // Generate QR Code
+                QRCode.toCanvas(document.getElementById(`qr-${row.no}`), row.link, {
+                    width: 60,
+                    color: {
+                        dark: "#00ffc3",
+                        light: "#121212"
+                    }
+                });
+            });
+
+            $('#alamatTable').DataTable();
+        }
+
+        function tampilkanPeta(data) {
+            if (!data.length) return;
+
+            const center = {
+                lat: data[0].lat,
+                lng: data[0].lng
+            };
+            map = new google.maps.Map(document.getElementById("map"), {
+                center,
+                zoom: 10,
+                mapId: "DEMO_MAP"
+            });
+
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            data.forEach(point => {
+                if (point.lat && point.lng) {
+                    const marker = new google.maps.Marker({
+                        position: {
+                            lat: point.lat,
+                            lng: point.lng
+                        },
+                        map,
+                        title: point.alamat
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `<b>${point.alamat}</b><br>${point.kecamatan}, ${point.kota}, ${point.provinsi}`
+                    });
+
+                    marker.addListener("click", () => infoWindow.open(map, marker));
+                    markers.push(marker);
+                }
+            });
+        }
+
+        function exportToExcel() {
+            const wsData = [
+                ["No", "Alamat", "Kota", "Kecamatan", "Provinsi", "Latitude", "Longitude", "Link Maps"],
+                ...alamatData.map(row => [
+                    row.no,
+                    row.alamat,
+                    row.kota,
+                    row.kecamatan,
+                    row.provinsi,
+                    row.lat,
+                    row.lng,
+                    row.link
+                ])
+            ];
+
+            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Alamat + Link");
+
+            XLSX.writeFile(workbook, "alamat_shareloc_qr.xlsx");
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8&callback=initMap">
+    </script>
+    <script>
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {
+                    lat: -6.2,
+                    lng: 106.8
+                },
+                zoom: 5,
+                mapId: "DEMO_MAP"
+            });
+        }
+    </script>
+</body>
+
+</html>

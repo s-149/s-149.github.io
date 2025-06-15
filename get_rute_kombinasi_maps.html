@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Alamat & Maps ke Rute</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #00ffc3;
+        }
+        
+        input,
+        button {
+            padding: 10px;
+            margin: 10px 5px;
+            background: #00ffc3;
+            color: #111;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #map {
+            height: 500px;
+            margin-top: 20px;
+            border-radius: 10px;
+            border: 2px solid #00ffc3;
+        }
+        
+        #loader {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📍 Alamat / Link Maps → Rute Otomatis</h2>
+    <p>Nama header di isi "Lokasi", kemudian isi dengan Alamat/link maps</p>
+
+    <input type="file" id="fileInput" accept=".xlsx" />
+    <button onclick="exportToExcel()">⬇️ Export ke Excel</button>
+
+    <div id="loader">⏳ Memproses data lokasi...</div>
+    <div id="map"></div>
+
+    <script>
+        const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8";
+        let lokasiData = [];
+        let map, directionsRenderer, directionsService;
+
+        document.getElementById("fileInput").addEventListener("change", handleFile);
+
+        async function handleFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async(event) => {
+                document.getElementById("loader").style.display = "block";
+
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {
+                    type: "array"
+                });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1
+                });
+                const list = rows.slice(1).filter(row => row[0]);
+
+                lokasiData = [];
+
+                for (let i = 0; i < list.length; i++) {
+                    const raw = list[i][0];
+                    let coord = await parseToLatLng(raw);
+                    if (coord) {
+                        lokasiData.push({
+                            input: raw,
+                            ...coord
+                        });
+                    }
+                    await new Promise(r => setTimeout(r, 300)); // hindari overlimit
+                }
+
+                document.getElementById("loader").style.display = "none";
+                tampilkanRute(lokasiData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseLatLngString(str) {
+            const match = str.match(/([-0-9.]+),\s*([-0-9.]+)/);
+            if (match) {
+                return {
+                    lat: parseFloat(match[1]),
+                    lng: parseFloat(match[2])
+                };
+            }
+            return null;
+        }
+
+        async function parseToLatLng(input) {
+            const direct = parseLatLngString(input);
+            if (direct) return direct;
+
+            try {
+                const url = new URL(input);
+                const queryParam = url.searchParams.get("q") || url.searchParams.get("query");
+                if (queryParam) {
+                    const coord = parseLatLngString(queryParam);
+                    if (coord) return coord;
+                }
+            } catch (e) {
+                // Not a URL
+            }
+
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&key=${apiKey}`;
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+                if (json.status === "OK") {
+                    const loc = json.results[0].geometry.location;
+                    return {
+                        lat: loc.lat,
+                        lng: loc.lng
+                    };
+                }
+            } catch (e) {
+                console.log("Geocoding gagal", input);
+            }
+
+            return null;
+        }
+
+        function tampilkanRute(data) {
+            if (data.length < 2) {
+                alert("Minimal 2 titik untuk membuat rute.");
+                return;
+            }
+
+            const origin = data[0];
+            const destination = data[data.length - 1];
+            const waypoints = data.slice(1, -1).map(p => ({
+                location: new google.maps.LatLng(p.lat, p.lng),
+                stopover: true
+            }));
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {
+                    lat: origin.lat,
+                    lng: origin.lng
+                },
+                zoom: 6,
+                mapId: "ROUTE_MAP"
+            });
+
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map
+            });
+            directionsService = new google.maps.DirectionsService();
+
+            directionsService.route({
+                origin: new google.maps.LatLng(origin.lat, origin.lng),
+                destination: new google.maps.LatLng(destination.lat, destination.lng),
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (result, status) => {
+                if (status === "OK") {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    alert("Gagal membuat rute: " + status);
+                }
+            });
+        }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(lokasiData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rute");
+            XLSX.writeFile(wb, "rute_dari_lokasi.xlsx");
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8&callback=initMap">
+    </script>
+    <script>
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {
+                    lat: -6.2,
+                    lng: 106.8
+                },
+                zoom: 5
+            });
+        }
+    </script>
+</body>
+
+</html>

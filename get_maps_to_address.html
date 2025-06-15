@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Koordinat ke Alamat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #00ffc3;
+        }
+        
+        input[type="file"],
+        button {
+            margin: 10px 5px;
+            padding: 10px;
+            background-color: #00ffc3;
+            color: #121212;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #map {
+            height: 400px;
+            margin-top: 20px;
+            border: 2px solid #00ffc3;
+            border-radius: 10px;
+        }
+        
+        #loader {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 6px solid #1e1e1e;
+            border-top: 6px solid #00ffc3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📍 Link / Koordinat → Alamat Lengkap</h2>
+    <p>Nama header di isi "Link", kemudian isi dengan link maps</p>
+
+    <input type="file" id="fileInput" accept=".xlsx" />
+    <button onclick="exportToExcel()">⬇️ Export ke Excel</button>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p id="progressText">Memproses koordinat...</p>
+    </div>
+
+    <div id="map"></div><br><br>
+
+    <table id="alamatTable" class="display">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Link / Koordinat</th>
+                <th>Alamat Lengkap</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8";
+        let hasilData = [];
+        let map;
+        let markers = [];
+
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+
+        async function handleFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1
+                });
+
+                const rows = json.slice(1).filter(row => row[0]);
+
+                hasilData = [];
+
+                $('#loader').show();
+                document.getElementById("progressText").innerText = `Memproses 0 dari ${rows.length}...`;
+
+                for (let i = 0; i < rows.length; i++) {
+                    const link = rows[i][0];
+                    const {
+                        lat,
+                        lng
+                    } = extractLatLng(link);
+                    const alamat = await reverseGeocode(lat, lng);
+                    hasilData.push({
+                        no: i + 1,
+                        link,
+                        alamat,
+                        lat,
+                        lng
+                    });
+
+                    document.getElementById("progressText").innerText = `Memproses ${i + 1} dari ${rows.length}...`;
+                    await new Promise(resolve => setTimeout(resolve, 300)); // rate limit
+                }
+
+                $('#loader').hide();
+                tampilkanTabel(hasilData);
+                tampilkanPeta(hasilData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function extractLatLng(input) {
+            try {
+                if (input.includes("maps")) {
+                    const match = input.match(/@?([-0-9.]+),([-0-9.]+)/) || input.match(/q=([-0-9.]+),([-0-9.]+)/);
+                    return {
+                        lat: parseFloat(match[1]),
+                        lng: parseFloat(match[2])
+                    };
+                } else {
+                    const [lat, lng] = input.split(",");
+                    return {
+                        lat: parseFloat(lat),
+                        lng: parseFloat(lng)
+                    };
+                }
+            } catch {
+                return {
+                    lat: 0,
+                    lng: 0
+                };
+            }
+        }
+
+        async function reverseGeocode(lat, lng) {
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
+                const data = await response.json();
+                return data.status === "OK" ? data.results[0].formatted_address : "-";
+            } catch {
+                return "-";
+            }
+        }
+
+        function tampilkanTabel(data) {
+            $('#alamatTable').DataTable().clear().destroy();
+            const tbody = document.querySelector('#alamatTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td>${row.no}</td>
+          <td>${row.link}</td>
+          <td>${row.alamat}</td>
+          <td>${row.lat}</td>
+          <td>${row.lng}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            $('#alamatTable').DataTable();
+        }
+
+        function tampilkanPeta(data) {
+            if (!data.length) return;
+            const center = {
+                lat: data[0].lat,
+                lng: data[0].lng
+            };
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center,
+                zoom: 10,
+                mapId: "DEMO_MAP"
+            });
+
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+
+            data.forEach(point => {
+                const marker = new google.maps.Marker({
+                    position: {
+                        lat: point.lat,
+                        lng: point.lng
+                    },
+                    map,
+                    title: point.alamat
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<b>${point.alamat}</b>`
+                });
+
+                marker.addListener("click", () => infoWindow.open(map, marker));
+                markers.push(marker);
+            });
+        }
+
+        function exportToExcel() {
+            const wsData = [
+                ["No", "Link / Koordinat", "Alamat", "Latitude", "Longitude"],
+                ...hasilData.map(row => [
+                    row.no,
+                    row.link,
+                    row.alamat,
+                    row.lat,
+                    row.lng
+                ])
+            ];
+
+            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Reverse Geocode");
+            XLSX.writeFile(workbook, "hasil_reverse_geocode.xlsx");
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8&callback=initMap">
+    </script>
+    <script>
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {
+                    lat: -6.2,
+                    lng: 106.8
+                },
+                zoom: 5,
+                mapId: "DEMO_MAP"
+            });
+        }
+    </script>
+</body>
+
+</html>

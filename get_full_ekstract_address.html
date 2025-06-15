@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Import Alamat & Wilayah</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #00ffc3;
+        }
+        
+        input[type="file"],
+        button {
+            margin: 10px 5px;
+            padding: 10px;
+            background-color: #00ffc3;
+            color: #121212;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            color: #fff;
+            margin-top: 20px;
+        }
+        
+        #loader {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 6px solid #1e1e1e;
+            border-top: 6px solid #00ffc3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📥 Import Alamat & Ambil Kota / Provinsi / Kecamatan</h2>
+    <p>Nama header di isi "Alamat", kemudian isi dengan Alamat</p>
+
+    <input type="file" id="fileInput" accept=".xlsx" />
+    <button onclick="exportToExcel()">⬇️ Export ke Excel</button>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p id="progressText">Memproses alamat...</p>
+    </div>
+
+    <table id="alamatTable" class="display">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Alamat</th>
+                <th>Kota</th>
+                <th>Kecamatan</th>
+                <th>Provinsi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiKey = "AIzaSyBj3dEMVfxewVQ7jbull1Hb_fKOM-BmFr8";
+        let alamatData = [];
+        const cache = {};
+
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+
+        async function handleFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet, {
+                    header: 1
+                });
+
+                const rows = json.slice(1).filter(row => row[0]); // Hapus baris kosong
+                alamatData = [];
+
+                $('#loader').show();
+                document.getElementById("progressText").innerText = `Memproses 0 dari ${rows.length}...`;
+
+                await batchProcess(rows, 10, 1000);
+
+                $('#loader').hide();
+                tampilkanTabel(alamatData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function batchProcess(rows, batchSize = 10, delayMs = 1000) {
+            for (let i = 0; i < rows.length; i += batchSize) {
+                const batch = rows.slice(i, i + batchSize);
+
+                const batchResults = await Promise.all(
+                    batch.map(async(row, idx) => {
+                        const alamat = row[0];
+                        const wilayah = await ambilWilayahDariAlamat(alamat);
+                        return {
+                            no: i + idx + 1,
+                            alamat,
+                            kota: wilayah.kota,
+                            kecamatan: wilayah.kecamatan,
+                            provinsi: wilayah.provinsi
+                        };
+                    })
+                );
+
+                alamatData.push(...batchResults);
+                document.getElementById("progressText").innerText = `Memproses ${Math.min(i + batchSize, rows.length)} dari ${rows.length}...`;
+
+                if (i + batchSize < rows.length) {
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+        }
+
+        async function ambilWilayahDariAlamat(alamat) {
+            if (cache[alamat]) return cache[alamat];
+
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(alamat)}&key=${apiKey}`);
+                const data = await response.json();
+
+                if (data.status === "OK") {
+                    const components = data.results[0].address_components;
+
+                    const kota = cariKomponen(components, ["administrative_area_level_2", "locality"]);
+                    const kecamatan = cariKomponen(components, ["administrative_area_level_3", "sublocality"]);
+                    const provinsi = cariKomponen(components, ["administrative_area_level_1"]);
+
+                    const result = {
+                        kota: kota || "-",
+                        kecamatan: kecamatan || "-",
+                        provinsi: provinsi || "-"
+                    };
+
+                    cache[alamat] = result;
+                    return result;
+                } else {
+                    return {
+                        kota: "-",
+                        kecamatan: "-",
+                        provinsi: "-"
+                    };
+                }
+            } catch {
+                return {
+                    kota: "-",
+                    kecamatan: "-",
+                    provinsi: "-"
+                };
+            }
+        }
+
+        function cariKomponen(components, types) {
+            const item = components.find(c => c.types.some(t => types.includes(t)));
+            return item ? item.long_name : null;
+        }
+
+        function tampilkanTabel(data) {
+            $('#alamatTable').DataTable().clear().destroy();
+            const tbody = document.querySelector('#alamatTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.no}</td><td>${row.alamat}</td><td>${row.kota}</td><td>${row.kecamatan}</td><td>${row.provinsi}</td>`;
+                tbody.appendChild(tr);
+            });
+
+            $('#alamatTable').DataTable();
+        }
+
+        function exportToExcel() {
+            const wsData = [
+                ["No", "Alamat", "Kota", "Kecamatan", "Provinsi"],
+                ...alamatData.map(row => [row.no, row.alamat, row.kota, row.kecamatan, row.provinsi])
+            ];
+
+            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Alamat Wilayah");
+
+            XLSX.writeFile(workbook, "data_alamat_wilayah.xlsx");
+        }
+    </script>
+</body>
+
+</html>
