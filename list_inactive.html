@@ -52,20 +52,16 @@
     <div class="container">
         <h1 class="mt-5 mb-3">List Unit</h1>
 
-        <div class="container py-5">
+        <!-- <div class="container py-5">
             <div class="row">
-
-                <!-- Dropdown Select2 untuk Filter Kolom 1 -->
                 <div class="col-md-3 mb-4">
-                    <!-- <select id="filterDropdown1" class="form-control" style="width: 100%;" multiple></select> -->
+                    <select id="filterDropdown1" class="form-control" style="width: 100%;" multiple></select>
                 </div>
-
-                <!-- Dropdown Select2 untuk Filter Kolom 2 -->
                 <div class="col-md-3 mb-4">
-                    <!-- <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select> -->
+                    <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="table-responsive">
             <table id="dataTable" class="table" style="width:100%">
                 <thead>
@@ -133,59 +129,59 @@
             // });
         }
 
-        function populateDropdowns(data) {
-            const bodyRows = data.slice(1); // Skip headers
+        // function populateDropdowns(data) {
+        //     const bodyRows = data.slice(1); // Skip headers
 
-            // Populate dropdown for column ke-1
-            const dropdown1 = $("#filterDropdown1");
-            dropdown1.empty();
-            const column1Values = [...new Set(bodyRows.map(row => row[1]))];
-            column1Values.forEach(value => {
-                dropdown1.append(`<option value="${value}">${value}</option>`);
-            });
+        //     // Populate dropdown for column ke-1
+        //     const dropdown1 = $("#filterDropdown1");
+        //     dropdown1.empty();
+        //     const column1Values = [...new Set(bodyRows.map(row => row[1]))];
+        //     column1Values.forEach(value => {
+        //         dropdown1.append(`<option value="${value}">${value}</option>`);
+        //     });
 
-            // Populate dropdown for column ke-2
-            const dropdown2 = $("#filterDropdown2");
-            dropdown2.empty();
-            const column2Values = [...new Set(bodyRows.map(row => row[4]))];
-            column2Values.forEach(value => {
-                dropdown2.append(`<option value="${value}">${value}</option>`);
-            });
+        //     // Populate dropdown for column ke-2
+        //     const dropdown2 = $("#filterDropdown2");
+        //     dropdown2.empty();
+        //     const column2Values = [...new Set(bodyRows.map(row => row[4]))];
+        //     column2Values.forEach(value => {
+        //         dropdown2.append(`<option value="${value}">${value}</option>`);
+        //     });
 
-            // Initialize Select2 with multiple select for both dropdowns
-            dropdown1.select2({
-                placeholder: "Plate",
-                allowClear: true
-            });
-            dropdown2.select2({
-                placeholder: "Category",
-                allowClear: true
-            });
+        //     // Initialize Select2 with multiple select for both dropdowns
+        //     dropdown1.select2({
+        //         placeholder: "Plate",
+        //         allowClear: true
+        //     });
+        //     dropdown2.select2({
+        //         placeholder: "Category",
+        //         allowClear: true
+        //     });
 
-            // Event listener for column ke-1 filter
-            dropdown1.on('change', function() {
-                const selectedValues = $(this).val();
-                const dataTable = $('#dataTable').DataTable();
-                if (selectedValues && selectedValues.length > 0) {
-                    const searchValue = selectedValues.join('|');
-                    dataTable.column(0).search(searchValue, true, false).draw();
-                } else {
-                    dataTable.column(0).search('').draw();
-                }
-            });
+        //     // Event listener for column ke-1 filter
+        //     dropdown1.on('change', function() {
+        //         const selectedValues = $(this).val();
+        //         const dataTable = $('#dataTable').DataTable();
+        //         if (selectedValues && selectedValues.length > 0) {
+        //             const searchValue = selectedValues.join('|');
+        //             dataTable.column(0).search(searchValue, true, false).draw();
+        //         } else {
+        //             dataTable.column(0).search('').draw();
+        //         }
+        //     });
 
-            // Event listener for column ke-2 filter
-            dropdown2.on('change', function() {
-                const selectedValues = $(this).val();
-                const dataTable = $('#dataTable').DataTable();
-                if (selectedValues && selectedValues.length > 0) {
-                    const searchValue = selectedValues.join('|');
-                    dataTable.column(5).search(searchValue, true, false).draw();
-                } else {
-                    dataTable.column(5).search('').draw();
-                }
-            });
-        }
+        //     // Event listener for column ke-2 filter
+        //     dropdown2.on('change', function() {
+        //         const selectedValues = $(this).val();
+        //         const dataTable = $('#dataTable').DataTable();
+        //         if (selectedValues && selectedValues.length > 0) {
+        //             const searchValue = selectedValues.join('|');
+        //             dataTable.column(5).search(searchValue, true, false).draw();
+        //         } else {
+        //             dataTable.column(5).search('').draw();
+        //         }
+        //     });
+        // }
 
         // Fetch and display data on page load
         $(document).ready(() => {
