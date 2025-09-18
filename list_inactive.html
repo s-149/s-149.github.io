@@ -57,12 +57,12 @@
 
                 <!-- Dropdown Select2 untuk Filter Kolom 1 -->
                 <div class="col-md-3 mb-4">
-                    <select id="filterDropdown1" class="form-control" style="width: 100%;" multiple></select>
+                    <!-- <select id="filterDropdown1" class="form-control" style="width: 100%;" multiple></select> -->
                 </div>
 
                 <!-- Dropdown Select2 untuk Filter Kolom 2 -->
                 <div class="col-md-3 mb-4">
-                    <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select>
+                    <!-- <select id="filterDropdown2" class="form-control" style="width: 100%;" multiple></select> -->
                 </div>
             </div>
         </div>
@@ -118,19 +118,19 @@
             });
 
             // Initialize DataTable
-            $(document).ready(function() {
-                $('#dataTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    scrollX: true,
-                    scrollY: 300,
-                    // dom: 'lBfrtip',
-                    // buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-                    lengthMenu: [10, 25, 50, 100],
-                    pageLength: 10
-                });
-            });
+            // $(document).ready(function() {
+            //     $('#dataTable').DataTable({
+            //         paging: true,
+            //         searching: true,
+            //         ordering: true,
+            //         scrollX: true,
+            //         scrollY: 300,
+            //         // dom: 'lBfrtip',
+            //         // buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+            //         lengthMenu: [10, 25, 50, 100],
+            //         pageLength: 10
+            //     });
+            // });
         }
 
         function populateDropdowns(data) {
@@ -192,9 +192,9 @@
             fetchData();
 
             // Display current date
-            const today = new Date();
-            const currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-            $("#display").text(currentDate);
+            // const today = new Date();
+            // const currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+            // $("#display").text(currentDate);
         });
     </script>
 </body>
