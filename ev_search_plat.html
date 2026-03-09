@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Installment Logistics | Search</title>
+    <meta content="Search EV with Vehicle Number" name="description" />
+    <meta content="input, search, blitz, electric, mobility, molis, ev, EV" name="keywords" />
+    <meta name="author" content="Mr.S-149" />
+
+    <!-- Favicons -->
+    <link href="assets-blitz/img/logo/logo.jpg" rel="icon" />
+    <link href="assets-blitz/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link rel="icon" href="assets-blitz/img/logo/logo.jpg" type="image/jpeg">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(45deg, #edece6, #f7bc89);
+        }
+        
+        #data-container,
+        #data-container-2 {
+            display: none;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-container input {
+            height: 60px;
+            border-radius: 25px;
+            padding: 0 50px;
+            text-align: center;
+            line-height: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(45deg, #f1c40f, #e67e22);
+            background-size: 200% 200%;
+            color: #fff;
+            border: none;
+        }
+        
+        .search-container input:focus {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            outline: none;
+        }
+        
+        .search-container .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 30px;
+        }
+        
+        .search-container input:hover+.search-icon,
+        .search-container input:focus+.search-icon {
+            color: black;
+        }
+        
+        table td {
+            max-height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
+            vertical-align: middle;
+        }
+        
+        table th {
+            vertical-align: middle;
+            white-space: nowrap;
+            color: white;
+            background-color: black;
+        }
+        
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .marquee {
+            overflow: hidden;
+            /* Menyembunyikan bagian yang keluar dari batas */
+            white-space: nowrap;
+            /* Mencegah teks terputus */
+            display: inline-block;
+            /* Membuat elemen inline agar bisa diterapkan transform */
+        }
+        
+        .icon-container {
+            position: relative;
+            /* Mengatur posisi relatif untuk ikon */
+        }
+        
+        .waving-icon {
+            transition: transform 0.2s ease;
+            /* Transisi saat bergerak */
+        }
+        
+        @keyframes wave {
+            0% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(30deg);
+            }
+            /* Putar 30 derajat ke kanan */
+            50% {
+                transform: rotate(-30deg);
+            }
+            /* Putar 30 derajat ke kiri */
+            75% {
+                transform: rotate(15deg);
+            }
+            /* Putar sedikit ke kanan */
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">EV Installment</h2>
+        <h4 class="text-center mb-4">
+            <div class="icon-container" id="icon-container">
+                <img src="assets-blitz/images/hand.png" alt="Waving Hand" class="waving-icon" id="waving-icon" width="50">
+            </div>
+            <div class="marquee" id="marquee"></div>
+        </h4>
+        <div class="mb-3 search-container">
+            <input type="text" id="search-input" class="form-control" placeholder="Search Vehicle Number..." required autofocus>
+            <i class="bi bi-search search-icon"></i>
+        </div><br><br>
+
+        <div id="data-container">
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Details
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tbody id="table-body"></tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Transaction
+                    </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr style="background-color: silver;">
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body-2"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQh8SQi59GPUx6_4GajeQf3h_MwIGglauGbep0uPcU9x7g0eNxFqnTe6yAs1SUhrKzunADM0MFfOXAo/pub?gid=0&single=true&output=csv',
+                dataType: 'text',
+                success: function(data) {
+                    processData(data);
+                }
+            });
+
+            let allRows = [];
+            let headers = [];
+
+            function processData(data) {
+                var rows = data.split('\n');
+                headers = rows[0].split(',');
+
+                // headers.forEach(function(header, index) {
+                //     // if (index < 7) {
+                //     //     $('#table-header').append('<th>' + header + '</th>');
+                //     // }
+                //     // if (index >= 7) {
+                //     //     $('#table-header-2').append('<th>' + header + '</th>');
+                //     // }
+                // });
+
+                for (var i = 1; i < rows.length; i++) {
+                    var row = rows[i].split(',');
+                    if (row.length > 1) {
+                        allRows.push(row);
+                    }
+                }
+
+                $('.search-icon').on('click', function() {
+                    var searchTerm = $('#search-input').val().trim();
+
+                    // Cek apakah input kosong
+                    if (searchTerm === '') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oops...',
+                            text: 'Form pencarian tidak boleh kosong!',
+                            confirmButtonText: 'Oke'
+                        });
+                        return; // Stop jika input kosong
+                    }
+
+                    var matchFound = false; // Flag untuk cek apakah data cocok ditemukan
+
+                    $('#table-body').empty();
+                    // $('#table-body-2').empty();
+                    $('#data-container').hide();
+                    // $('#data-container-2').hide();
+
+                    allRows.forEach(function(row) {
+                        if (row.some(cell => cell === searchTerm)) {
+                            matchFound = true; // Tandai bahwa ada kecocokan
+
+                            var tableRow = '';
+                            for (var index = 0; index < 16; index++) {
+                                tableRow += '<tr><th style="background-color: black;">' + headers[index] + '</th><td>' + (row[index] || '') + '</td></tr>';
+                            }
+                            $('#table-body').append(tableRow);
+
+                            // var tableRow2 = '';
+                            // for (var index = 7; index < row.length; index++) {
+                            //     tableRow2 += '<tr><th style="background-color: black;">' + headers[index] + '</th><td>' + (row[index] || '') + '</td></tr>';
+                            // }
+                            // $('#table-body-2').append(tableRow2);
+                        }
+                    });
+
+                    // Jika tidak ada data yang cocok, tampilkan alert
+                    if (!matchFound) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hemzz,, data tidak ditemukan',
+                            text: 'Tidak ada hasil pencarian yang cocok dengan "' + searchTerm + '"',
+                            confirmButtonText: 'Oke'
+                        });
+                    } else {
+                        // Jika cocok, munculkan SweetAlert sebelum menampilkan data
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Hore,,, data ditemukan!',
+                            text: 'Menampilkan hasil pencarian untuk "' + searchTerm + '"',
+                            confirmButtonText: 'Tampilkan Data'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $('#data-container').show();
+                                $('#data-container-2').show();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        const text = "hello users, welcome back ....."; // Teks yang ingin ditampilkan
+        const marquee = document.getElementById("marquee"); // Mengambil elemen marquee
+        let index = 0; // Indeks untuk melacak karakter yang ditampilkan
+
+        function typeText() {
+            if (index < text.length) {
+                marquee.innerHTML += text.charAt(index); // Menambahkan karakter ke elemen marquee
+                index++; // Meningkatkan indeks
+                setTimeout(typeText, 300); // Mengatur jeda 200ms sebelum karakter berikutnya ditampilkan
+            }
+        }
+        // Memulai fungsi typeText setelah halaman dimuat
+        window.onload = typeText;
+
+        const iconContainer = document.getElementById("icon-container");
+        const wavingIcon = document.getElementById("waving-icon");
+
+        iconContainer.addEventListener("mouseenter", () => {
+            wavingIcon.style.transform = "translateY(-10px)"; // Menggerakkan ikon ke atas
+            wavingIcon.style.animation = "wave 0.6s infinite"; // Menambahkan animasi gelombang
+        });
+
+        iconContainer.addEventListener("mouseleave", () => {
+            wavingIcon.style.transform = "translateY(0)"; // Mengembalikan ikon ke posisi semula
+            wavingIcon.style.animation = ""; // Menghentikan animasi gelombang
+        });
+    </script>
+</body>
+
+</html>
