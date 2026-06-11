@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Inspector Pro</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #0b1020;
+            color: #e5e7eb;
+            font-family: Arial, sans-serif
+        }
+        
+        header {
+            padding: 16px;
+            background: #111827
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            padding: 12px
+        }
+        
+        .card {
+            background: #111827;
+            border-radius: 12px;
+            padding: 12px
+        }
+        
+        h3 {
+            margin: 0 0 8px
+        }
+        
+        #map {
+            height: 450px;
+            border-radius: 12px
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            max-height: 250px;
+            overflow: auto
+        }
+        
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🚀 Network Inspector Pro</h1>
+        <button onclick="runScan()">Scan Device</button>
+        <button onclick="exportData()">Export JSON</button>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Public Network</h3>
+            <div id="net"></div>
+        </div>
+        <div class="card">
+            <h3>Device</h3>
+            <div id="device"></div>
+        </div>
+        <div class="card">
+            <h3>Connection</h3>
+            <div id="conn"></div>
+        </div>
+        <div class="card">
+            <h3>Fingerprint</h3>
+            <div id="fp"></div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card" style="grid-column:1/-1">
+            <h3>Map</h3>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>History</h3><pre id="history"></pre></div>
+        <div class="card">
+            <h3>Logs</h3><pre id="logs"></pre></div>
+    </div>
+
+    <script>
+        let report = {};
+        let map = L.map('map').setView([-6.6, 106.8], 10);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let markers = [];
+
+        function log(t) {
+            document.getElementById('logs').textContent += new Date().toLocaleTimeString() + " " + t + "\\n";
+        }
+
+        async function sha256(str) {
+            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+            return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, "0")).join("");
+        }
+
+        async function runScan() {
+            log("Scanning...");
+            const geo = await fetch("https://ipapi.co/json/").then(r => r.json());
+
+            const device = {
+                ua: navigator.userAgent,
+                lang: navigator.language,
+                platform: navigator.platform,
+                cores: navigator.hardwareConcurrency,
+                memory: navigator.deviceMemory,
+                screen: `${screen.width}x${screen.height}`,
+                tz: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+
+            const conn = navigator.connection ? {
+                type: navigator.connection.effectiveType,
+                downlink: navigator.connection.downlink,
+                rtt: navigator.connection.rtt
+            } : {};
+
+            const fp = await sha256(JSON.stringify(device));
+
+            report = {
+                timestamp: new Date().toISOString(),
+                geo,
+                device,
+                conn,
+                fp
+            };
+
+            document.getElementById("net").innerHTML = `
+ IP: ${geo.ip||"-"}<br>
+ ISP: ${geo.org||"-"}<br>
+ City: ${geo.city||"-"}<br>
+ Region: ${geo.region||"-"}<br>
+ Country: ${geo.country_name||"-"}`;
+
+            document.getElementById("device").innerHTML = `
+ Platform: ${device.platform}<br>
+ CPU: ${device.cores}<br>
+ RAM: ${device.memory||"?"} GB<br>
+ Screen: ${device.screen}<br>
+ TZ: ${device.tz}`;
+
+            document.getElementById("conn").innerHTML = `
+ Type: ${conn.type||"-"}<br>
+ Downlink: ${conn.downlink||"-"} Mbps<br>
+ RTT: ${conn.rtt||"-"} ms`;
+
+            document.getElementById("fp").textContent = fp;
+
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            if (geo.latitude && geo.longitude) {
+                const m = L.marker([geo.latitude, geo.longitude]).addTo(map)
+                    .bindPopup("GeoIP Location");
+                markers.push(m);
+                map.setView([geo.latitude, geo.longitude], 12);
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const m = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map)
+                        .bindPopup("GPS Location");
+                    markers.push(m);
+                });
+            }
+
+            let hist = JSON.parse(localStorage.getItem("ipHistory") || "[]");
+            hist.push({
+                ip: geo.ip,
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem("ipHistory", JSON.stringify(hist));
+            document.getElementById("history").textContent = JSON.stringify(hist, null, 2);
+
+            log("Scan complete");
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(report, null, 2)], {
+                type: "application/json"
+            });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "network-report.json";
+            a.click();
+        }
+
+        window.addEventListener("online", () => log("Internet Connected"));
+        window.addEventListener("offline", () => log("Internet Disconnected"));
+    </script>
+</body>
+
+</html>
