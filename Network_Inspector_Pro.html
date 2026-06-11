@@ -3,43 +3,64 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Inspector Pro</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Network Inspector Pro GPS Edition</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         body {
             margin: 0;
-            background: #0b1020;
-            color: #e5e7eb;
-            font-family: Arial, sans-serif
+            background: #0a0f1f;
+            color: #e2e8f0;
+            font-family: Segoe UI, Arial, sans-serif
         }
         
         header {
-            padding: 16px;
-            background: #111827
+            padding: 15px;
+            background: #324265;
+            position: sticky;
+            top: 0
+        }
+        
+        h1 {
+            margin: 0
+        }
+        
+        .container {
+            padding: 15px
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 12px;
-            padding: 12px
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px
         }
         
         .card {
             background: #111827;
             border-radius: 12px;
-            padding: 12px
+            padding: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, .3)
         }
         
-        h3 {
-            margin: 0 0 8px
+        .value {
+            font-weight: bold;
+            color: #22c55e
         }
         
         #map {
-            height: 450px;
+            height: 500px;
             border-radius: 12px
+        }
+        
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 8px
         }
         
         pre {
@@ -48,163 +69,316 @@
             overflow: auto
         }
         
-        button {
-            padding: 10px 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer
+        .small {
+            font-size: 13px;
+            color: #94a3b8
         }
     </style>
 </head>
 
 <body>
+
     <header>
-        <h1>🚀 Network Inspector Pro</h1>
+        <h1>🚀 Network Inspector Pro - GPS Edition</h1>
+        <p class="small">GPS Priority → Fallback GeoIP</p>
         <button onclick="runScan()">Scan Device</button>
-        <button onclick="exportData()">Export JSON</button>
+        <button onclick="exportReport()">Export JSON</button>
     </header>
 
-    <div class="grid">
-        <div class="card">
-            <h3>Public Network</h3>
-            <div id="net"></div>
-        </div>
-        <div class="card">
-            <h3>Device</h3>
-            <div id="device"></div>
-        </div>
-        <div class="card">
-            <h3>Connection</h3>
-            <div id="conn"></div>
-        </div>
-        <div class="card">
-            <h3>Fingerprint</h3>
-            <div id="fp"></div>
-        </div>
-    </div>
+    <div class="container">
 
-    <div class="grid">
-        <div class="card" style="grid-column:1/-1">
-            <h3>Map</h3>
+        <div class="grid">
+            <div class="card">
+                <h3>🌐 Network</h3>
+                <div id="network">-</div>
+            </div>
+            <div class="card">
+                <h3>📍 Location Source</h3>
+                <div id="source">-</div>
+            </div>
+            <div class="card">
+                <h3>💻 Device</h3>
+                <div id="device">-</div>
+            </div>
+            <div class="card">
+                <h3>🔐 Fingerprint</h3>
+                <div id="fingerprint">-</div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <h3>🗺️ Map</h3>
             <div id="map"></div>
         </div>
-    </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>History</h3><pre id="history"></pre></div>
-        <div class="card">
-            <h3>Logs</h3><pre id="logs"></pre></div>
+        <br>
+
+        <div class="grid">
+            <div class="card">
+                <h3>📌 GPS Coordinates</h3>
+                <pre id="gpsData">No Data</pre>
+            </div>
+
+            <div class="card">
+                <h3>📌 GeoIP Coordinates</h3>
+                <pre id="geoData">No Data</pre>
+            </div>
+
+            <div class="card">
+                <h3>📏 GPS ↔ GeoIP Distance</h3>
+                <div id="distance">-</div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="grid">
+            <div class="card">
+                <h3>📜 IP History</h3>
+                <pre id="history"></pre>
+            </div>
+
+            <div class="card">
+                <h3>📝 Logs</h3>
+                <pre id="logs"></pre>
+            </div>
+        </div>
+
     </div>
 
     <script>
         let report = {};
-        let map = L.map('map').setView([-6.6, 106.8], 10);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        let markers = [];
+        let gpsMarker, geoMarker, gpsCircle;
 
-        function log(t) {
-            document.getElementById('logs').textContent += new Date().toLocaleTimeString() + " " + t + "\\n";
+        const map = L.map('map').setView([-6.6, 106.8], 10);
+
+        L.tileLayer(
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }
+        ).addTo(map);
+
+        function log(msg) {
+            document.getElementById('logs').textContent +=
+                `[${new Date().toLocaleTimeString()}] ${msg}\n`;
         }
 
-        async function sha256(str) {
-            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-            return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, "0")).join("");
+        async function sha256(text) {
+            const buffer = await crypto.subtle.digest(
+                'SHA-256',
+                new TextEncoder().encode(text)
+            );
+            return [...new Uint8Array(buffer)]
+                .map(x => x.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        function getGPS() {
+            return new Promise((resolve, reject) => {
+
+                if (!navigator.geolocation) {
+                    reject("Geolocation not supported");
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    pos => resolve(pos),
+                    err => reject(err), {
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    }
+                );
+
+            });
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+
+            const R = 6371;
+
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) *
+                Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
         }
 
         async function runScan() {
-            log("Scanning...");
-            const geo = await fetch("https://ipapi.co/json/").then(r => r.json());
+
+            log("Starting scan...");
+
+            const geo = await fetch("https://ipapi.co/json/")
+                .then(r => r.json());
+
+            let gps = null;
+            let source = "GeoIP";
+
+            try {
+                gps = await getGPS();
+                source = "GPS";
+                log("GPS permission granted");
+            } catch (e) {
+                log("GPS unavailable / denied");
+            }
 
             const device = {
-                ua: navigator.userAgent,
-                lang: navigator.language,
+                userAgent: navigator.userAgent,
                 platform: navigator.platform,
+                language: navigator.language,
                 cores: navigator.hardwareConcurrency,
-                memory: navigator.deviceMemory,
+                memory: navigator.deviceMemory || "Unknown",
                 screen: `${screen.width}x${screen.height}`,
-                tz: Intl.DateTimeFormat().resolvedOptions().timeZone
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
             };
 
-            const conn = navigator.connection ? {
-                type: navigator.connection.effectiveType,
-                downlink: navigator.connection.downlink,
-                rtt: navigator.connection.rtt
-            } : {};
-
-            const fp = await sha256(JSON.stringify(device));
+            const fingerprint = await sha256(JSON.stringify(device));
 
             report = {
                 timestamp: new Date().toISOString(),
                 geo,
+                gps: gps ? {
+                    latitude: gps.coords.latitude,
+                    longitude: gps.coords.longitude,
+                    accuracy: gps.coords.accuracy
+                } : null,
                 device,
-                conn,
-                fp
+                fingerprint
             };
 
-            document.getElementById("net").innerHTML = `
- IP: ${geo.ip||"-"}<br>
- ISP: ${geo.org||"-"}<br>
- City: ${geo.city||"-"}<br>
- Region: ${geo.region||"-"}<br>
- Country: ${geo.country_name||"-"}`;
+            document.getElementById("network").innerHTML = `
+ <b>IP</b>: ${geo.ip}<br>
+ <b>ISP</b>: ${geo.org}<br>
+ <b>City</b>: ${geo.city}<br>
+ <b>Region</b>: ${geo.region}<br>
+ <b>Country</b>: ${geo.country_name}
+ `;
+
+            document.getElementById("source").innerHTML = `
+ <span class="value">${source}</span><br>
+ ${source==="GPS" ? "Using actual device location" : "Using GeoIP fallback"}
+ `;
 
             document.getElementById("device").innerHTML = `
- Platform: ${device.platform}<br>
  CPU: ${device.cores}<br>
- RAM: ${device.memory||"?"} GB<br>
+ RAM: ${device.memory} GB<br>
  Screen: ${device.screen}<br>
- TZ: ${device.tz}`;
+ TZ: ${device.timezone}
+ `;
 
-            document.getElementById("conn").innerHTML = `
- Type: ${conn.type||"-"}<br>
- Downlink: ${conn.downlink||"-"} Mbps<br>
- RTT: ${conn.rtt||"-"} ms`;
+            document.getElementById("fingerprint").textContent = fingerprint;
 
-            document.getElementById("fp").textContent = fp;
+            if (gpsMarker) map.removeLayer(gpsMarker);
+            if (geoMarker) map.removeLayer(geoMarker);
+            if (gpsCircle) map.removeLayer(gpsCircle);
 
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+            document.getElementById("geoData").textContent = JSON.stringify({
+                latitude: geo.latitude,
+                longitude: geo.longitude
+            }, null, 2);
 
-            if (geo.latitude && geo.longitude) {
-                const m = L.marker([geo.latitude, geo.longitude]).addTo(map)
-                    .bindPopup("GeoIP Location");
-                markers.push(m);
+            geoMarker = L.marker([geo.latitude, geo.longitude])
+                .addTo(map)
+                .bindPopup("🔴 GeoIP Estimated Location");
+
+            let distanceText = "GPS not available";
+
+            if (gps) {
+
+                const lat = gps.coords.latitude;
+                const lng = gps.coords.longitude;
+                const acc = gps.coords.accuracy;
+
+                document.getElementById("gpsData").textContent = JSON.stringify({
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy_meters: acc
+                }, null, 2);
+
+                gpsMarker = L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup("🟢 GPS Actual Location");
+
+                gpsCircle = L.circle([lat, lng], {
+                    radius: acc
+                }).addTo(map);
+
+                map.setView([lat, lng], 15);
+
+                const dist = haversine(
+                    lat, lng,
+                    geo.latitude, geo.longitude
+                );
+
+                distanceText = dist.toFixed(2) + " KM";
+
+            } else {
+
+                document.getElementById("gpsData").textContent =
+                    "Permission denied / unavailable";
+
                 map.setView([geo.latitude, geo.longitude], 12);
+
             }
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const m = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map)
-                        .bindPopup("GPS Location");
-                    markers.push(m);
-                });
-            }
+            document.getElementById("distance").innerHTML =
+                `<span class="value">${distanceText}</span>`;
 
-            let hist = JSON.parse(localStorage.getItem("ipHistory") || "[]");
-            hist.push({
+            let history = JSON.parse(
+                localStorage.getItem("ipHistory") || "[]"
+            );
+
+            history.push({
                 ip: geo.ip,
                 time: new Date().toLocaleString()
             });
-            localStorage.setItem("ipHistory", JSON.stringify(hist));
-            document.getElementById("history").textContent = JSON.stringify(hist, null, 2);
+
+            localStorage.setItem(
+                "ipHistory",
+                JSON.stringify(history)
+            );
+
+            document.getElementById("history").textContent =
+                JSON.stringify(history, null, 2);
 
             log("Scan complete");
+
         }
 
-        function exportData() {
-            const blob = new Blob([JSON.stringify(report, null, 2)], {
-                type: "application/json"
-            });
+        function exportReport() {
+
+            const blob = new Blob(
+                [JSON.stringify(report, null, 2)], {
+                    type: "application/json"
+                }
+            );
+
             const a = document.createElement("a");
+
             a.href = URL.createObjectURL(blob);
-            a.download = "network-report.json";
+            a.download = "network-inspector-report.json";
             a.click();
+
+            log("Report exported");
         }
 
-        window.addEventListener("online", () => log("Internet Connected"));
-        window.addEventListener("offline", () => log("Internet Disconnected"));
+        window.addEventListener(
+            "online",
+            () => log("Internet Connected")
+        );
+
+        window.addEventListener(
+            "offline",
+            () => log("Internet Disconnected")
+        );
     </script>
+
 </body>
 
 </html>
