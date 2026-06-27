@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order List Sby</title>
+    <title>Order List Merapi</title>
     <meta content="List AWB" name="description" />
     <meta content="inv,INV,awb,AWB" name="keywords" />
     <meta name="author" content="Mr.S-149" />
@@ -86,11 +86,15 @@
         <!-- Ini akan menampilkan jumlah data -->
         <p id="checkedCount">Jumlah AWB yang dipilih: 0</p>
         <!-- Ini akan menampilkan jumlah data yang dicek secara realtime -->
-
-        <div class="mb-3">
+        <span style="color: red;" id="resultCount"></span>
+        <!-- <div class="mb-3">
             <label for="nameSelect" class="form-label">Nama:</label>
             <select id="nameSelect" name="nameSelect" class="form-control">
             </select>
+        </div> -->
+        <div class="mb-3">
+            <label for="nameSelect" class="form-label">Nama:</label>
+            <input type="text" id="nameSelect" name="nameSelect" class="form-control" placeholder="Masukkan Nama...">
         </div>
 
         <button type="submit" class="btn btn-primary" style="float: right;">Kirim Data ke WhatsApp</button><br><br>
@@ -99,7 +103,7 @@
     <script>
         let selectedData = [];
         const sheetURLListData = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd3XC6z3hWbJZqoxK7dfhjpzwN3jBpCIxzzoNo8FCYn38bfeM0zVKIrLFqDcAW5goJ6y0gfR62Rmz_/pub?gid=133105485&single=true&output=csv";
-        const sheetURLSelectData = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd3XC6z3hWbJZqoxK7dfhjpzwN3jBpCIxzzoNo8FCYn38bfeM0zVKIrLFqDcAW5goJ6y0gfR62Rmz_/pub?gid=0&single=true&output=csv";
+        // const sheetURLSelectData = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd3XC6z3hWbJZqoxK7dfhjpzwN3jBpCIxzzoNo8FCYn38bfeM0zVKIrLFqDcAW5goJ6y0gfR62Rmz_/pub?gid=0&single=true&output=csv";
 
         // Fungsi untuk memuat list data (draggable items)
         function loadListData() {
@@ -207,19 +211,55 @@
 
             const name = document.getElementById("nameSelect").value;
 
-            const message = `Nama: ${name}\nList AWB:\n${selectedData.join(',\n')}`;
-            const encodedMessage = encodeURIComponent(message);
+            console.log(selectedData);
+            dataString = selectedData.join(', ');
 
-            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            var pattern = /INV.{13}/g; // Regex untuk mencari "INV" beserta 13 karakter setelahnya
+            var matches = dataString.match(pattern); // Mencari semua kemunculan yang sesuai dengan pola
 
-            let whatsappURL;
-            if (isMobile) {
-                whatsappURL = `whatsapp://send?text=${encodedMessage}`;
+            var hasil = [];
+            if (matches) {
+                hasil = matches.map(function(match) {
+                    return match; // Tambahkan koma nanti, bukan di sini
+                });
+
+                // Gabungkan hasil dengan koma di antara, tapi tidak di akhir
+                var hasilString = hasil.join(', ');
+
+                const message = `Nama: ${name}\nList AWB:\n${hasilString}`;
+                const encodedMessage = encodeURIComponent(message);
+
+                const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                let whatsappURL;
+                if (isMobile) {
+                    whatsappURL = `whatsapp://send?text=${encodedMessage}`;
+                } else {
+                    whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+                }
+
+                window.open(whatsappURL, '_blank');
             } else {
-                whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+                hasilString = "Tidak ada awb yg dipilih, silahkan pilih awb terlebih dahulu...";
+                document.getElementById("resultCount").innerText = hasilString;
             }
 
-            window.open(whatsappURL, '_blank');
+
+            // console.log(hasilString);
+
+            // const message = `Nama: ${name}\nList AWB:\n${hasilString}`;
+            // const encodedMessage = encodeURIComponent(message);
+
+            // const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // let whatsappURL;
+            // if (isMobile) {
+            //     whatsappURL = `whatsapp://send?text=${encodedMessage}`;
+            // } else {
+            //     whatsappURL = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+            // }
+
+            // window.open(whatsappURL, '_blank');
         });
 
         document.getElementById("searchInput").addEventListener("input", function() {
