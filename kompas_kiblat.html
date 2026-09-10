@@ -791,126 +791,180 @@
     |--------------------------------------------------------------------------
     */
 
+    // function handleOrientation(event) {
+
+    //     let heading = null;
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | iOS
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     if (
+    //         event.webkitCompassHeading !== undefined &&
+    //         event.webkitCompassHeading !== null
+    //     ) {
+
+    //         heading =
+    //             event.webkitCompassHeading;
+
+    //     }
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Android / Other browsers
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     else if (
+    //         event.absolute &&
+    //         event.alpha !== null
+    //     ) {
+
+    //         heading =
+    //             360 - event.alpha;
+
+    //     }
+
+    //     else if (event.alpha !== null) {
+
+    //         heading =
+    //             360 - event.alpha;
+
+    //     }
+
+
+    //     if (heading === null) {
+
+    //         setStatus(
+    //             "Compass sensor is not available on this device.",
+    //             "error"
+    //         );
+
+    //         return;
+
+    //     }
+
+
+    //     heading =
+    //         normalizeDegree(heading);
+
+
+    //     deviceHeading =
+    //         heading;
+
+
+    //     deviceHeadingElement.innerText =
+    //         `${Math.round(heading)}°`;
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | ROTATE COMPASS
+    //     |--------------------------------------------------------------------------
+    //     |
+    //     | The compass itself rotates opposite to the phone heading.
+    //     |
+    //     */
+
+    //     compass.style.transform =
+    //         `rotate(${-heading}deg)`;
+
+    // }
+
+
+    // /*
+    // |--------------------------------------------------------------------------
+    // | HELPERS
+    // |--------------------------------------------------------------------------
+    // */
+
+    // function toRadians(degrees) {
+
+    //     return degrees * Math.PI / 180;
+
+    // }
+
+
+    // function toDegrees(radians) {
+
+    //     return radians * 180 / Math.PI;
+
+    // }
+
+
+    // function normalizeDegree(degree) {
+
+    //     return (degree + 360) % 360;
+
+    // }
+
+
+    // function setStatus(message, type = "") {
+
+    //     statusElement.innerText =
+    //         message;
+
+    //     statusElement.className =
+    //         `status ${type}`;
+
+    // }
+
     function handleOrientation(event) {
 
-        let heading = null;
+    console.log("DEVICE ORIENTATION EVENT:", event);
+
+    const debugData = {
+        alpha: event.alpha,
+        beta: event.beta,
+        gamma: event.gamma,
+        absolute: event.absolute,
+        webkitCompassHeading: event.webkitCompassHeading
+    };
+
+    console.log(debugData);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | iOS
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            event.webkitCompassHeading !== undefined &&
-            event.webkitCompassHeading !== null
-        ) {
-
-            heading =
-                event.webkitCompassHeading;
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Android / Other browsers
-        |--------------------------------------------------------------------------
-        */
-
-        else if (
-            event.absolute &&
-            event.alpha !== null
-        ) {
-
-            heading =
-                360 - event.alpha;
-
-        }
-
-        else if (event.alpha !== null) {
-
-            heading =
-                360 - event.alpha;
-
-        }
+    let heading = null;
 
 
-        if (heading === null) {
+    if (
+        event.webkitCompassHeading !== undefined &&
+        event.webkitCompassHeading !== null
+    ) {
 
-            setStatus(
-                "Compass sensor is not available on this device.",
-                "error"
-            );
+        heading = event.webkitCompassHeading;
 
-            return;
+    }
 
-        }
+    else if (
+        event.alpha !== null &&
+        event.alpha !== undefined
+    ) {
 
+        heading = 360 - event.alpha;
+
+    }
+
+
+    if (heading !== null) {
 
         heading =
-            normalizeDegree(heading);
-
-
-        deviceHeading =
-            heading;
-
+            (heading + 360) % 360;
 
         deviceHeadingElement.innerText =
             `${Math.round(heading)}°`;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ROTATE COMPASS
-        |--------------------------------------------------------------------------
-        |
-        | The compass itself rotates opposite to the phone heading.
-        |
-        */
-
-        compass.style.transform =
-            `rotate(${-heading}deg)`;
+        console.log(
+            "CALCULATED HEADING:",
+            heading
+        );
 
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | HELPERS
-    |--------------------------------------------------------------------------
-    */
-
-    function toRadians(degrees) {
-
-        return degrees * Math.PI / 180;
-
-    }
-
-
-    function toDegrees(radians) {
-
-        return radians * 180 / Math.PI;
-
-    }
-
-
-    function normalizeDegree(degree) {
-
-        return (degree + 360) % 360;
-
-    }
-
-
-    function setStatus(message, type = "") {
-
-        statusElement.innerText =
-            message;
-
-        statusElement.className =
-            `status ${type}`;
-
-    }
+}
 
 </script>
 
