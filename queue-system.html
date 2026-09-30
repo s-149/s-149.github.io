@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -10,7 +11,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Nomor Antrian</title>
+    <title>Cek Nomor Antrian</title>
 
 
     <!-- SweetAlert2 -->
@@ -23,12 +24,17 @@
             box-sizing: border-box;
         }
 
+
         body {
+
             margin: 0;
+
             min-height: 100vh;
 
             display: flex;
+
             justify-content: center;
+
             align-items: center;
 
             font-family: Arial, sans-serif;
@@ -45,6 +51,7 @@
         .container {
 
             width: 90%;
+
             max-width: 420px;
 
             padding: 30px;
@@ -54,7 +61,8 @@
             border-radius: 20px;
 
             box-shadow:
-                0 20px 50px rgba(0,0,0,0.25);
+                0 20px 50px
+                rgba(0,0,0,0.25);
 
             text-align: center;
         }
@@ -124,6 +132,7 @@
             font-weight: bold;
 
             cursor: pointer;
+
         }
 
 
@@ -141,7 +150,6 @@
             font-size: 13px;
 
             color: #999;
-
         }
 
     </style>
@@ -154,13 +162,13 @@
 
 <div class="container">
 
-    <h1>🎫 Nomor Antrian</h1>
+    <h1>🎫 Cek Nomor Antrian</h1>
 
 
     <div class="description">
 
         Masukkan nomor WhatsApp kamu
-        untuk mengambil nomor antrian.
+        untuk melihat nomor antrian hari ini.
 
     </div>
 
@@ -173,9 +181,9 @@
     >
 
 
-    <button onclick="startQueue()">
+    <button onclick="checkQueue()">
 
-        Ambil Nomor Antrian
+        🔍 Cek Nomor Antrian
 
     </button>
 
@@ -196,10 +204,6 @@
 // CONFIG
 // =====================================================
 
-const LARK_FORM_URL =
-    "https://jsgdrhutjuri.sg.larksuite.com/share/base/form/shrlg44k2OnzIHbUn3AEqiQ7C7g";
-
-
 const APPS_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbw0XlzBFlH88etCJXMG5PCXGloan7sPV5-PHrWO623RXC2qL6sK2d8Hnesbz-GEH7M/exec";
 
@@ -214,13 +218,16 @@ function getToday() {
 
     const now = new Date();
 
+
     const year =
         now.getFullYear();
+
 
     const month =
         String(
             now.getMonth() + 1
         ).padStart(2, "0");
+
 
     const day =
         String(
@@ -273,14 +280,14 @@ function normalizePhone(phone) {
 // =====================================================
 
 document.getElementById("todayText").innerText =
-    "Tanggal antrian: " + getToday();
+    "Tanggal hari ini: " + getToday();
 
 
 // =====================================================
-// START QUEUE
+// CHECK QUEUE
 // =====================================================
 
-function startQueue() {
+async function checkQueue() {
 
     const input =
         document.getElementById("phone");
@@ -289,6 +296,10 @@ function startQueue() {
     const rawPhone =
         input.value.trim();
 
+
+    // ================================================
+    // VALIDASI INPUT
+    // ================================================
 
     if (!rawPhone) {
 
@@ -307,11 +318,18 @@ function startQueue() {
     }
 
 
+    // ================================================
+    // NORMALIZE PHONE
+    // ================================================
+
     const phone =
         normalizePhone(rawPhone);
 
 
-    // Validasi sederhana
+    // ================================================
+    // VALIDASI NOMOR
+    // ================================================
+
     if (
         !/^62\d{8,15}$/.test(phone)
     ) {
@@ -323,7 +341,7 @@ function startQueue() {
             title: "Nomor tidak valid",
 
             text:
-                "Contoh nomor yang benar: 081234567890"
+                "Contoh: 081234567890"
 
         });
 
@@ -331,97 +349,39 @@ function startQueue() {
     }
 
 
-    const today =
-        getToday();
-
-
-    // =================================================
-    // SAVE LOCAL STORAGE
-    // =================================================
-
-    localStorage.setItem(
-        "queue_phone",
-        phone
-    );
-
-    localStorage.setItem(
-        "queue_date",
-        today
-    );
-
-
-    // =================================================
-    // OPEN LARK FORM
-    // =================================================
-
-    const fieldName =
-        "Nomor Telepon";
-
-
-    const larkUrl =
-        LARK_FORM_URL +
-        "?prefill_" +
-        encodeURIComponent(fieldName) +
-        "=" +
-        encodeURIComponent(phone);
-
-
-    window.location.href =
-        larkUrl;
-
-}
-
-
-// =====================================================
-// CHECK QUEUE
-// =====================================================
-
-async function checkQueue() {
-
-    const phone =
-        localStorage.getItem(
-            "queue_phone"
-        );
-
-
-    const savedDate =
-        localStorage.getItem(
-            "queue_date"
-        );
-
-
-    if (!phone) {
-        return;
-    }
-
-
-    // =================================================
-    // IMPORTANT
-    // Kalau hari berubah, reset session lama
-    // =================================================
+    // ================================================
+    // TODAY
+    // ================================================
 
     const today =
         getToday();
 
 
-    if (savedDate !== today) {
+    // ================================================
+    // SHOW LOADING
+    // ================================================
 
-        localStorage.removeItem(
-            "queue_phone"
-        );
+    Swal.fire({
 
-        localStorage.removeItem(
-            "queue_date"
-        );
+        title: "Mencari data...",
 
-        return;
+        text:
+            "Mohon tunggu sebentar.",
 
-    }
+        allowOutsideClick: false,
+
+        didOpen: () => {
+
+            Swal.showLoading();
+
+        }
+
+    });
 
 
-    // =================================================
-    // LOOKUP GOOGLE SHEET
-    // =================================================
+    // ================================================
+    // BUILD REQUEST
+    // ================================================
 
     const url =
         APPS_SCRIPT_URL +
@@ -431,10 +391,29 @@ async function checkQueue() {
         encodeURIComponent(today);
 
 
+    console.log(
+        "Lookup URL:",
+        url
+    );
+
+
     try {
+
+        // ============================================
+        // REQUEST GOOGLE APPS SCRIPT
+        // ============================================
 
         const response =
             await fetch(url);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
 
 
         const result =
@@ -442,58 +421,57 @@ async function checkQueue() {
 
 
         console.log(
-            "Queue response:",
+            "Response:",
             result
         );
 
 
-        // =================================================
+        // ============================================
         // FOUND
-        // =================================================
+        // ============================================
 
         if (
             result.success === true &&
             result.status === "FOUND"
         ) {
 
-            const queue =
-                result.data.no_antrian;
-
-
-            const nama =
-                result.data.nama || "";
+            const data =
+                result.data;
 
 
             Swal.fire({
 
                 icon: "success",
 
-                title: "🎫 Nomor Antrian Kamu",
+                title:
+                    "🎫 Nomor Antrian Kamu",
 
                 html: `
 
                     <div style="
-                        font-size:14px;
+                        margin-top:10px;
                         color:#777;
-                        margin-bottom:10px;
+                        font-size:14px;
                     ">
-                        ${nama}
+                        ${data.nama || ""}
                     </div>
 
+
                     <div style="
-                        font-size:52px;
+                        margin:20px 0;
+                        font-size:56px;
                         font-weight:bold;
                         color:#667eea;
-                        margin:15px 0;
                     ">
-                        ${queue}
+                        ${data.no_antrian}
                     </div>
+
 
                     <div style="
                         font-size:14px;
                         color:#777;
                     ">
-                        ${today}
+                        ${data.tanggal}
                     </div>
 
                 `,
@@ -504,33 +482,98 @@ async function checkQueue() {
             });
 
 
-            // Jangan lookup lagi setiap refresh
-            localStorage.setItem(
-                "queue_found",
-                "true"
-            );
-
-
             return;
-
         }
 
 
-        // =================================================
+        // ============================================
         // NOT FOUND
-        // =================================================
+        // ============================================
 
         if (
             result.status === "NOT_FOUND"
         ) {
 
-            console.log(
-                "Nomor antrian belum tersedia."
-            );
+            Swal.fire({
+
+                icon: "info",
+
+                title:
+                    "Data belum ditemukan",
+
+                html: `
+
+                    <p>
+                        Belum ditemukan nomor antrian
+                        untuk nomor:
+                    </p>
+
+                    <b>
+                        ${phone}
+                    </b>
+
+                    <p style="
+                        margin-top:15px;
+                        color:#777;
+                    ">
+                        Tanggal:
+                        ${today}
+                    </p>
+
+                `,
+
+                confirmButtonText:
+                    "OK"
+
+            });
+
 
             return;
-
         }
+
+
+        // ============================================
+        // INVALID
+        // ============================================
+
+        if (
+            result.status === "INVALID"
+        ) {
+
+            Swal.fire({
+
+                icon: "warning",
+
+                title:
+                    "Parameter tidak valid",
+
+                text:
+                    result.message ||
+                    "Data yang dikirim tidak valid."
+
+            });
+
+
+            return;
+        }
+
+
+        // ============================================
+        // ERROR
+        // ============================================
+
+        Swal.fire({
+
+            icon: "error",
+
+            title:
+                "Terjadi kesalahan",
+
+            text:
+                result.message ||
+                "Tidak dapat mengambil data."
+
+        });
 
 
     } catch (error) {
@@ -540,45 +583,22 @@ async function checkQueue() {
             error
         );
 
+
+        Swal.fire({
+
+            icon: "error",
+
+            title:
+                "Gagal mengambil data",
+
+            text:
+                "Tidak dapat terhubung ke server."
+
+        });
+
     }
 
 }
-
-
-// =====================================================
-// PAGE LOAD
-// =====================================================
-
-window.addEventListener(
-    "load",
-    function() {
-
-        const phone =
-            localStorage.getItem(
-                "queue_phone"
-            );
-
-
-        const found =
-            localStorage.getItem(
-                "queue_found"
-            );
-
-
-        // Kalau kembali dari Lark
-        // dan belum pernah ditampilkan
-        if (
-            phone &&
-            found !== "true"
-        ) {
-
-            checkQueue();
-
-        }
-
-    }
-);
-
 
 </script>
 
@@ -586,3 +606,4 @@ window.addEventListener(
 </body>
 
 </html>
+```
