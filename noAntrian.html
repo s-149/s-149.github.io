@@ -1,1 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Nomor Antrian</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const queue = params.get("queue");
+const phone = params.get("phone");
+
+if (queue) {
+
+    Swal.fire({
+        icon: "success",
+        title: "Pendaftaran Berhasil!",
+        html: `
+            <p style="margin-bottom:5px;">
+                Nomor antrian Anda
+            </p>
+
+            <h1 style="
+                font-size:60px;
+                margin:10px 0;
+                font-weight:bold;
+            ">
+                ${queue}
+            </h1>
+        `,
+        confirmButtonText: "Lanjut",
+        allowOutsideClick: false
+    }).then((result) => {
+
+        if (result.isConfirmed && phone) {
+
+            Swal.fire({
+                icon: "info",
+                title: "Hubungkan WhatsApp?",
+                text: "Anda dapat membuka WhatsApp untuk melanjutkan.",
+                showCancelButton: true,
+                confirmButtonText: "💬 Buka WhatsApp",
+                cancelButtonText: "Tutup"
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    const message =
+                        `Halo, saya sudah melakukan pendaftaran. Nomor antrian saya ${queue}.`;
+
+                    const whatsappUrl =
+                        `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+                    window.location.href = whatsappUrl;
+                }
+
+            });
+
+        }
+
+    });
+
+} else {
+
+    Swal.fire({
+        icon: "warning",
+        title: "Nomor antrian tidak ditemukan",
+        text: "Silakan kembali ke halaman pendaftaran."
+    });
+
+}
+
+</script>
+
+</body>
+</html>
