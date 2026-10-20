@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babypips FX Academy - Company Profile</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap');
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #FFFDF9;
+        }
+        .heading-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Babypips Inspired Palette */
+        .bg-babypips-green { background-color: #64C2A6; }
+        .text-babypips-green { color: #64C2A6; }
+        .bg-babypips-yellow { background-color: #F7D060; }
+        .text-babypips-dark { color: #2C3E50; }
+        .bg-babypips-dark { background-color: #2C3E50; }
+    </style>
+</head>
+<body class="text-babypips-dark antialiased">
+
+    <!-- TOP ANNOUNCEMENT BAR (Marketing Feature: Scarcity/FOMO) -->
+    <div class="bg-babypips-dark text-white text-center py-2 px-4 text-sm font-semibold">
+        <i class="fa-solid fa-bullhorn text-babypips-yellow mr-2 animate-bounce"></i> 
+        Diskon 50% Kelas Mentor Eksklusif Crypto & Forex Bulan Ini! 
+        <a href="#pricing" class="underline text-babypips-yellow ml-1 hover:text-white transition">Daftar Sekarang &rarr;</a>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-babypips-green rounded-xl flex items-center justify-center text-white text-xl font-bold heading-font shadow-md">
+                    bp
+                </div>
+                <span class="text-2xl font-bold heading-font tracking-tight text-babypips-dark">
+                    baby<span class="text-babypips-green">pips</span>
+                </span>
+            </a>
+            <nav class="hidden md:flex space-x-8 font-semibold">
+                <a href="#about" class="hover:text-babypips-green transition">Tentang Kami</a>
+                <a href="#features" class="hover:text-babypips-green transition">Fitur Utama</a>
+                <a href="#pricing" class="hover:text-babypips-green transition">Kelas & Mentorship</a>
+                <a href="#testimonials" class="hover:text-babypips-green transition">Testimoni</a>
+            </nav>
+            <div>
+                <a href="#lead-capture" class="bg-babypips-green text-white px-5 py-2.5 rounded-full font-bold shadow-md hover:bg-emerald-500 transition duration-300 transform hover:-translate-y-0.5 inline-block text-sm">
+                    Mulai Belajar Gratis
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION (Marketing Feature: Clear Value Proposition & Lead Magnet) -->
+    <section class="relative bg-gradient-to-b from-[#EBF7F4] to-[#FFFDF9] pt-16 pb-20 overflow-hidden">
+        <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <div class="space-y-6 text-center md:text-left">
+                <div class="inline-flex items-center space-x-2 bg-white px-4 py-1.5 rounded-full shadow-sm border border-emerald-100">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Komunitas Edukasi Trading #1</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold heading-font leading-tight text-babypips-dark">
+                    Belajar Trading Forex & Crypto Jadi <span class="text-babypips-green underline decoration-babypips-yellow decoration-wavy">Super Gampang!</span>
+                </h1>
+                <p class="text-gray-600 text-lg max-w-lg mx-auto md:mx-0">
+                    Gak usah pusing sama grafik ribet. Kami ubah materi trading yang kaku menjadi konten visual ala Babypips yang fun, edukatif, dan ramah pemula.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4 pt-2">
+                    <a href="#pricing" class="bg-babypips-dark text-white px-8 py-3.5 rounded-xl font-bold text-center shadow-lg hover:bg-slate-700 transition duration-300">
+                        Lihat Program Kelas
+                    </a>
+                    <a href="#lead-capture" class="bg-white text-babypips-dark border-2 border-gray-200 px-8 py-3.5 rounded-xl font-bold text-center hover:border-babypips-green hover:text-babypips-green transition duration-300 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-gift text-babypips-yellow"></i> Ambil E-Book Gratis
+                    </a>
+                </div>
+                <!-- Trust Badge -->
+                <div class="pt-6 flex items-center justify-center md:justify-start space-x-6 text-sm text-gray-500">
+                    <div><i class="fa-solid fa-users text-babypips-green mr-1"></i> <b>10,000+</b> Members</div>
+                    <div><i class="fa-solid fa-star text-babypips-yellow mr-1"></i> <b>4.9/5</b> Rating IG</div>
+                </div>
+            </div>
+            <div class="relative flex justify-center">
+                <!-- Visual Dashboard & Mascot Placeholder Concept -->
+                <div class="bg-white p-6 rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md transform rotate-1 hover:rotate-0 transition duration-500">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+                        </div>
+                        <span class="text-xs bg-emerald-50 text-emerald-600 font-bold px-2.5 py-1 rounded-md">Analisis Mingguan</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase">BTC / USDT</p>
+                                <h4 class="text-xl font-bold heading-font text-babypips-dark">+14.5% Bullish</h4>
+                            </div>
+                            <span class="p-3 bg-emerald-100 text-emerald-600 rounded-xl text-lg font-bold"><i class="fa-solid fa-chart-line"></i></span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-dashed border-gray-200 flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-babypips-yellow/20 text-babypips-yellow rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <div>
+                                <h5 class="font-bold text-sm">Pipsologi Dasar Kelas K-1</h5>
+                                <p class="text-xs text-gray-400">Materi: Mengenal Candlestick Imut</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <span class="text-xs text-gray-400 italic">"Trading dibikin santai, profit dibikin konsisten!"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOCIAL PROOF / LOGO BAR -->
+    <section class="py-10 bg-white border-y border-gray-100">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-xs uppercase font-bold tracking-widest text-gray-400 mb-6">Telah Direview & Diliput Oleh</p>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition duration-300">
+                <span class="text-xl font-extrabold heading-font text-slate-700"><i class="fa-solid fa-chart-pie mr-2 text-babypips-green"></i>CryptoNews</span>
+                <span class="text-xl font-extrabold heading-font text-slate-700"><i class="fa-solid fa-wallet mr-2 text-babypips-yellow"></i>IndoTrader</span>
+                <span class="text-xl font-extrabold heading-font text-slate-700"><i class="fa-solid fa-building-columns mr-2 text-blue-500"></i>CuanMedia</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="py-20 bg-[#FFFDF9]">
+        <div class="container mx-auto px-6 max-w-4xl text-center space-y-6">
+            <h2 class="text-3xl md:text-4xl font-bold heading-font text-babypips-dark">Mengapa Harus Belajar di Babypips FX?</h2>
+            <p class="text-gray-600 text-lg leading-relaxed">
+                Kami paham kalau belajar analisa teknikal dan fundamental itu sering bikin pusing kepala. Terinspirasi dari vibes seru, edukatif, dan penuh chart eye-catching ala akun Instagram komunitas, kami menyusun kurikulum trading interaktif yang bisa dipahami bahkan oleh orang yang awam matematika sekalipun!
+            </p>
+        </div>
+    </section>
+
+    <!-- CORE FEATURES / VALUE MARKETING -->
+    <section id="features" class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="p-8 rounded-2xl bg-[#FFFDF9] border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-babypips-green/10 text-babypips-green rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fa-solid fa-lightbulb"></i></div>
+                    <h3 class="text-xl font-bold heading-font mb-3">Materi Visual & Simpel</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Gak ada rumus membosankan. Semua indikator dijelaskan lewat infografis imut dan studi kasus dunia nyata.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="p-8 rounded-2xl bg-[#FFFDF9] border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-babypips-yellow/20 text-yellow-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fa-solid fa-comments text-babypips-yellow"></i></div>
+                    <h3 class="text-xl font-bold heading-font mb-3">Komunitas Diskusi VIP</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Akses grup Discord & Telegram untuk bedah chart bareng mentor setiap hari Senin sampai Jumat.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="p-8 rounded-2xl bg-[#FFFDF9] border border-gray-100 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-red-100 text-red-500 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3 class="text-xl font-bold heading-font mb-3">Risk Management First</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Kami tidak menjual mimpi cepat kaya. Fokus utama kami adalah menjaga modal Anda tetap aman selamat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARKETING LEAD CAPTURE (Marketing Feature: Lead Magnet / List Building) -->
+    <section id="lead-capture" class="py-16 bg-gradient-to-r from-babypips-green to-emerald-600 text-white relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        <div class="container mx-auto px-6 max-w-3xl text-center space-y-6 relative z-10">
+            <span class="bg-babypips-dark/30 text-babypips-yellow text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">FREE DOWNLOAD</span>
+            <h2 class="text-3xl md:text-4xl font-bold heading-font">Ambil E-Book "Panduan Cuan Pipsology 101" Gratis!</h2>
+            <p class="text-emerald-50 max-w-xl mx-auto">
+                Sudah di-download oleh 5,000+ pemula. Pelajari cara membaca tren market dalam waktu kurang dari 15 menit. Masukkan email Anda di bawah:
+            </p>
+            <!-- Lead Generation Form -->
+            <form id="marketingLeadForm" onsubmit="handleLeadSubmit(event)" class="bg-white p-2 rounded-xl shadow-lg flex flex-col sm:flex-row gap-2 max-w-xl mx-auto">
+                <input type="email" required placeholder="Masukkan alamat email aktifmu..." class="p-3 text-babypips-dark flex-grow rounded-lg focus:outline-none text-sm placeholder-gray-400">
+                <button type="submit" class="bg-babypips-dark text-white font-bold px-6 py-3 rounded-lg text-sm hover:bg-slate-800 transition whitespace-nowrap">
+                    Kirim E-Book Saya!
+                </button>
+            </form>
+            <p id="leadSuccessMsg" class="text-babypips-yellow font-bold hidden text-sm"><i class="fa-solid fa-circle-check"></i> Sukses! Link download e-book otomatis dikirim ke email kamu.</p>
+        </div>
+    </section>
+
+    <!-- PRICING / PRODUCTS (Marketing Feature: High Converting Tiers & CTA) -->
+    <section id="pricing" class="py-20 bg-[#FFFDF9]">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-xl mx-auto mb-16 space-y-4">
+                <h2 class="text-3xl md:text-4xl font-bold heading-font">Investasi Ilmu Trading Terbaik Anda</h2>
+                <p class="text-gray-500">Pilih program belajar yang sesuai dengan tingkat pengalaman dan goal financial Anda.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+                <!-- Tier 1 -->
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-400 mb-2">Kelas Basic</h4>
+                        <div class="flex items-baseline mb-6">
+                            <span class="text-3xl font-bold heading-font">Rp 0</span>
+                            <span class="text-gray-400 text-sm ml-2">/ Selamanya</span>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-600 mb-8">
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Akses Modul Dasar K-1 & K-2</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Kamus Istilah Pipsology</li>
+                            <li class="opacity-40"><i class="fa-solid fa-xmark text-red-400 mr-2"></i> Live Analisis & Sinyal Harian</li>
+                            <li class="opacity-40"><i class="fa-solid fa-xmark text-red-400 mr-2"></i> Konsultasi Portofolio 1-on-1</li>
+                        </ul>
+                    </div>
+                    <a href="#lead-capture" class="w-full text-center py-3 bg-gray-100 hover:bg-gray-200 text-babypips-dark font-bold rounded-xl transition text-sm">
+                        Mulai Belajar Free
+                    </a>
+                </div>
+
+                <!-- Tier 2 (Best Seller - Marketing Highlight) -->
+                <div class="bg-white p-8 rounded-3xl border-2 border-babypips-green shadow-xl flex flex-col justify-between relative transform lg:-translate-y-4">
+                    <span class="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-babypips-yellow text-babypips-dark font-bold text-xs uppercase px-4 py-1 rounded-full shadow">
+                        Paling Populer 🔥
+                    </span>
+                    <div>
+                        <h4 class="text-lg font-bold text-babypips-green mb-2">Premium Mentorship</h4>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-3xl font-bold heading-font text-babypips-dark">Rp 499.000</span>
+                            <span class="text-gray-400 text-sm ml-2">/ bulan</span>
+                        </div>
+                        <p class="text-xs text-red-500 line-through mb-6">Harga Normal: Rp 999.000</p>
+                        <ul class="space-y-3 text-sm text-gray-600 mb-8">
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> <b>Semua Modul Lengkap</b> (Basic - Advance)</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Akses VIP Discord Watchlist</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> 3x Seminggu Live Webinar Bedah Chart</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Premium E-Book Library</li>
+                        </ul>
+                    </div>
+                    <!-- Direct Checkout Marketing Action -->
+                    <button onclick="openCheckoutModal('Premium Mentorship', 'Rp 499.000')" class="w-full text-center py-3 bg-babypips-green hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition text-sm">
+                        Ambil Promo Sekarang
+                    </button>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-400 mb-2">Exclusive 1-on-1</h4>
+                        <div class="flex items-baseline mb-6">
+                            <span class="text-3xl font-bold heading-font">Rp 2.499.000</span>
+                            <span class="text-gray-400 text-sm ml-2">/ paket</span>
+                        </div>
+                        <ul class="space-y-3 text-sm text-gray-600 mb-8">
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Privat Langsung Bersama Head Mentor</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Custom Strategi Sesuai Jam Kerja Anda</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Review Akun & Evaluasi Psikologi Jurnal</li>
+                            <li><i class="fa-solid fa-check text-babypips-green mr-2"></i> Free Re-seat Kelas Unlimited</li>
+                        </ul>
+                    </div>
+                    <button onclick="openCheckoutModal('Exclusive 1-on-1', 'Rp 2.499.000')" class="w-full text-center py-3 bg-babypips-dark hover:bg-slate-700 text-white font-bold rounded-xl transition text-sm">
+                        Daftar Privat VIP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS (Marketing Feature: Social Proof & Conversions) -->
+    <section id="testimonials" class="py-20 bg-white border-t border-gray-100">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-3xl font-bold heading-font">Kata Mereka Yang Udah Gak Pusing</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testi 1 -->
+                <div class="p-6 rounded-2xl bg-[#FFFDF9] border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-babypips-yellow rounded-full flex items-center justify-center font-bold text-babypips-dark">B</div>
+                        <div>
+                            <h5 class="font-bold text-sm">Budi Santoso</h5>
+                            <p class="text-xs text-gray-400">Karyawan Swasta</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm italic">"Dulu liat chart forex pusing tujuh keliling, pas join Babypips FX penjelasannya simpel banget pake analogi sehari-hari. Sukses dapet pips konsisten!"</p>
+                </div>
+                <!-- Testi 2 -->
+                <div class="p-6 rounded-2xl bg-[#FFFDF9] border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-babypips-green rounded-full text-white flex items-center justify-center font-bold">A</div>
+                        <div>
+                            <h5 class="font-bold text-sm">Amanda Putri</h5>
+                            <p class="text-xs text-gray-400">Mahasiswa</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm italic">"Ilustrasinya gemes kayak akun instagramnya, tapi materinya daging semua! Cocok buat Gen-Z yang gak mau ribet baca buku tebel."</p>
+                </div>
+                <!-- Testi 3 -->
+                <div class="p-6 rounded-2xl bg-[#FFFDF9] border border-gray-100">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-400 rounded-full text-white flex items-center justify-center font-bold">R</div>
+                        <div>
+                            <h5 class="font-bold text-sm">Rian Wijaya</h5>
+                            <p class="text-xs text-gray-400">Fulltime Trader</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm italic">"Grup Discord VIP-nya aktif parah. Mentornya objektif banget ngajarin manajemen risiko ketimbang pamer profit. Recommended!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE CONVERSION NOTIFICATION / SOCIAL PROOF POPUP (Marketing Feature: Live Urgency) -->
+    <div id="liveNotification" class="fixed bottom-6 left-6 bg-babypips-dark text-white p-4 rounded-xl shadow-2xl border border-slate-600 z-50 flex items-center space-x-3 transition-all duration-500 transform translate-y-32 opacity-0 max-w-sm">
+        <div class="w-8 h-8 bg-babypips-green rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-fire text-white"></i></div>
+        <div>
+            <p class="text-xs text-gray-300 font-semibold" id="notifText">Seseorang baru saja mendaftar kelas!</p>
+            <p class="text-[10px] text-babypips-yellow" id="notifTime">2 menit yang lalu</p>
+        </div>
+        <button onclick="closeNotification()" class="text-gray-400 hover:text-white text-xs pl-2"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- CHECKOUT MODAL (Marketing Feature: Instant Seamless Order Intent Close) -->
+    <div id="checkoutModal" class="fixed inset-0 bg-babypips-dark/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full space-y-6 shadow-2xl relative">
+            <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-babypips-dark"><i class="fa-solid fa-circle-xmark text-2xl"></i></button>
+            <div class="text-center">
+                <h3 class="text-2xl font-bold heading-font text-babypips-dark">Konfirmasi Pendaftaran</h3>
+                <p class="text-gray-400 text-sm mt-1">Kamu memilih program edukasi terbaik</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-gray-100 flex justify-between items-center">
+                <div>
+                    <h5 class="font-bold text-babypips-dark" id="modalProductName">Premium Mentorship</h5>
+                    <p class="text-xs text-gray-400">Akses instan setelah verifikasi</p>
+                </div>
+                <span class="font-extrabold text-babypips-green heading-font" id="modalProductPrice">Rp 499.000</span>
+            </div>
+            <!-- Marketing WhatsApp Action Redirect / Form -->
+            <form onsubmit="handleCheckoutSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Lengkap</label>
+                    <input type="text" required id="buyerName" placeholder="Contoh: Andi Wijaya" class="w-full p-3 bg-slate-50 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-babypips-green">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nomor WhatsApp Aktif</label>
+                    <input type="tel" required id="buyerWhatsapp" placeholder="Contoh: 08123456789" class="w-full p-3 bg-slate-50 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-babypips-green">
+                </div>
+                <button type="submit" class="w-full py-4 bg-babypips-green hover:bg-emerald-500 text-white font-extrabold rounded-xl shadow-lg transition text-sm flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Hubungkan ke WhatsApp Admin
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-babypips-dark text-white py-12">
+        <div class="container mx-auto px-6 grid md:grid-cols-3 gap-8 border-b border-slate-700 pb-8 mb-8">
+            <div class="space-y-4">
+                <a href="#" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-babypips-green rounded-lg flex items-center justify-center text-white font-bold heading-font">bp</div>
+                    <span class="text-xl font-bold heading-font tracking-tight text-white">baby<span class="text-babypips-green">pips</span></span>
+                </a>
+                <p class="text-gray-400 text-xs leading-relaxed">
+                    Platform edukasi finansial trading forex dan cryptocurrency terpopuler dengan gaya interaktif, visual atraktif, dan ramah pemula.
+                </p>
+            </div>
+            <div>
+                <h5 class="font-bold text-sm mb-4 tracking-wide text-babypips-yellow">Navigasi</h5>
+                <ul class="space-y-2 text-xs text-gray-400">
+                    <li><a href="#about" class="hover:text-white transition">Tentang Kami</a></li>
+                    <li><a href="#features" class="hover:text-white transition">Fitur Utama</a></li>
+                    <li><a href="#pricing" class="hover:text-white transition">Daftar Paket</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold text-sm mb-4 tracking-wide text-babypips-yellow">Ikuti Media Sosial</h5>
+                <div class="flex space-x-4 text-xl">
+                    <a href="https://instagram.com/_babypips" target="_blank" class="text-gray-400 hover:text-pink-400 transition"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-emerald-400 transition"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto px-6 text-center text-[10px] text-gray-500 space-y-2">
+            <p>&copy; 2026 Babypips FX Academy Community. All rights reserved.</p>
+            <p class="max-w-2xl mx-auto"><b>Disclaimer Risiko:</b> Perdagangan berjangka keuangan memiliki risiko kerugian yang tinggi dan tidak cocok untuk semua investor. Kinerja masa lalu tidak mencerminkan hasil di masa mendatang.</p>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE MARKETING SCRIPTS -->
+    <script>
+        // Lead Capture Management
+        function handleLeadSubmit(e) {
+            e.preventDefault();
+            document.getElementById('marketingLeadForm').reset();
+            const msg = document.getElementById('leadSuccessMsg');
+            msg.classList.remove('hidden');
+            setTimeout(() => { msg.classList.add('hidden'); }, 6000);
+        }
+
+        // Checkout Modal Management
+        function openCheckoutModal(name, price) {
+            document.getElementById('modalProductName').innerText = name;
+            document.getElementById('modalProductPrice').innerText = price;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            document.getElementById('checkoutModal').classList.add('flex');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+            document.getElementById('checkoutModal').classList.remove('flex');
+        }
+
+        function handleCheckoutSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('buyerName').value;
+            const pName = document.getElementById('modalProductName').innerText;
+            
+            // Build Dynamic WhatsApp Direct Message Link for Marketing Closing Conversion
+            const waNumber = "628123456789"; // Replace with real admin WA number
+            const text = `Halo Admin Babypips FX! Saya ${name} ingin mendaftar untuk kelas *${pName}*. Tolong infokan prosedur pembayarannya ya. Terima kasih!`;
+            const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(text)}`;
+            
+            window.open(waUrl, '_blank');
+            closeCheckoutModal();
+        }
+
+        // Live Notification Engine (Social Proof Mockup)
+        const mockNames = ['Riko dari Jakarta', 'Siti dari Bandung', 'Dewi dari Surabaya', 'Fahmi dari Medan', 'Kevin dari Tangerang'];
+        const mockClasses = ['Premium Mentorship', 'Exclusive 1-on-1', 'Free E-Book Pipsology'];
+
+        function triggerLiveNotif() {
+            const randomName = mockNames[Math.floor(Math.random() * mockNames.length)];
+            const randomClass = mockClasses[Math.floor(Math.random() * mockClasses.length)];
+            
+            document.getElementById('notifText').innerHTML = `🔥 <b>${randomName}</b> baru saja mengambil <b>${randomClass}</b>`;
+            document.getElementById('notifTime').innerText = `Baru saja`;
+            
+            const notif = document.getElementById('liveNotification');
+            notif.classList.remove('translate-y-32', 'opacity-0');
+            
+            setTimeout(() => {
+                closeNotification();
+            }, 6000);
+        }
+
+        function closeNotification() {
+            const notif = document.getElementById('liveNotification');
+            notif.classList.add('translate-y-32', 'opacity-0');
+        }
+
+        // Loop live social proof notifications every 20 seconds to drive active conversions
+        setInterval(triggerLiveNotif, 20000);
+        // First trigger after 4 seconds
+        setTimeout(triggerLiveNotif, 4000);
+    </script>
+</body>
+</html>
