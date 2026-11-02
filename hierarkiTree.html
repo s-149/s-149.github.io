@@ -719,7 +719,8 @@
             (mengacu pada Kepmendagri No. 300.2.2-2138 Tahun 2025). Data kabupaten/kota dan kecamatan
             serta desa/kelurahan dimuat saat cabang dibuka; koneksi internet diperlukan.
             Data RW/RT, nama kampung administratif, dan jumlah penduduk per wilayah tidak tersedia pada sumber ini
-            dan tidak ditampilkan tanpa sumber resmi.
+            dan tidak ditampilkan tanpa sumber resmi. Jika API tidak dapat diakses, data cadangan dibaca dari
+            <code>wilayah-indonesia.json</code> di folder yang sama.
         </p>
     </header>
 
@@ -865,6 +866,9 @@
     let exportController = null;
     let fullExportData = null;
     let sourceUpdatedAt = null;
+    let fallbackDatasetPromise = null;
+    let fallbackData = null;
+    let fallbackDataUsed = false;
     let lastUpdateCheckAt = 0;
     let updateCheckPromise = null;
     let treeDataVersion = 0;
@@ -1722,13 +1726,15 @@
         }
     }
 
-    function updateSourceDate(updatedAt) {
+    function updateSourceDate(updatedAt, source = 'official') {
         sourceUpdatedAt = updatedAt;
         const label = updatedAt || 'tidak tersedia';
         exportSourceDate.textContent = label;
-        dataUpdateStatus.textContent = updatedAt
-            ? `Data Wilayah.id diperbarui: ${updatedAt}. Pemeriksaan otomatis setiap 6 jam saat halaman terbuka.`
-            : 'Sumber data tidak menyertakan tanggal pembaruan.';
+        dataUpdateStatus.textContent = source === 'fallback'
+            ? `API Wilayah.id tidak dapat diakses. Menggunakan data cadangan (${label}) dari wilayah-indonesia.json.`
+            : updatedAt
+                ? `Data Wilayah.id diperbarui: ${updatedAt}. Pemeriksaan otomatis setiap 6 jam saat halaman terbuka.`
+                : 'Sumber data tidak menyertakan tanggal pembaruan.';
     }
 
     async function refreshLoadedTree() {
@@ -1796,8 +1802,12 @@
             dataUpdateStatus.textContent = 'Memeriksa pembaruan data Wilayah.id...';
             try {
                 const metadata = await requestAreaPayload('country', '');
-                if (!metadata.updatedAt) throw new Error('Metadata API tidak mencantumkan updated_at.');
                 lastUpdateCheckAt = Date.now();
+                if (metadata.source === 'fallback') {
+                    updateSourceDate(metadata.updatedAt, 'fallback');
+                    return;
+                }
+                if (!metadata.updatedAt) throw new Error('Metadata API tidak mencantumkan updated_at.');
                 const previousUpdatedAt = sourceUpdatedAt;
                 updateSourceDate(metadata.updatedAt);
 
@@ -1825,6 +1835,71 @@
         return result.data;
     }
 
+    async function loadFallbackDataset() {
+        if (fallbackDatasetPromise) return fallbackDatasetPromise;
+
+        fallbackDatasetPromise = (async () => {
+            const pageUrl = new URL(document.baseURI);
+            const lastPathSegment = pageUrl.pathname.split('/').filter(Boolean).pop() || '';
+            if (!pageUrl.pathname.endsWith('/') && !lastPathSegment.includes('.')) {
+                pageUrl.pathname += '/';
+            }
+            const fallbackUrl = new URL('wilayah-indonesia.json', pageUrl);
+            const response = await fetch(fallbackUrl);
+            if (!response.ok) {
+                throw new Error(`Data cadangan gagal dimuat (HTTP ${response.status}): ${fallbackUrl}`);
+            }
+
+            const dataset = await response.json();
+            if (!dataset || !Array.isArray(dataset.data) || !dataset.data.length) {
+                throw new Error('Format data cadangan tidak berisi daftar wilayah.');
+            }
+
+            const indexes = {
+                country: new Map(),
+                province: new Map(),
+                regency: new Map(),
+                district: new Map()
+            };
+            const children = (level, parentCode) => {
+                if (!indexes[level].has(parentCode)) indexes[level].set(parentCode, new Map());
+                return indexes[level].get(parentCode);
+            };
+            const addArea = (level, parentCode, code, name) => {
+                const areas = children(level, parentCode);
+                if (!areas.has(code)) areas.set(code, { code, name });
+            };
+
+            for (const row of dataset.data) {
+                if (!row || typeof row.kode_provinsi !== 'string' || typeof row.provinsi !== 'string' ||
+                    typeof row.kode_kabupaten_kota !== 'string' || typeof row.kabupaten_kota !== 'string' ||
+                    typeof row.kode_kecamatan !== 'string' || typeof row.kecamatan !== 'string' ||
+                    typeof row.kode_desa_kelurahan !== 'string' || typeof row.desa_kelurahan !== 'string') {
+                    throw new Error('Format salah satu baris data cadangan tidak sesuai.');
+                }
+
+                addArea('country', '', row.kode_provinsi, row.provinsi);
+                addArea('province', row.kode_provinsi, row.kode_kabupaten_kota, row.kabupaten_kota);
+                addArea('regency', row.kode_kabupaten_kota, row.kode_kecamatan, row.kecamatan);
+                addArea('district', row.kode_kecamatan, row.kode_desa_kelurahan, row.desa_kelurahan);
+            }
+
+            fallbackData = dataset.data;
+            return {
+                indexes,
+                data: dataset.data,
+                updatedAt: typeof dataset.diperbarui === 'string' ? dataset.diperbarui : null
+            };
+        })();
+
+        try {
+            return await fallbackDatasetPromise;
+        } catch (error) {
+            fallbackDatasetPromise = null;
+            throw error;
+        }
+    }
+
     async function requestAreaPayload(level, code, signal) {
         const endpoint = level === 'country'
             ? `${apiBase}/provinces.json`
@@ -1833,19 +1908,44 @@
                 : level === 'regency'
                     ? `${apiBase}/districts/${encodeURIComponent(code)}.json`
                     : `${apiBase}/villages/${encodeURIComponent(code)}.json`;
-        const response = await fetch(endpoint, { signal, cache: 'no-store' });
-        if (!response.ok) throw new Error(`Permintaan data gagal (HTTP ${response.status}): ${endpoint}`);
-        const result = await response.json();
-        if (!Array.isArray(result.data) ||
-            result.data.some(area => typeof area.code !== 'string' || typeof area.name !== 'string')) {
-            throw new Error(`Format data dari sumber tidak sesuai: ${endpoint}`);
+        try {
+            const response = await fetch(endpoint, { signal, cache: 'no-store' });
+            if (!response.ok) throw new Error(`Permintaan data gagal (HTTP ${response.status}): ${endpoint}`);
+            const result = await response.json();
+            if (!Array.isArray(result.data) ||
+                result.data.some(area => typeof area.code !== 'string' || typeof area.name !== 'string')) {
+                throw new Error(`Format data dari sumber tidak sesuai: ${endpoint}`);
+            }
+            return {
+                data: result.data,
+                updatedAt: result.meta && typeof result.meta.updated_at === 'string'
+                    ? result.meta.updated_at
+                    : null,
+                source: 'official'
+            };
+        } catch (error) {
+            if (error.name === 'AbortError') throw error;
+            if (signal && signal.aborted) throw new DOMException('Permintaan dibatalkan.', 'AbortError');
+
+            try {
+                const fallback = await loadFallbackDataset();
+                if (signal && signal.aborted) throw new DOMException('Permintaan dibatalkan.', 'AbortError');
+                const areas = fallback.indexes[level].get(code);
+                if (!areas && level !== 'country') {
+                    throw new Error(`Data ${levelLabels[level]} dengan kode ${code} tidak ditemukan pada file cadangan.`);
+                }
+                fallbackDataUsed = true;
+                updateSourceDate(fallback.updatedAt, 'fallback');
+                return {
+                    data: areas ? Array.from(areas.values()) : [],
+                    updatedAt: fallback.updatedAt,
+                    source: 'fallback'
+                };
+            } catch (fallbackError) {
+                if (fallbackError.name === 'AbortError') throw fallbackError;
+                throw new Error(`${error.message} Fallback: ${fallbackError.message}`);
+            }
         }
-        return {
-            data: result.data,
-            updatedAt: result.meta && typeof result.meta.updated_at === 'string'
-                ? result.meta.updated_at
-                : null
-        };
     }
 
     async function mapWithConcurrency(items, concurrency, worker, signal) {
@@ -1891,9 +1991,20 @@
             return fullExportData;
         }
 
+        if (fallbackDataUsed && fallbackData) {
+            fullExportData = fallbackData;
+            exportProgress.value = 1;
+            return fullExportData;
+        }
+
         exportProgress.value = 0.02;
         exportStatus.textContent = 'Mengambil data provinsi...';
         const provinces = await requestAreas('country', '', signal);
+        if (fallbackDataUsed && fallbackData) {
+            fullExportData = fallbackData;
+            exportProgress.value = 1;
+            return fullExportData;
+        }
         const updateRegencies = setExportStage('Mengambil kabupaten/kota', provinces.length, 0.02, 0.12);
         const regenciesByProvince = await mapWithConcurrency(provinces, 5, async province => {
             const areas = await requestAreas('province', province.code, signal);
