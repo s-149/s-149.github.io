@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indonesia Administrative Areas</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        /* --- CORE HACKER THEME COLORS --- */
+        :root {
+            --bg-color: #0b1118;
+            --surface-color: #121b25;
+            --surface-raised: #182431;
+            --terminal-green: #55e6c1;
+            --dark-green: #183b3a;
+            --glow-color: rgba(85, 230, 193, 0.16);
+            --font-hacker: Inter, "Segoe UI", Arial, sans-serif;
+            --text-muted: #9aabba;
+            --border-color: #293846;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #e8f0f5;
+            font-family: var(--font-hacker);
+            padding: 32px 20px;
+            margin: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(ellipse at 50% -20%, rgba(85, 230, 193, 0.12), transparent 55%);
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        h1 {
+            margin: 0;
+            color: #f3f8fb;
+            font-size: clamp(1.7rem, 3vw, 2.4rem);
+            letter-spacing: -0.04em;
+            line-height: 1.15;
+        }
+
+        .system-status {
+            margin: 10px 0 0;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .data-update-status {
+            margin: 8px 0 0;
+            color: var(--terminal-green);
+            font-size: 0.85rem;
+        }
+
+        .page-header {
+            padding: 12px 0 24px;
+        }
+
+        .page-kicker {
+            margin: 0 0 10px;
+            color: var(--terminal-green);
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        /* --- TREE VIEW STRUCTURE --- */
+        .tree, .tree ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tree ul {
+            margin-left: 17px;
+            border-left: 1px solid var(--border-color);
+            display: none; /* Sembunyikan cabang secara default */
+        }
+
+        .tree li {
+            margin: 3px 0;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        /* Garis horizontal penghubung cabang */
+        .tree li::before {
+            content: "";
+            position: absolute;
+            top: 17px;
+            left: 0;
+            width: 9px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- INTERACTIVE NODE STYLES --- */
+        .node {
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            user-select: none;
+            color: inherit;
+            background: transparent;
+            font: inherit;
+            text-align: left;
+            max-width: 100%;
+        }
+
+        .node:hover {
+            background-color: var(--surface-raised);
+            border-color: var(--border-color);
+        }
+
+        .node.selected,
+        .leaf.selected {
+            color: #ffffff;
+            background: rgba(85, 230, 193, 0.13);
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 0 2px rgba(85, 230, 193, 0.08);
+        }
+
+        /* Indikator folder/cabang */
+        .node::before {
+            content: "+";
+            font-weight: bold;
+            color: var(--terminal-green);
+            display: inline-grid;
+            width: 17px;
+            height: 17px;
+            place-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            line-height: 1;
+        }
+
+        .node.open::before {
+            content: "−";
+            background: var(--dark-green);
+            border-color: var(--terminal-green);
+        }
+
+        .node-count {
+            display: inline-block;
+            margin-left: 2px;
+            padding: 3px 7px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            color: #b6c6d3;
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 0.72em;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .node-count[hidden] {
+            display: none;
+        }
+
+        /* Style khusus untuk level ujung (City/District) yang tidak punya cabang lagi */
+        .leaf {
+            color: #c6d2dc;
+            cursor: pointer;
+            display: inline-block;
+            padding: 7px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            font: inherit;
+            text-align: left;
+        }
+
+        .leaf:hover {
+            background-color: var(--surface-raised);
+            border-color: var(--border-color);
+        }
+        
+        .leaf::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin: 0 10px 2px 4px;
+            border-radius: 50%;
+            background: var(--terminal-green);
+        }
+
+        .tree .error {
+            color: #ff7777;
+        }
+
+        .tree .retry {
+            margin-left: 8px;
+        }
+
+        .source {
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+        }
+
+        .map-section {
+            margin: 0;
+            min-width: 0;
+        }
+
+        .map-section h2,
+        .tree-section h2,
+        .export-section h2 {
+            margin: 0;
+            color: #f1f6fa;
+            font-size: 1.08rem;
+            letter-spacing: -0.02em;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin: 16px 0 6px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .search-input {
+            min-width: 0;
+            flex: 1;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #0c141c;
+            color: #e8f0f5;
+            font: inherit;
+        }
+
+        .search-input:focus,
+        .search-button:focus-visible,
+        .search-result:focus-visible {
+            outline: 2px solid var(--terminal-green);
+            outline-offset: 2px;
+        }
+
+        .search-button,
+        .search-result {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--surface-raised);
+            color: #e8f0f5;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .search-button {
+            display: inline-grid;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            place-items: center;
+            padding: 0;
+            color: var(--terminal-green);
+            transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .search-button:hover,
+        .export-button:hover,
+        .export-cancel:hover,
+        .map-fullscreen-button:hover,
+        .tree .retry:hover {
+            background: var(--dark-green);
+            border-color: var(--terminal-green);
+        }
+
+        .search-button:active,
+        .export-button:active,
+        .export-cancel:active {
+            transform: translateY(1px);
+        }
+
+        .icon {
+            display: block;
+            width: 20px;
+            height: 20px;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon[hidden] {
+            display: none;
+        }
+
+        .location-button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+        }
+
+        .location-status {
+            min-height: 1.2em;
+            margin: 6px 0 10px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .search-results {
+            display: none;
+            list-style: none;
+            margin: 0 0 8px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface-color);
+        }
+
+        .search-results.visible {
+            display: block;
+        }
+
+        .search-results li + li {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .search-result {
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            border: 0;
+            border-radius: 0;
+            text-align: left;
+            background: transparent;
+        }
+
+        .search-result:hover {
+            background: var(--surface-raised);
+        }
+
+        .search-status {
+            min-height: 1.2em;
+            margin: 8px 0 12px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .export-section {
+            margin: 0 0 18px;
+            padding: 18px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--surface-color);
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
+        }
+
+        .export-section h2 {
+            margin: 0;
+        }
+
+        .export-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .export-button,
+        .export-cancel {
+            display: inline-grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--surface-raised);
+            color: var(--terminal-green);
+            font: inherit;
+            cursor: pointer;
+            transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .export-button:disabled,
+        .export-cancel:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .export-cancel {
+            color: #ff8f91;
+        }
+
+        .export-progress {
+            width: 100%;
+            height: 12px;
+            margin-top: 12px;
+            accent-color: var(--terminal-green);
+        }
+
+        .map-shell {
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 420px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #101820;
+        }
+
+        .map-fullscreen-button {
+            position: absolute;
+            z-index: 1000;
+            top: 10px;
+            right: 10px;
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            background: rgba(11, 17, 24, 0.92);
+            color: var(--terminal-green);
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+
+        .map-fullscreen-button:hover,
+        .map-fullscreen-button:focus-visible {
+            background: var(--dark-green);
+            outline: 2px solid var(--terminal-green);
+            outline-offset: 2px;
+        }
+
+        .map-shell:fullscreen,
+        .map-shell:-webkit-full-screen,
+        .map-shell.fullscreen-fallback {
+            position: fixed;
+            z-index: 9999;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-color);
+            border-radius: 0;
+        }
+
+        .map-shell:fullscreen #map,
+        .map-shell:-webkit-full-screen #map,
+        .map-shell.fullscreen-fallback #map {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: #071007;
+            color: var(--terminal-green);
+        }
+
+        .leaflet-popup-content {
+            font-family: var(--font-hacker);
+        }
+
+        .leaflet-control-attribution {
+            font-size: 10px !important;
+        }
+
+        .live-marker {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            background: var(--terminal-green);
+            box-shadow: 0 0 12px var(--terminal-green);
+            animation: marker-pulse 1.5s ease-out infinite;
+        }
+
+        .find-me-marker {
+            width: 18px;
+            height: 18px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            background: #168bff;
+            box-shadow: 0 0 12px #168bff;
+            animation: find-me-pulse 1.5s ease-out infinite;
+        }
+
+        @keyframes marker-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 51, 0.8), 0 0 12px var(--terminal-green); }
+            70% { box-shadow: 0 0 0 18px rgba(0, 255, 51, 0), 0 0 12px var(--terminal-green); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 51, 0), 0 0 12px var(--terminal-green); }
+        }
+
+        @keyframes find-me-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(22, 139, 255, 0.8), 0 0 12px #168bff; }
+            70% { box-shadow: 0 0 0 18px rgba(22, 139, 255, 0), 0 0 12px #168bff; }
+            100% { box-shadow: 0 0 0 0 rgba(22, 139, 255, 0), 0 0 12px #168bff; }
+        }
+
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .map-section,
+        .tree-section {
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--surface-color);
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .section-caption {
+            margin: 5px 0 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .tree-panel {
+            max-height: 680px;
+            overflow: auto;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(8, 14, 20, 0.45);
+        }
+
+        .tree {
+            min-width: max-content;
+        }
+
+        .tree ul {
+            margin-left: 13px;
+        }
+
+        .tree li {
+            margin: 2px 0;
+            padding-left: 9px;
+        }
+
+        .tree li::before {
+            width: 7px;
+        }
+
+        .tree .node {
+            padding: 6px 7px;
+            font-size: 0.88rem;
+        }
+
+        .node-count {
+            font-size: 0.68rem;
+        }
+
+        .leaf {
+            padding: 6px 7px;
+            font-size: 0.88rem;
+        }
+
+        .tree .error {
+            padding: 9px;
+            color: #ff9898;
+            font-size: 0.85rem;
+        }
+
+        .tree .retry {
+            display: inline-grid;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            place-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface-raised);
+            color: var(--terminal-green);
+        }
+
+        .page-header .source {
+            max-width: 1000px;
+            margin: 14px 0 0;
+        }
+
+        .export-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+
+        .export-heading .source {
+            margin: 0;
+        }
+
+        .export-meta {
+            margin-top: 2px !important;
+        }
+
+        @media (max-width: 980px) {
+            .workspace-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .tree-panel {
+                max-height: 520px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            body {
+                padding: 18px 12px;
+            }
+
+            .page-header {
+                padding: 8px 0 18px;
+            }
+
+            .export-section,
+            .map-section,
+            .tree-section {
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .search-form {
+                gap: 7px;
+            }
+
+            .search-input {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .search-button,
+            .export-button,
+            .export-cancel {
+                width: 42px;
+                height: 42px;
+                flex-basis: 42px;
+            }
+
+            .export-heading {
+                display: block;
+            }
+
+            .export-heading .source {
+                margin-top: 8px;
+            }
+
+            .tree-panel {
+                padding: 8px;
+                max-height: 55vh;
+            }
+
+            #map {
+                height: min(58vh, 440px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="page-header">
+        <p class="page-kicker">Direktori Administrasi</p>
+        <h1>Wilayah Administratif Indonesia</h1>
+        <div class="system-status" id="system-status" role="status" aria-live="polite">
+            Memuat data provinsi...
+        </div>
+        <p class="data-update-status" id="data-update-status" role="status" aria-live="polite">
+            Memeriksa versi data Wilayah.id...
+        </p>
+        <p class="source">
+            Sumber data: <a href="https://wilayah.id/" target="_blank" rel="noopener noreferrer">Wilayah.id</a>
+            (mengacu pada Kepmendagri No. 300.2.2-2138 Tahun 2025). Data kabupaten/kota dan kecamatan
+            serta desa/kelurahan dimuat saat cabang dibuka; koneksi internet diperlukan.
+            Data RW/RT, nama kampung administratif, dan jumlah penduduk per wilayah tidak tersedia pada sumber ini
+            dan tidak ditampilkan tanpa sumber resmi.
+        </p>
+    </header>
+
+    <section class="export-section" aria-labelledby="export-title">
+        <div class="export-heading">
+            <h2 id="export-title">Ekspor Data Wilayah</h2>
+            <p class="source">
+                Unduh seluruh hierarki wilayah. Pembaruan sumber:
+                <span id="export-source-date">memeriksa...</span>.
+            </p>
+        </div>
+        <p class="source export-meta">
+            Proses mengambil data dari API dan dapat berlangsung beberapa menit.
+        </p>
+        <div class="export-actions">
+            <button class="export-button" type="button" data-export-format="csv" aria-label="Ekspor CSV" title="Ekspor CSV">
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M5 9h14M5 14h14M10 9v11m5-11v11"/></svg>
+            </button>
+            <button class="export-button" type="button" data-export-format="json" aria-label="Ekspor JSON" title="Ekspor JSON">
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 4c-2 0-2 2-2 4s-1 4-3 4c2 0 3 2 3 4s0 4 2 4M15 4c2 0 2 2 2 4s1 4 3 4c-2 0-3 2-3 4s0 4-2 4"/></svg>
+            </button>
+            <button class="export-button" type="button" data-export-format="xlsx" aria-label="Ekspor Excel" title="Ekspor Excel (.xlsx)">
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 10h16M4 14h16m-11-9v14m6-14v14"/></svg>
+            </button>
+            <button class="export-cancel" id="export-cancel" type="button" aria-label="Batalkan ekspor" title="Batalkan ekspor" disabled>
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+        </div>
+        <progress class="export-progress" id="export-progress" max="1" value="0" aria-label="Progres ekspor"></progress>
+        <p class="search-status" id="export-status" role="status" aria-live="polite">
+            Belum ada ekspor yang dijalankan.
+        </p>
+    </section>
+
+    <main class="workspace-layout">
+        <section class="map-section" aria-labelledby="map-title">
+            <div class="section-heading">
+                <div>
+                    <h2 id="map-title">Peta Wilayah</h2>
+                    <p class="section-caption">Klik titik atau batas wilayah, atau cari lokasi.</p>
+                </div>
+            </div>
+            <form class="search-form" id="place-search" role="search">
+                <label class="sr-only" for="place-query">Cari nama tempat atau wilayah di Indonesia</label>
+                <input class="search-input" id="place-query" type="search" autocomplete="off"
+                       placeholder="Cari provinsi, kota, kecamatan..." aria-controls="search-results">
+                <button class="search-button" type="submit" aria-label="Cari lokasi" title="Cari lokasi">
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+                </button>
+                <button class="search-button location-button" id="find-me" type="button"
+                        aria-label="Temukan lokasi saya" title="Temukan lokasi saya">
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+                </button>
+            </form>
+            <p class="location-status" id="location-status" role="status" aria-live="polite">
+                Posisi Anda hanya digunakan di browser untuk menampilkan lokasi pada peta.
+            </p>
+            <ul class="search-results" id="search-results" aria-label="Saran lokasi"></ul>
+            <p class="search-status" id="search-status" role="status" aria-live="polite">
+                Ketik minimal 3 karakter untuk mencari lokasi.
+            </p>
+            <div class="map-shell" id="map-shell">
+                <div id="map" role="region" aria-label="Peta interaktif wilayah Indonesia"></div>
+                <button class="map-fullscreen-button" id="map-fullscreen" type="button"
+                        aria-label="Buka peta dalam layar penuh" title="Layar penuh" aria-pressed="false">
+                    <svg class="icon icon-enter-fullscreen" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>
+                    <svg class="icon icon-exit-fullscreen" aria-hidden="true" viewBox="0 0 24 24" hidden><path d="M8 3v5H3m13-5v5h5M3 16h5v5m13-5h-5v5"/></svg>
+                </button>
+            </div>
+            <p class="search-status" id="map-fullscreen-status" role="status" aria-live="polite"></p>
+            <p class="search-status" id="boundary-status" role="status" aria-live="polite">
+                Memuat batas kabupaten/kota...
+            </p>
+            <p class="source">
+                Peta © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>.
+                Pencarian <a href="https://photon.komoot.io/" target="_blank" rel="noopener noreferrer">Photon</a>.
+                Batas ADM2: <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener noreferrer">geoBoundaries</a>
+                (BPS/WFP/OCHA, data 2020, CC BY 3.0 IGO).
+            </p>
+        </section>
+
+        <section class="tree-section" aria-labelledby="tree-title">
+            <div class="section-heading">
+                <div>
+                    <h2 id="tree-title">Daftar Wilayah</h2>
+                    <p class="section-caption">Pilih wilayah untuk menampilkannya pada peta dan membuka hierarkinya.</p>
+                </div>
+            </div>
+            <div class="tree-panel">
+                <ul class="tree">
+                    <li>
+                        <button class="node" type="button" data-level="country" data-code="" aria-expanded="false">
+                            <span class="node-name">INDONESIA</span>
+                            <span class="node-count" hidden></span>
+                        </button>
+                        <ul></ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+    const apiBase = 'https://wilayah.id/api';
+    const statusElement = document.getElementById('system-status');
+    const rootNode = document.querySelector('.node[data-level="country"]');
+    const dataUpdateStatus = document.getElementById('data-update-status');
+    const exportSourceDate = document.getElementById('export-source-date');
+    const searchForm = document.getElementById('place-search');
+    const searchInput = document.getElementById('place-query');
+    const searchResults = document.getElementById('search-results');
+    const searchStatus = document.getElementById('search-status');
+    const findMeButton = document.getElementById('find-me');
+    const locationStatus = document.getElementById('location-status');
+    const mapShell = document.getElementById('map-shell');
+    const mapFullscreenButton = document.getElementById('map-fullscreen');
+    const mapFullscreenStatus = document.getElementById('map-fullscreen-status');
+    const boundaryStatus = document.getElementById('boundary-status');
+    const exportStatus = document.getElementById('export-status');
+    const exportProgress = document.getElementById('export-progress');
+    const exportCancelButton = document.getElementById('export-cancel');
+    const exportButtons = Array.from(document.querySelectorAll('[data-export-format]'));
+    const map = L.map('map').setView([-2.5, 118], 5);
+    let activeMarker = null;
+    let userLocationMarker = null;
+    let userAccuracyCircle = null;
+    let activeBoundary = null;
+    let boundaryLayer = null;
+    let boundaryFeatures = [];
+    let selectedAreaElement = null;
+    let searchTimer = null;
+    let searchRequest = null;
+    let searchGeneration = 0;
+    let mapSelectionRequest = null;
+    let mapSelectionGeneration = 0;
+    let treeMapRequest = null;
+    let treeMapGeneration = 0;
+    let treeRevealGeneration = 0;
+    let lastFeatures = [];
+    let exportController = null;
+    let fullExportData = null;
+    let sourceUpdatedAt = null;
+    let lastUpdateCheckAt = 0;
+    let updateCheckPromise = null;
+    let treeDataVersion = 0;
+    const updateCheckInterval = 6 * 60 * 60 * 1000;
+    const areaDataCache = new Map();
+
+    function isMapFullscreen() {
+        return document.fullscreenElement === mapShell ||
+            document.webkitFullscreenElement === mapShell ||
+            mapShell.classList.contains('fullscreen-fallback');
+    }
+
+    function updateFullscreenControl() {
+        const fullscreen = isMapFullscreen();
+        mapFullscreenButton.querySelector('.icon-enter-fullscreen').hidden = fullscreen;
+        mapFullscreenButton.querySelector('.icon-exit-fullscreen').hidden = !fullscreen;
+        mapFullscreenButton.setAttribute('aria-label', fullscreen
+            ? 'Keluar dari layar penuh'
+            : 'Buka peta dalam layar penuh');
+        mapFullscreenButton.title = fullscreen ? 'Keluar dari layar penuh' : 'Layar penuh';
+        mapFullscreenButton.setAttribute('aria-pressed', String(fullscreen));
+        mapFullscreenStatus.textContent = fullscreen
+            ? 'Peta sedang ditampilkan dalam layar penuh. Tekan Esc atau tombol di peta untuk keluar.'
+            : '';
+        window.setTimeout(() => map.invalidateSize({ pan: false }), 100);
+    }
+
+    async function toggleMapFullscreen() {
+        try {
+            if (isMapFullscreen()) {
+                if (document.fullscreenElement === mapShell && document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitFullscreenElement === mapShell && document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else {
+                    mapShell.classList.remove('fullscreen-fallback');
+                    document.removeEventListener('keydown', handleFallbackFullscreenKeydown);
+                    updateFullscreenControl();
+                }
+                return;
+            }
+
+            if (mapShell.requestFullscreen) {
+                await mapShell.requestFullscreen();
+            } else if (mapShell.webkitRequestFullscreen) {
+                mapShell.webkitRequestFullscreen();
+            } else {
+                mapShell.classList.add('fullscreen-fallback');
+                document.addEventListener('keydown', handleFallbackFullscreenKeydown);
+                updateFullscreenControl();
+            }
+        } catch (error) {
+            mapFullscreenStatus.textContent = `Tidak dapat membuka layar penuh: ${error.message}`;
+        }
+    }
+
+    function handleFallbackFullscreenKeydown(event) {
+        if (event.key !== 'Escape') return;
+        mapShell.classList.remove('fullscreen-fallback');
+        document.removeEventListener('keydown', handleFallbackFullscreenKeydown);
+        updateFullscreenControl();
+    }
+
+    mapFullscreenButton.addEventListener('click', toggleMapFullscreen);
+    document.addEventListener('fullscreenchange', updateFullscreenControl);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenControl);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    const liveMarkerIcon = L.divIcon({
+        className: '',
+        html: '<div class="live-marker"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+    });
+
+    const findMeIcon = L.divIcon({
+        className: '',
+        html: '<div class="find-me-marker"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+
+    findMeButton.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            locationStatus.textContent = 'Browser ini tidak mendukung layanan lokasi.';
+            return;
+        }
+        if (!window.isSecureContext) {
+            locationStatus.textContent = 'Lokasi memerlukan konteks aman (HTTPS atau localhost). Buka halaman melalui server lokal atau HTTPS.';
+            return;
+        }
+
+        findMeButton.disabled = true;
+        locationStatus.textContent = 'Meminta izin dan mencari posisi Anda...';
+        navigator.geolocation.getCurrentPosition(position => {
+            findMeButton.disabled = false;
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+                !Number.isFinite(accuracy) || latitude < -90 || latitude > 90 ||
+                longitude < -180 || longitude > 180 || accuracy < 0) {
+                locationStatus.textContent = 'Browser mengembalikan koordinat lokasi yang tidak valid.';
+                return;
+            }
+
+            const positionLatLng = L.latLng(latitude, longitude);
+            if (userLocationMarker) map.removeLayer(userLocationMarker);
+            if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+            userAccuracyCircle = L.circle(positionLatLng, {
+                radius: accuracy,
+                color: '#168bff',
+                weight: 2,
+                opacity: 0.9,
+                fillColor: '#168bff',
+                fillOpacity: 0.14
+            }).addTo(map);
+            userLocationMarker = L.marker(positionLatLng, { icon: findMeIcon })
+                .addTo(map)
+                .bindPopup('Posisi Anda')
+                .openPopup();
+            map.flyTo(positionLatLng, Math.max(13, map.getZoom()), { duration: 1.2 });
+            locationStatus.textContent = `Posisi ditemukan. Lingkaran menunjukkan akurasi perkiraan ±${Math.round(accuracy)} meter. Koordinat tidak dikirim ke layanan pencarian.`;
+        }, error => {
+            findMeButton.disabled = false;
+            if (error.code === error.PERMISSION_DENIED) {
+                locationStatus.textContent = 'Izin lokasi ditolak. Izinkan akses lokasi di pengaturan browser lalu coba lagi.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                locationStatus.textContent = 'Posisi tidak tersedia. Periksa layanan lokasi perangkat lalu coba lagi.';
+            } else if (error.code === error.TIMEOUT) {
+                locationStatus.textContent = 'Pencarian posisi melewati batas waktu. Coba lagi.';
+            } else {
+                locationStatus.textContent = `Gagal mendapatkan posisi: ${error.message || 'kesalahan lokasi yang tidak diketahui.'}`;
+            }
+        }, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        });
+    });
+
+    function featureLabel(feature) {
+        const properties = feature.properties || {};
+        return [
+            properties.name,
+            properties.locality,
+            properties.district,
+            properties.city,
+            properties.state,
+            properties.country
+        ].filter((value, index, values) => value && values.indexOf(value) === index).join(', ');
+    }
+
+    function showLocation(feature, zoom, revealInTree = true) {
+        const coordinates = feature.geometry.coordinates;
+        const latitude = coordinates[1];
+        const longitude = coordinates[0];
+        const label = featureLabel(feature) || 'Lokasi terpilih';
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+            latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            searchStatus.textContent = 'Koordinat lokasi tidak valid.';
+            return;
+        }
+
+        if (activeMarker) map.removeLayer(activeMarker);
+        activeMarker = L.marker([latitude, longitude], { icon: liveMarkerIcon })
+            .addTo(map)
+            .bindPopup(label)
+            .openPopup();
+        map.flyTo([latitude, longitude], zoom, { duration: 1.2 });
+        searchResults.classList.remove('visible');
+        searchResults.replaceChildren();
+        lastFeatures = [];
+        if (revealInTree) {
+            revealFeatureInTree(feature).then(found => {
+                searchInput.value = label;
+                searchStatus.textContent = found
+                    ? `Lokasi aktif: ${label}. Wilayah yang cocok sudah dibuka dan disorot pada daftar.`
+                    : `Lokasi aktif: ${label}. Wilayah administratif yang cocok tidak ditemukan pada daftar.`;
+            });
+        } else {
+            searchInput.value = label;
+            searchStatus.textContent = `Lokasi aktif: ${label}`;
+        }
+    }
+
+    function showTreeAreaOnMap(areaElement, areaPath) {
+        const generation = ++treeMapGeneration;
+        treeRevealGeneration += 1;
+        if (treeMapRequest) treeMapRequest.abort();
+        if (mapSelectionRequest) mapSelectionRequest.abort();
+        if (searchRequest) searchRequest.abort();
+        clearTimeout(searchTimer);
+        searchGeneration += 1;
+        renderSearchResults([]);
+
+        const level = areaElement.dataset.level ||
+            (areaElement.classList.contains('leaf') ? 'village' : 'country');
+        const name = areaElement.classList.contains('leaf')
+            ? areaElement.textContent.trim()
+            : getNodeName(areaElement);
+        searchInput.value = areaPath.join(', ');
+        searchStatus.textContent = `Menampilkan ${levelLabels[level] || 'Indonesia'} pada peta...`;
+
+        if (level === 'regency') {
+            const boundary = closestBoundary(name);
+            if (boundary && boundaryLayer) {
+                highlightBoundary(boundary);
+                const layer = boundaryLayer.getLayers().find(item => item.feature === boundary);
+                if (layer) {
+                    const point = layer.getBounds().getCenter();
+                    showLocation({
+                        properties: { name, country: 'Indonesia', countrycode: 'ID' },
+                        geometry: { type: 'Point', coordinates: [point.lng, point.lat] }
+                    }, 10, false);
+                    searchInput.value = areaPath.join(', ');
+                    searchStatus.textContent = `${name} ditampilkan pada peta dan disorot pada daftar.`;
+                    return;
+                }
+            }
+        }
+
+        const point = level === 'country' && boundaryLayer
+            ? boundaryLayer.getBounds().getCenter()
+            : L.latLng(-2.5, 118);
+        if (level === 'country') {
+            showLocation({
+                properties: { name: 'Indonesia', country: 'Indonesia', countrycode: 'ID' },
+                geometry: { type: 'Point', coordinates: [point.lng, point.lat] }
+            }, 5, false);
+            searchInput.value = areaPath.join(', ');
+            searchStatus.textContent = 'Indonesia ditampilkan pada peta dan disorot pada daftar.';
+            if (boundaryLayer) map.fitBounds(boundaryLayer.getBounds(), { padding: [20, 20] });
+            return;
+        }
+
+        treeMapRequest = new AbortController();
+        const params = new URLSearchParams({
+            q: `${areaPath.slice(1).join(', ')}, Indonesia`,
+            limit: '5',
+            lat: String(point.lat),
+            lon: String(point.lng)
+        });
+        fetch(`https://photon.komoot.io/api/?${params}`, { signal: treeMapRequest.signal })
+            .then(response => {
+                if (!response.ok) throw new Error(`Layanan pencarian merespons HTTP ${response.status}.`);
+                return response.json();
+            })
+            .then(result => {
+                if (generation !== treeMapGeneration) return;
+                const feature = Array.isArray(result.features)
+                    ? result.features.find(item =>
+                        item.properties &&
+                        (item.properties.countrycode === 'ID' || item.properties.country === 'Indonesia') &&
+                        item.geometry &&
+                        Array.isArray(item.geometry.coordinates) &&
+                        item.geometry.coordinates.length >= 2 &&
+                        item.geometry.coordinates.every(Number.isFinite)
+                    )
+                    : null;
+                if (!feature) {
+                    searchStatus.textContent = `Titik untuk ${name} tidak ditemukan oleh layanan peta. Wilayah tetap terpilih pada daftar.`;
+                    return;
+                }
+                showLocation(feature, level === 'province' ? 7 : level === 'regency' ? 10 : 12, false);
+                searchInput.value = areaPath.join(', ');
+                searchStatus.textContent = `${name} ditampilkan pada peta dan disorot pada daftar.`;
+            })
+            .catch(error => {
+                if (error.name === 'AbortError' || generation !== treeMapGeneration) return;
+                searchStatus.textContent = `Gagal menampilkan ${name} pada peta: ${error.message}`;
+            });
+    }
+
+    async function selectMapPoint(latlng, adminRegency = '') {
+        const generation = ++mapSelectionGeneration;
+        treeRevealGeneration += 1;
+        if (selectedAreaElement) {
+            selectedAreaElement.classList.remove('selected');
+            selectedAreaElement = null;
+        }
+        if (mapSelectionRequest) mapSelectionRequest.abort();
+        if (treeMapRequest) treeMapRequest.abort();
+        if (searchRequest) searchRequest.abort();
+        clearTimeout(searchTimer);
+        searchGeneration += 1;
+
+        const initialFeature = {
+            properties: { name: 'Titik dipilih', country: 'Indonesia', countrycode: 'ID' },
+            geometry: { type: 'Point', coordinates: [latlng.lng, latlng.lat] }
+        };
+        showLocation(initialFeature, Math.max(map.getZoom(), 12), false);
+        if (adminRegency) {
+            const boundary = closestBoundary(adminRegency);
+            if (boundary) highlightBoundary(boundary);
+        }
+        searchStatus.textContent = 'Mencari wilayah administratif pada titik ini...';
+
+        mapSelectionRequest = new AbortController();
+        try {
+            const params = new URLSearchParams({
+                lat: String(latlng.lat),
+                lon: String(latlng.lng),
+                limit: '1'
+            });
+            const response = await fetch(`https://photon.komoot.io/reverse?${params}`, {
+                signal: mapSelectionRequest.signal
+            });
+            if (!response.ok) throw new Error(`Layanan pencarian merespons HTTP ${response.status}.`);
+            const result = await response.json();
+            if (generation !== mapSelectionGeneration) return;
+            const feature = Array.isArray(result.features)
+                ? result.features.find(item =>
+                    item.properties &&
+                    (item.properties.countrycode === 'ID' || item.properties.country === 'Indonesia')
+                )
+                : null;
+            if (!feature) {
+                searchStatus.textContent = 'Titik ditampilkan pada peta, tetapi wilayah administratif Indonesia tidak ditemukan di lokasi ini.';
+                return;
+            }
+
+            const selectedFeature = {
+                ...feature,
+                properties: { ...feature.properties, ...(adminRegency ? { adminRegency } : {}) },
+                geometry: { type: 'Point', coordinates: [latlng.lng, latlng.lat] }
+            };
+            showLocation(selectedFeature, Math.max(map.getZoom(), 12));
+        } catch (error) {
+            if (error.name === 'AbortError' || generation !== mapSelectionGeneration) return;
+            searchStatus.textContent = `Titik ditampilkan pada peta, tetapi wilayah gagal dicari: ${error.message}`;
+        }
+    }
+
+    function normalizeAreaName(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('id')
+            .replace(/\b(kabupaten administrasi|kota administrasi|kabupaten|kota|regency|city|municipality)\b/g, ' ')
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+            .replace(/\s+/g, ' ');
+    }
+
+    function normalizeExactName(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('id')
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+            .replace(/\s+/g, ' ');
+    }
+
+    function areaNameScore(areaName, candidates) {
+        const area = normalizeAreaName(areaName);
+        if (!area) return 0;
+        let score = 0;
+        for (const candidate of candidates) {
+            const value = normalizeAreaName(candidate.value);
+            if (!value) continue;
+            const matchScore = area === value ? 100 + candidate.weight
+                : area.startsWith(`${value} `) || value.startsWith(`${area} `) ? 70 + candidate.weight
+                    : area.includes(value) || value.includes(area) ? 40 + candidate.weight : 0;
+            score = Math.max(score, matchScore);
+        }
+        return score;
+    }
+
+    function featureCandidates(feature) {
+        const properties = feature.properties || {};
+        return [
+            { value: properties.name, weight: 20 },
+            { value: properties.district, weight: 18 },
+            { value: properties.city, weight: 12 },
+            { value: properties.county, weight: 10 },
+            { value: properties.state, weight: 4 }
+        ].filter(candidate => candidate.value);
+    }
+
+    function colorForBoundary(index) {
+        return `hsl(${(index * 137.508) % 360} 72% 54%)`;
+    }
+
+    function highlightBoundary(feature) {
+        if (!boundaryLayer) return;
+        if (activeBoundary) boundaryLayer.resetStyle(activeBoundary);
+        const layer = boundaryLayer.getLayers().find(item => item.feature === feature);
+        if (!layer) return;
+        activeBoundary = layer;
+        layer.setStyle({ color: '#ffffff', weight: 3, fillOpacity: 0.78 });
+        if (layer.bringToFront) layer.bringToFront();
+    }
+
+    function closestBoundary(areaName) {
+        const target = normalizeAreaName(areaName);
+        if (!target) return null;
+        return boundaryFeatures.find(feature =>
+            normalizeAreaName(feature.properties.shapeName) === target
+        ) || null;
+    }
+
+    async function getAllRegencies() {
+        const provinces = await fetchAreas('country', '');
+        const results = [];
+        for (let index = 0; index < provinces.length; index += 6) {
+            const batch = provinces.slice(index, index + 6);
+            const regencies = await Promise.all(batch.map(province => fetchAreas('province', province.code)));
+            regencies.forEach((areas, batchIndex) => {
+                results.push(...areas.map(area => ({ ...area, province: batch[batchIndex] })));
+            });
+        }
+        return results;
+    }
+
+    async function expandNode(node) {
+        const list = node && node.nextElementSibling;
+        if (!list || list.tagName !== 'UL') return;
+        node.classList.add('open');
+        node.setAttribute('aria-expanded', 'true');
+        list.style.display = 'block';
+        await loadChildren(node, list);
+    }
+
+    async function findAndExpandNode(level, code) {
+        const node = Array.from(document.querySelectorAll(`.node[data-level="${level}"]`))
+            .find(item => item.dataset.code === code);
+        if (!node) return null;
+        await expandNode(node);
+        return node;
+    }
+
+    async function revealFeatureInTree(feature) {
+        const generation = ++treeRevealGeneration;
+        try {
+            document.querySelectorAll('.node.open').forEach(node => {
+                node.classList.remove('open');
+                node.setAttribute('aria-expanded', 'false');
+                if (node.nextElementSibling && node.nextElementSibling.tagName === 'UL') {
+                    node.nextElementSibling.style.display = 'none';
+                }
+            });
+            if (selectedAreaElement) {
+                selectedAreaElement.classList.remove('selected');
+                selectedAreaElement = null;
+            }
+
+            const properties = feature.properties || {};
+            const candidates = featureCandidates(feature);
+            const provinces = await fetchAreas('country', '');
+            if (generation !== treeRevealGeneration) return false;
+            const provinceMatches = provinces
+                .map(province => ({ area: province, score: areaNameScore(province.name, candidates) }))
+                .filter(match => match.score > 0)
+                .sort((left, right) => right.score - left.score);
+            const regencies = provinceMatches.length && provinceMatches[0].score >= 100
+                ? (await Promise.all(
+                    provinceMatches
+                        .filter(match => match.score === provinceMatches[0].score)
+                        .map(match => fetchAreas('province', match.area.code))
+                )).flatMap((areas, index) => {
+                    const province = provinceMatches
+                        .filter(match => match.score === provinceMatches[0].score)[index].area;
+                    return areas.map(area => ({ ...area, province }));
+                })
+                : await getAllRegencies();
+            if (generation !== treeRevealGeneration) return false;
+
+            const administrativeRegency = properties.adminRegency || properties.regency;
+            const explicitRegencyMatches = administrativeRegency
+                ? regencies.filter(area =>
+                    normalizeAreaName(area.name) === normalizeAreaName(administrativeRegency)
+                )
+                : [];
+            const targetName = normalizeAreaName(properties.name);
+            const directRegencies = explicitRegencyMatches.length
+                ? explicitRegencyMatches.map(area => ({ area, score: 400 }))
+                : regencies
+                .map(area => ({
+                    area,
+                    score: normalizeExactName(area.name) === normalizeExactName(properties.name)
+                        ? 300
+                        : areaNameScore(area.name, [{ value: targetName, weight: 20 }])
+                }))
+                .filter(match => match.score >= 120)
+                .sort((left, right) => right.score - left.score);
+
+            let districtMatch = null;
+            let villageMatch = null;
+            const isVillage = properties.type === 'locality' &&
+                (properties.osm_key === 'place' || properties.osm_value === 'village');
+            if (properties.type === 'district' || properties.district ||
+                properties.city || properties.locality || isVillage) {
+                const regencyCandidates = directRegencies.length
+                    ? directRegencies.map(match => match.area)
+                    : regencies
+                        .map(area => ({
+                            area,
+                            score: areaNameScore(area.name, candidates.filter(candidate => candidate.value !== properties.name))
+                        }))
+                        .filter(match => match.score > 0)
+                        .sort((left, right) => right.score - left.score)
+                        .slice(0, 8)
+                        .map(match => match.area);
+                const districtCandidates = isVillage
+                    ? [{ value: properties.district, weight: 24 }]
+                    : [
+                        { value: properties.name, weight: 24 },
+                        { value: properties.district, weight: 20 }
+                    ].filter(candidate => candidate.value);
+                const districtLists = await Promise.all(regencyCandidates.map(async regency => ({
+                    regency,
+                    districts: await fetchAreas('regency', regency.code)
+                })));
+                if (generation !== treeRevealGeneration) return false;
+                const matches = districtLists.flatMap(({ regency, districts }) =>
+                    districts
+                        .map(district => ({
+                            district,
+                            regency,
+                            score: areaNameScore(district.name, districtCandidates)
+                        }))
+                        .filter(match => match.score >= 120));
+                matches.sort((left, right) => right.score - left.score);
+                districtMatch = matches[0] || null;
+
+                if (isVillage) {
+                    if (districtMatch) {
+                        const villages = await fetchAreas('district', districtMatch.district.code);
+                        if (generation !== treeRevealGeneration) return false;
+                        villageMatch = villages.find(village =>
+                            normalizeExactName(village.name) === normalizeExactName(properties.name)
+                        ) || null;
+                    }
+
+                    const villageCandidates = [
+                        properties.name,
+                        properties.locality,
+                        properties.district,
+                        properties.city
+                    ]
+                        .map(normalizeExactName)
+                        .filter(Boolean);
+                    if (!villageMatch && villageCandidates.length) {
+                        const districts = districtLists.flatMap(({ regency, districts: areas }) =>
+                            areas.map(district => ({ district, regency }))
+                        );
+                        for (let index = 0; index < districts.length; index += 6) {
+                            const batch = districts.slice(index, index + 6);
+                            const villageLists = await Promise.all(batch.map(async ({ district, regency }) => ({
+                                district,
+                                regency,
+                                villages: await fetchAreas('district', district.code)
+                            })));
+                            if (generation !== treeRevealGeneration) return false;
+                            const match = villageLists
+                                .flatMap(({ district, regency, villages }) =>
+                                    villages
+                                        .filter(village =>
+                                            villageCandidates.includes(normalizeExactName(village.name))
+                                        )
+                                        .map(village => ({ village, district, regency }))
+                                )[0];
+                            if (match) {
+                                villageMatch = match.village;
+                                districtMatch = { district: match.district, regency: match.regency };
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            let regencyMatch = districtMatch && districtMatch.regency;
+            if (!regencyMatch && directRegencies.length) {
+                regencyMatch = directRegencies[0].area;
+                if (properties.type === 'city' || properties.type === 'town') {
+                    const cityMatch = directRegencies.find(match =>
+                        /^kota\b/i.test(match.area.name)
+                    );
+                    if (cityMatch) regencyMatch = cityMatch.area;
+                }
+            }
+            if (!regencyMatch) {
+                const matching = regencies
+                    .map(area => ({ area, score: areaNameScore(area.name, candidates) }))
+                    .filter(match => match.score > 0)
+                    .sort((left, right) => right.score - left.score);
+                regencyMatch = matching[0] && matching[0].area;
+            }
+
+            const provinceMatch = regencyMatch
+                ? regencyMatch.province
+                : provinceMatches[0] && provinceMatches[0].score >= 100
+                    ? provinceMatches[0].area
+                    : null;
+            await expandNode(rootNode);
+            if (generation !== treeRevealGeneration) return false;
+            let targetNode = rootNode;
+            if (provinceMatch) {
+                targetNode = await findAndExpandNode('province', provinceMatch.code);
+                if (generation !== treeRevealGeneration) return false;
+            }
+            if (regencyMatch && targetNode) {
+                targetNode = await findAndExpandNode('regency', regencyMatch.code);
+                if (generation !== treeRevealGeneration) return false;
+            }
+            if (districtMatch && targetNode) {
+                const districtNode = await findAndExpandNode('district', districtMatch.district.code);
+                if (generation !== treeRevealGeneration) return false;
+                if (districtNode) targetNode = districtNode;
+                if (villageMatch && districtNode) {
+                    const villageLeaf = Array.from(districtNode.nextElementSibling.querySelectorAll('.leaf'))
+                        .find(element => element.dataset.code === villageMatch.code);
+                    if (villageLeaf) targetNode = villageLeaf;
+                }
+            }
+
+            const boundary = closestBoundary(regencyMatch ? regencyMatch.name : properties.name);
+            if (boundary) {
+                highlightBoundary(boundary);
+                const layer = boundaryLayer.getLayers().find(item => item.feature === boundary);
+                if (layer) map.flyToBounds(layer.getBounds(), { duration: 1.2, maxZoom: 11 });
+            }
+            if (!targetNode || targetNode === rootNode) return false;
+            if (generation !== treeRevealGeneration) return false;
+            if (selectedAreaElement) selectedAreaElement.classList.remove('selected');
+            targetNode.classList.add('selected');
+            selectedAreaElement = targetNode;
+            targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return true;
+        } catch (error) {
+            searchStatus.textContent = `Lokasi tampil di peta, tetapi daftar wilayah gagal dibuka: ${error.message}`;
+            return false;
+        }
+    }
+
+    async function loadBoundaries() {
+        try {
+            const metadataResponse = await fetch('https://www.geoboundaries.org/api/current/gbOpen/IDN/ADM2/');
+            if (!metadataResponse.ok) throw new Error(`Metadata batas gagal dimuat (HTTP ${metadataResponse.status}).`);
+            const metadata = await metadataResponse.json();
+            if (!metadata.simplifiedGeometryGeoJSON) throw new Error('URL GeoJSON batas wilayah tidak tersedia.');
+
+            const boundaryResponse = await fetch(metadata.simplifiedGeometryGeoJSON);
+            if (!boundaryResponse.ok) throw new Error(`GeoJSON batas gagal dimuat (HTTP ${boundaryResponse.status}).`);
+            const geojson = await boundaryResponse.json();
+            if (!Array.isArray(geojson.features)) throw new Error('Format GeoJSON batas wilayah tidak sesuai.');
+            boundaryFeatures = geojson.features.filter(feature =>
+                feature.geometry &&
+                feature.properties &&
+                typeof feature.properties.shapeName === 'string'
+            );
+            if (!boundaryFeatures.length) throw new Error('Data tidak berisi batas wilayah yang valid.');
+
+            boundaryLayer = L.geoJSON(boundaryFeatures, {
+                style: feature => {
+                    const index = boundaryFeatures.indexOf(feature);
+                    return {
+                        color: '#061006',
+                        weight: 1.4,
+                        opacity: 0.9,
+                        fillColor: colorForBoundary(index),
+                        fillOpacity: 0.48
+                    };
+                },
+                onEachFeature: (feature, layer) => {
+                    const areaName = feature.properties.shapeName;
+                    layer.bindTooltip(areaName);
+                    layer.on({
+                        mouseover: () => layer.setStyle({ weight: 2.5, color: '#ffffff', fillOpacity: 0.72 }),
+                        mouseout: () => {
+                            if (activeBoundary !== layer) boundaryLayer.resetStyle(layer);
+                        },
+                        click: event => {
+                            L.DomEvent.stopPropagation(event);
+                            highlightBoundary(feature);
+                            const point = layer.getBounds().getCenter();
+                            selectMapPoint(point, areaName);
+                        }
+                    });
+                }
+            }).addTo(map);
+            boundaryStatus.textContent = `${boundaryFeatures.length} batas kabupaten/kota dimuat. Klik peta untuk menampilkan wilayah terkait pada daftar.`;
+        } catch (error) {
+            boundaryStatus.textContent = `Batas wilayah gagal dimuat: ${error.message}`;
+        }
+    }
+
+    map.on('click', event => selectMapPoint(event.latlng));
+
+    function renderSearchResults(features) {
+        searchResults.replaceChildren();
+        lastFeatures = features;
+
+        features.forEach((feature, index) => {
+            const item = document.createElement('li');
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'search-result';
+            button.dataset.resultIndex = String(index);
+            button.textContent = featureLabel(feature) || 'Lokasi tanpa nama';
+            item.appendChild(button);
+            searchResults.appendChild(item);
+        });
+
+        searchResults.classList.toggle('visible', features.length > 0);
+    }
+
+    async function searchPlaces(query, generation) {
+        if (searchRequest) searchRequest.abort();
+        searchRequest = new AbortController();
+        searchStatus.textContent = 'Mencari lokasi...';
+
+        try {
+            const params = new URLSearchParams({
+                q: `${query} Indonesia`,
+                limit: '10',
+                lat: '-2.5',
+                lon: '118'
+            });
+            const response = await fetch(`https://photon.komoot.io/api/?${params}`, {
+                signal: searchRequest.signal
+            });
+            if (!response.ok) throw new Error(`Layanan pencarian merespons HTTP ${response.status}.`);
+
+            const result = await response.json();
+            if (generation !== searchGeneration) return;
+            const features = Array.isArray(result.features)
+                ? result.features.filter(feature =>
+                    feature.properties &&
+                    (feature.properties.countrycode === 'ID' || feature.properties.country === 'Indonesia') &&
+                    feature.geometry &&
+                    Array.isArray(feature.geometry.coordinates) &&
+                    feature.geometry.coordinates.length >= 2 &&
+                    feature.geometry.coordinates.every(Number.isFinite)
+                )
+                : [];
+            features.sort((left, right) =>
+                Number(right.properties.osm_key === 'place') - Number(left.properties.osm_key === 'place')
+            );
+            renderSearchResults(features.slice(0, 6));
+            searchStatus.textContent = features.length
+                ? `${Math.min(features.length, 6)} hasil ditemukan. Pilih lokasi untuk melihat peta dan membuka wilayah terkait pada daftar.`
+                : 'Lokasi tidak ditemukan di Indonesia. Coba kata kunci yang lebih spesifik.';
+        } catch (error) {
+            if (error.name === 'AbortError' || generation !== searchGeneration) return;
+            renderSearchResults([]);
+            searchStatus.textContent = `Pencarian gagal: ${error.message}`;
+        }
+    }
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim();
+        searchGeneration += 1;
+        if (searchRequest) searchRequest.abort();
+        clearTimeout(searchTimer);
+        renderSearchResults([]);
+
+        if (query.length < 3) {
+            searchStatus.textContent = 'Ketik minimal 3 karakter untuk mencari lokasi.';
+            return;
+        }
+
+        searchStatus.textContent = 'Menunggu kata kunci...';
+        const generation = searchGeneration;
+        searchTimer = setTimeout(() => searchPlaces(query, generation), 450);
+    });
+
+    searchForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const query = searchInput.value.trim();
+        if (query.length < 3) {
+            searchStatus.textContent = 'Masukkan minimal 3 karakter untuk mencari lokasi.';
+            searchInput.focus();
+            return;
+        }
+
+        if (lastFeatures.length) {
+            showLocation(lastFeatures[0], 12);
+            return;
+        }
+
+        clearTimeout(searchTimer);
+        searchGeneration += 1;
+        searchPlaces(query, searchGeneration);
+    });
+
+    searchResults.addEventListener('click', event => {
+        const button = event.target.closest('.search-result');
+        if (!button) return;
+        const feature = lastFeatures[Number(button.dataset.resultIndex)];
+        if (feature) showLocation(feature, 12);
+    });
+
+    document.addEventListener('click', event => {
+        if (!searchForm.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.classList.remove('visible');
+        }
+    });
+
+    const levelLabels = {
+        province: 'provinsi',
+        regency: 'kabupaten/kota',
+        district: 'kecamatan',
+        village: 'desa/kelurahan'
+    };
+
+    function getChildLevel(level) {
+        if (level === 'country') return 'province';
+        if (level === 'province') return 'regency';
+        if (level === 'regency') return 'district';
+        if (level === 'district') return 'village';
+        return null;
+    }
+
+    function getNodeName(node) {
+        return node.querySelector('.node-name')?.textContent.trim() || '';
+    }
+
+    function setNodeCount(node, childLevel, count) {
+        const badge = node.querySelector('.node-count');
+        if (!badge) return;
+        const levelName = levelLabels[childLevel];
+        badge.textContent = `${count.toLocaleString('id-ID')} ${levelName}`;
+        badge.hidden = false;
+        badge.setAttribute('aria-label', `Jumlah ${levelName}: ${count.toLocaleString('id-ID')}`);
+    }
+
+    function clearNodeCount(node) {
+        const badge = node.querySelector('.node-count');
+        if (!badge) return;
+        badge.textContent = '';
+        badge.hidden = true;
+        badge.removeAttribute('aria-label');
+    }
+
+    async function fetchAreas(level, code) {
+        const cacheKey = `${level}:${code}`;
+        if (areaDataCache.has(cacheKey)) return areaDataCache.get(cacheKey);
+
+        const request = requestAreas(level, code);
+        areaDataCache.set(cacheKey, request);
+        try {
+            return await request;
+        } catch (error) {
+            areaDataCache.delete(cacheKey);
+            throw error;
+        }
+    }
+
+    function updateSourceDate(updatedAt) {
+        sourceUpdatedAt = updatedAt;
+        const label = updatedAt || 'tidak tersedia';
+        exportSourceDate.textContent = label;
+        dataUpdateStatus.textContent = updatedAt
+            ? `Data Wilayah.id diperbarui: ${updatedAt}. Pemeriksaan otomatis setiap 6 jam saat halaman terbuka.`
+            : 'Sumber data tidak menyertakan tanggal pembaruan.';
+    }
+
+    async function refreshLoadedTree() {
+        const openNodes = Array.from(document.querySelectorAll('.tree .node.open'))
+            .map(node => ({ level: node.dataset.level, code: node.dataset.code }));
+        const selected = selectedAreaElement
+            ? {
+                level: selectedAreaElement.dataset.level ||
+                    (selectedAreaElement.classList.contains('leaf') ? 'village' : ''),
+                code: selectedAreaElement.dataset.code
+            }
+            : null;
+
+        treeDataVersion += 1;
+        areaDataCache.clear();
+        fullExportData = null;
+        selectedAreaElement = null;
+
+        document.querySelectorAll('.tree .node').forEach(node => {
+            node.classList.remove('open', 'selected');
+            node.setAttribute('aria-expanded', 'false');
+            clearNodeCount(node);
+            const list = node.nextElementSibling;
+            if (list && list.tagName === 'UL') {
+                list.style.display = 'none';
+                list.replaceChildren();
+                delete list.dataset.loaded;
+                delete list.dataset.loading;
+                delete list.dataset.loadVersion;
+            }
+        });
+
+        await loadChildren(rootNode, rootNode.nextElementSibling);
+        for (const area of openNodes) {
+            if (area.level === 'country') {
+                await expandNode(rootNode);
+                continue;
+            }
+            const node = Array.from(document.querySelectorAll(`.tree .node[data-level="${area.level}"]`))
+                .find(item => item.dataset.code === area.code);
+            if (node) await expandNode(node);
+        }
+
+        if (selected && selected.code) {
+            const selector = selected.level === 'village' ? '.tree .leaf' : `.tree .node[data-level="${selected.level}"]`;
+            const selectedNode = Array.from(document.querySelectorAll(selector))
+                .find(item => item.dataset.code === selected.code);
+            if (selectedNode) {
+                selectedNode.classList.add('selected');
+                selectedAreaElement = selectedNode;
+            }
+        }
+
+        statusElement.textContent = `Data wilayah diperbarui otomatis dari Wilayah.id (${sourceUpdatedAt}).`;
+        dataUpdateStatus.textContent =
+            `Data baru ${sourceUpdatedAt} terdeteksi. Cabang wilayah yang terbuka telah dimuat ulang.`;
+    }
+
+    async function checkForDataUpdates(force = false) {
+        if (updateCheckPromise) return updateCheckPromise;
+        const now = Date.now();
+        if (!force && now - lastUpdateCheckAt < updateCheckInterval) return;
+
+        updateCheckPromise = (async () => {
+            dataUpdateStatus.textContent = 'Memeriksa pembaruan data Wilayah.id...';
+            try {
+                const metadata = await requestAreaPayload('country', '');
+                if (!metadata.updatedAt) throw new Error('Metadata API tidak mencantumkan updated_at.');
+                lastUpdateCheckAt = Date.now();
+                const previousUpdatedAt = sourceUpdatedAt;
+                updateSourceDate(metadata.updatedAt);
+
+                if (previousUpdatedAt && previousUpdatedAt !== metadata.updatedAt) {
+                    dataUpdateStatus.textContent =
+                        `Versi data berubah (${previousUpdatedAt} → ${metadata.updatedAt}). Memuat ulang wilayah yang terbuka...`;
+                    if (exportController) exportController.abort();
+                    await refreshLoadedTree();
+                } else if (!previousUpdatedAt) {
+                    dataUpdateStatus.textContent =
+                        `Data Wilayah.id diperbarui: ${metadata.updatedAt}. Pemeriksaan otomatis setiap 6 jam saat halaman terbuka.`;
+                }
+            } catch (error) {
+                lastUpdateCheckAt = 0;
+                dataUpdateStatus.textContent = `Gagal memeriksa pembaruan Wilayah.id: ${error.message}`;
+            } finally {
+                updateCheckPromise = null;
+            }
+        })();
+        return updateCheckPromise;
+    }
+
+    async function requestAreas(level, code, signal) {
+        const result = await requestAreaPayload(level, code, signal);
+        return result.data;
+    }
+
+    async function requestAreaPayload(level, code, signal) {
+        const endpoint = level === 'country'
+            ? `${apiBase}/provinces.json`
+            : level === 'province'
+                ? `${apiBase}/regencies/${encodeURIComponent(code)}.json`
+                : level === 'regency'
+                    ? `${apiBase}/districts/${encodeURIComponent(code)}.json`
+                    : `${apiBase}/villages/${encodeURIComponent(code)}.json`;
+        const response = await fetch(endpoint, { signal, cache: 'no-store' });
+        if (!response.ok) throw new Error(`Permintaan data gagal (HTTP ${response.status}): ${endpoint}`);
+        const result = await response.json();
+        if (!Array.isArray(result.data) ||
+            result.data.some(area => typeof area.code !== 'string' || typeof area.name !== 'string')) {
+            throw new Error(`Format data dari sumber tidak sesuai: ${endpoint}`);
+        }
+        return {
+            data: result.data,
+            updatedAt: result.meta && typeof result.meta.updated_at === 'string'
+                ? result.meta.updated_at
+                : null
+        };
+    }
+
+    async function mapWithConcurrency(items, concurrency, worker, signal) {
+        const results = new Array(items.length);
+        let nextIndex = 0;
+        let failure = null;
+        const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+            while (nextIndex < items.length) {
+                if (signal.aborted) throw new DOMException('Ekspor dibatalkan.', 'AbortError');
+                if (failure) throw failure;
+                const index = nextIndex;
+                nextIndex += 1;
+                try {
+                    results[index] = await worker(items[index], index);
+                } catch (error) {
+                    failure = error;
+                    throw error;
+                }
+            }
+        });
+        await Promise.allSettled(workers);
+        if (failure) throw failure;
+        if (signal.aborted) throw new DOMException('Ekspor dibatalkan.', 'AbortError');
+        return results;
+    }
+
+    function setExportStage(label, items, start, end) {
+        let completed = 0;
+        exportStatus.textContent = `${label}: 0 dari ${items}...`;
+        exportProgress.value = start;
+        return () => {
+            completed += 1;
+            exportProgress.value = Math.min(end, start + ((end - start) * completed / Math.max(items, 1)));
+            if (completed === items || completed % 10 === 0) {
+                exportStatus.textContent = `${label}: ${completed} dari ${items}...`;
+            }
+        };
+    }
+
+    async function collectFullExportData(signal) {
+        if (fullExportData) {
+            exportProgress.value = 1;
+            return fullExportData;
+        }
+
+        exportProgress.value = 0.02;
+        exportStatus.textContent = 'Mengambil data provinsi...';
+        const provinces = await requestAreas('country', '', signal);
+        const updateRegencies = setExportStage('Mengambil kabupaten/kota', provinces.length, 0.02, 0.12);
+        const regenciesByProvince = await mapWithConcurrency(provinces, 5, async province => {
+            const areas = await requestAreas('province', province.code, signal);
+            updateRegencies();
+            return areas.map(area => ({ ...area, province }));
+        }, signal);
+        const regencies = regenciesByProvince.flat();
+
+        const updateDistricts = setExportStage('Mengambil kecamatan', regencies.length, 0.12, 0.36);
+        const districtsByRegency = await mapWithConcurrency(regencies, 5, async regency => {
+            const areas = await requestAreas('regency', regency.code, signal);
+            updateDistricts();
+            return areas.map(area => ({ ...area, regency }));
+        }, signal);
+        const districts = districtsByRegency.flat();
+
+        const updateVillages = setExportStage('Mengambil desa/kelurahan', districts.length, 0.36, 0.99);
+        const villagesByDistrict = await mapWithConcurrency(districts, 5, async district => {
+            const areas = await requestAreas('district', district.code, signal);
+            updateVillages();
+            return areas.map(area => ({
+                kode_provinsi: district.regency.province.code,
+                provinsi: district.regency.province.name,
+                kode_kabupaten_kota: district.regency.code,
+                kabupaten_kota: district.regency.name,
+                kode_kecamatan: district.code,
+                kecamatan: district.name,
+                kode_desa_kelurahan: area.code,
+                desa_kelurahan: area.name
+            }));
+        }, signal);
+        const rows = villagesByDistrict.flat();
+        if (!rows.length) throw new Error('API tidak mengembalikan data desa/kelurahan.');
+        fullExportData = rows;
+        exportProgress.value = 1;
+        return rows;
+    }
+
+    function downloadExportFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function createExportFilename(extension) {
+        const now = new Date();
+        const date = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+        ].join('-');
+        return `wilayah-indonesia-${date}.${extension}`;
+    }
+
+    function exportAsCsv(rows) {
+        const columns = Object.keys(rows[0]);
+        const escapeCell = value => {
+            let text = String(value == null ? '' : value);
+            if (/^[\s]*[=+\-@]/.test(text)) text = `'${text}`;
+            return `"${text.replace(/"/g, '""')}"`;
+        };
+        const csv = [
+            columns.map(escapeCell).join(','),
+            ...rows.map(row => columns.map(column => escapeCell(row[column])).join(','))
+        ].join('\r\n');
+        downloadExportFile(createExportFilename('csv'), `\uFEFF${csv}`, 'text/csv;charset=utf-8');
+    }
+
+    function exportAsJson(rows) {
+        const data = {
+            sumber: 'Wilayah.id',
+            diperbarui: sourceUpdatedAt || null,
+            diekspor_pada: new Date().toISOString(),
+            jumlah_desa_kelurahan: rows.length,
+            data: rows
+        };
+        downloadExportFile(
+            createExportFilename('json'),
+            JSON.stringify(data, null, 2),
+            'application/json;charset=utf-8'
+        );
+    }
+
+    function exportAsExcel(rows) {
+        if (!window.XLSX) throw new Error('Pustaka Excel gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.');
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        worksheet['!cols'] = [
+            { wch: 16 }, { wch: 30 }, { wch: 20 }, { wch: 38 },
+            { wch: 16 }, { wch: 28 }, { wch: 22 }, { wch: 34 }
+        ];
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Wilayah Indonesia');
+        XLSX.writeFile(workbook, createExportFilename('xlsx'));
+    }
+
+    async function startExport(format) {
+        if (exportController) return;
+        if (format === 'xlsx' && !window.XLSX) {
+            exportStatus.textContent = 'Gagal: pustaka Excel tidak tersedia. Periksa koneksi internet lalu muat ulang halaman.';
+            return;
+        }
+
+        exportController = new AbortController();
+        exportButtons.forEach(button => { button.disabled = true; });
+        exportCancelButton.disabled = false;
+        exportProgress.value = 0;
+
+        try {
+            const rows = await collectFullExportData(exportController.signal);
+            if (exportController.signal.aborted) throw new DOMException('Ekspor dibatalkan.', 'AbortError');
+            if (format === 'csv') exportAsCsv(rows);
+            else if (format === 'json') exportAsJson(rows);
+            else exportAsExcel(rows);
+            exportStatus.textContent = `Ekspor selesai: ${rows.length.toLocaleString('id-ID')} desa/kelurahan berhasil diunduh.`;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                exportStatus.textContent = 'Ekspor dibatalkan. Tidak ada file yang diunduh.';
+                exportProgress.value = 0;
+            } else {
+                exportStatus.textContent = `Ekspor gagal: ${error.message} Tidak ada file parsial yang diunduh.`;
+                exportProgress.value = 0;
+            }
+        } finally {
+            exportController = null;
+            exportButtons.forEach(button => { button.disabled = false; });
+            exportCancelButton.disabled = true;
+        }
+    }
+
+    exportButtons.forEach(button => {
+        button.addEventListener('click', () => startExport(button.dataset.exportFormat));
+    });
+
+    exportCancelButton.addEventListener('click', () => {
+        if (!exportController) return;
+        exportCancelButton.disabled = true;
+        exportStatus.textContent = 'Membatalkan ekspor...';
+        exportController.abort();
+    });
+
+    function createAreaItem(area, level) {
+        const item = document.createElement('li');
+        if (level === 'village') {
+            const label = document.createElement('button');
+            label.className = 'leaf';
+            label.type = 'button';
+            label.dataset.code = area.code;
+            label.textContent = area.name;
+            item.appendChild(label);
+            return item;
+        }
+
+        const button = document.createElement('button');
+        button.className = 'node';
+        button.type = 'button';
+        button.dataset.level = level;
+        button.dataset.code = area.code;
+        button.setAttribute('aria-expanded', 'false');
+        const name = document.createElement('span');
+        name.className = 'node-name';
+        name.textContent = area.name;
+        const count = document.createElement('span');
+        count.className = 'node-count';
+        count.hidden = true;
+        button.append(name, count);
+        item.appendChild(button);
+        item.appendChild(document.createElement('ul'));
+        return item;
+    }
+
+    async function loadChildren(node, list) {
+        if (list.dataset.loading === 'true' || list.dataset.loaded === 'true') return;
+
+        const loadVersion = treeDataVersion;
+        list.dataset.loading = 'true';
+        list.dataset.loadVersion = String(loadVersion);
+        list.replaceChildren();
+        const level = getChildLevel(node.dataset.level);
+        statusElement.textContent = `Memuat data ${levelLabels[level]} untuk ${getNodeName(node)}...`;
+
+        try {
+            const areas = await fetchAreas(node.dataset.level, node.dataset.code);
+            if (loadVersion !== treeDataVersion) return;
+
+            const fragment = document.createDocumentFragment();
+            areas.forEach(area => fragment.appendChild(createAreaItem(area, level)));
+            list.appendChild(fragment);
+            list.dataset.loaded = 'true';
+            setNodeCount(node, level, areas.length);
+            statusElement.textContent = `${areas.length} ${levelLabels[level]} berhasil dimuat untuk ${getNodeName(node)}.`;
+        } catch (error) {
+            if (loadVersion !== treeDataVersion) return;
+            const errorItem = document.createElement('li');
+            errorItem.className = 'error';
+            errorItem.setAttribute('role', 'alert');
+            errorItem.append(document.createTextNode(`Gagal memuat data: ${error.message}`));
+
+            const retryButton = document.createElement('button');
+            retryButton.className = 'retry';
+            retryButton.type = 'button';
+            retryButton.setAttribute('aria-label', 'Coba lagi');
+            retryButton.title = 'Coba lagi';
+            retryButton.innerHTML = '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-5"/></svg>';
+            errorItem.appendChild(retryButton);
+            list.appendChild(errorItem);
+            statusElement.textContent = 'Data gagal dimuat. Periksa koneksi internet, lalu coba lagi.';
+        } finally {
+            if (list.dataset.loadVersion === String(loadVersion)) {
+                delete list.dataset.loading;
+                delete list.dataset.loadVersion;
+            }
+        }
+    }
+
+    document.querySelector('.tree').addEventListener('click', event => {
+        const retryButton = event.target.closest('.retry');
+        if (retryButton) {
+            const list = retryButton.closest('ul');
+            const parentNode = list.parentElement.querySelector(':scope > .node');
+            if (parentNode) loadChildren(parentNode, list);
+            return;
+        }
+
+        const areaElement = event.target.closest('.node, .leaf');
+        if (!areaElement) return;
+
+        const areaPath = [];
+        let currentElement = areaElement;
+        while (currentElement) {
+            if (currentElement.classList.contains('node')) {
+                areaPath.unshift(getNodeName(currentElement));
+            } else if (currentElement.classList.contains('leaf')) {
+                areaPath.unshift(currentElement.textContent.trim());
+            }
+            const parentItem = currentElement.closest('li')?.parentElement.closest('li');
+            currentElement = parentItem ? parentItem.querySelector(':scope > .node') : null;
+        }
+
+        if (selectedAreaElement) selectedAreaElement.classList.remove('selected');
+        areaElement.classList.add('selected');
+        selectedAreaElement = areaElement;
+        showTreeAreaOnMap(areaElement, areaPath);
+
+        if (areaElement.classList.contains('leaf')) return;
+        const list = areaElement.nextElementSibling;
+        areaElement.classList.toggle('open');
+        const isOpen = areaElement.classList.contains('open');
+        areaElement.setAttribute('aria-expanded', String(isOpen));
+        list.style.display = isOpen ? 'block' : 'none';
+        if (isOpen) loadChildren(areaElement, list);
+    });
+
+    loadBoundaries();
+    loadChildren(rootNode, rootNode.nextElementSibling);
+    checkForDataUpdates(true);
+    setInterval(() => checkForDataUpdates(), 60 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForDataUpdates();
+    });
+</script>
+
+</body>
+</html>
