@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Clean Law Firm - Rideblitz Inspired</title>
+    <style>
+        /* --- CORE STYLES & VARIABLES (Rideblitz Smooth Palette) --- */
+        :root {
+            --primary: #0B132B;
+            --primary-light: #1C2541;
+            --accent: #00B4D8;
+            --accent-hover: #48CAE4;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-dark: #2D3748;
+            --text-muted: #718096;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- SMOOTH NAVIGATION WITH RESPONSIVE TOGGLE --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: var(--transition-smooth);
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-nav {
+            background-color: var(--primary);
+            color: var(--bg-white);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-nav:hover {
+            background-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Hamburger Toggle Button */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .nav-toggle span {
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+            border-radius: 2px;
+            transition: var(--transition-smooth);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding-top: 160px;
+            padding-bottom: 80px;
+            background: linear-gradient(180deg, rgba(72, 202, 228, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-wrapper {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--primary);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 540px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: var(--bg-white);
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 180, 216, 0.2);
+        }
+
+        .btn-secondary {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-dark);
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-light);
+            border-color: var(--text-dark);
+        }
+
+        .hero-image {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            background-color: var(--bg-light);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .hero-image::before {
+            content: 'Concept Legal Visual';
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* --- INFINITE TICKER SECTION --- */
+        .ticker-section {
+            background-color: var(--bg-light);
+            padding: 24px 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .ticker-wrapper {
+            display: flex;
+            width: max-content;
+        }
+
+        .ticker-track {
+            display: flex;
+            gap: 60px;
+            animation: ticker 25s linear infinite;
+            padding-right: 60px;
+        }
+
+        .ticker-item {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* --- PRACTICE AREAS --- */
+        .section-padding {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .grid-law {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card-law {
+            background: var(--bg-white);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+        }
+
+        .card-law:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 180, 216, 0.05);
+        }
+
+        .card-law h3 {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 14px;
+        }
+
+        .card-law p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* --- CONVERSION PERSUASIVE SECTION --- */
+        .conversion-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--bg-white);
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .conversion-content max-width {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .conversion-section h2 {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .conversion-section p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 17px;
+            margin-bottom: 36px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- CONTACT & FOOTER --- */
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: var(--bg-light);
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            background-color: var(--bg-white);
+        }
+
+        .map-mock {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            height: 100%;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        footer {
+            background-color: var(--primary);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        /* --- FLOATING WHATSAPP --- */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+            z-index: 1000;
+            font-weight: bold;
+            font-size: 24px;
+            transition: var(--transition-smooth);
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 991px) {
+            .hero-wrapper {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-content p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-actions {
+                justify-content: center;
+            }
+            .contact-wrapper {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            /* Responsive Mobile Menu Layout */
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background-color: var(--bg-white);
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding-top: 60px;
+                gap: 40px;
+                transition: var(--transition-smooth);
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            /* Toggle Active Class */
+            .nav-menu.active {
+                left: 0;
+            }
+
+            /* Burger Animation transforms */
+            .nav-toggle.active span:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            .nav-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .nav-toggle.active span:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+
+            .hero-content h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR WITH INTEGRATED TOGGLE -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">Lex<span>Blitz</span></a>
+            
+            <button class="nav-toggle" id="mobile-menu-toggle" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="nav-menu-list">
+                <li><a href="#" class="nav-link">Beranda</a></li>
+                <li><a href="#about" class="nav-link">Tentang Kami</a></li>
+                <li><a href="#services" class="nav-link">Keahlian</a></li>
+                <li><a href="#contact" class="nav-link">Kontak</a></li>
+                <li><a href="#contact" class="btn-nav">Konsultasi</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="container hero-wrapper">
+            <div class="hero-content">
+                <h1>Selesaikan Krisis Hukum Bisnis Anda Secara Tepat</h1>
+                <p>Kami menghadirkan perlindungan hukum preventif dan litigasi komersial berstandar tinggi dengan eksekusi yang transparan dan adaptif.</p>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn-primary">Hubungi Kami</a>
+                    <a href="#services" class="btn-secondary">Lihat Layanan</a>
+                </div>
+            </div>
+            <div class="hero-image"></div>
+        </div>
+    </section>
+
+    <!-- INFINITE TICKER (10 CLIENTS) -->
+    <div class="ticker-section">
+        <div class="ticker-wrapper">
+            <div class="ticker-track">
+                <span class="ticker-item">01. PT Bank Mega Finansial</span>
+                <span class="ticker-item">02. Nusantara Tech Venture</span>
+                <span class="ticker-item">03. Global Logistics Express</span>
+                <span class="ticker-item">04. Mahakarya Properti Indonesia</span>
+                <span class="ticker-item">05. Pacific Energy Corp</span>
+                <span class="ticker-item">06. Astra Manufacturing Digital</span>
+                <span class="ticker-item">07. Java Agri Sejahtera</span>
+                <span class="ticker-item">08. Summit Retail Chain</span>
+                <span class="ticker-item">09. Borneo Mining Infrastructure</span>
+                <span class="ticker-item">10. Horizon Telecommunication</span>
+            </div>
+            <!-- Duplicate for seamless looping -->
+            <div class="ticker-track">
+                <span class="ticker-item">01. PT Bank Mega Finansial</span>
+                <span class="ticker-item">02. Nusantara Tech Venture</span>
+                <span class="ticker-item">03. Global Logistics Express</span>
+                <span class="ticker-item">04. Mahakarya Properti Indonesia</span>
+                <span class="ticker-item">05. Pacific Energy Corp</span>
+                <span class="ticker-item">06. Astra Manufacturing Digital</span>
+                <span class="ticker-item">07. Java Agri Sejahtera</span>
+                <span class="ticker-item">08. Summit Retail Chain</span>
+                <span class="ticker-item">09. Borneo Mining Infrastructure</span>
+                <span class="ticker-item">10. Horizon Telecommunication</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRACTICE AREAS SECTION -->
+    <section id="services" class="section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>Fokus Keahlian Hukum</h2>
+                <p>Layanan hukum komprehensif yang dirancang untuk memitigasi risiko operasional perusahaan Anda.</p>
+            </div>
+            <div class="grid-law">
+                <div class="card-law">
+                    <h3>Hukum Korporat & Bisnis</h3>
+                    <p>Pendirian usaha, draf kontrak komersial, merger akuisisi, hingga kepatuhan regulasi industri demi kelancaran ekspansi.</p>
+                </div>
+                <div class="card-law">
+                    <h3>Penyelesaian Sengketa</h3>
+                    <p>Representasi litigasi di pengadilan maupun mediasi/arbitrase non-litigasi untuk melindungi aset berharga Anda.</p>
+                </div>
+                <div class="card-law">
+                    <h3>Hak Kekayaan Intelektual</h3>
+                    <p>Perlindungan hukum menyeluruh mencakup pendaftaran merek dagang, hak paten, hak cipta, dan penindakan pelanggaran pasar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HIGH-CONVERTING PERSUASIVE BANNER -->
+    <section class="conversion-section">
+        <div class="container">
+            <div class="conversion-content">
+                <h2>Mencegah Masalah Hukum Jauh Lebih Murah Daripada Memperbaikinya</h2>
+                <p>Satu celah kecil pada kontrak bisnis Anda dapat berakibat fatal pada kelangsungan seluruh aset perusahaan. Amankan posisi legal bisnis Anda bersama tim pengacara andal kami hari ini.</p>
+                <a href="#contact" class="btn-primary" style="background-color: var(--bg-white); color: var(--primary);">Amankan Konsultasi Sekarang</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>Mulai Konsultasi Hukum</h2>
+                <p>Sampaikan situasi yang sedang Anda hadapi, tim kami akan merespons dalam waktu kurang dari 24 jam.</p>
+            </div>
+            <div class="contact-wrapper">
+                <form id="contact-form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Nama Lengkap Perwakilan" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" placeholder="Alamat Email Perusahaan" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" rows="5" placeholder="Detail singkat mengenai kasus atau kebutuhan hukum Anda..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; border: none; cursor: pointer;">Kirim Pesan Konsultasi</button>
+                </form>
+                <div class="map-mock">
+                    <span>Google Maps Interactive Placeholder</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 LexBlitz Law Firm. All Rights Reserved. Hubungi Kami via Instagram DM atau WA +62 858-8187-8039.</p>
+        </div>
+    </footer>
+
+    <!-- FLOATING WHATSAPP -->
+    <a href="https://wa.me/6285881878039" class="whatsapp-float" target="_blank" aria-label="Hubungi via WhatsApp">WA</a>
+
+    <!-- JAVASCRIPT FOR RESPONSIVE TOGGLE INTERACTION -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('mobile-menu-toggle');
+            const navMenu = document.getElementById('nav-menu-list');
+            const navLinks = document.querySelectorAll('.nav-link, .btn-nav');
+
+            // Toggle active state on burger click
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu smoothly when clicking any link
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    menuToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
