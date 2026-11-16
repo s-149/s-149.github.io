@@ -129,6 +129,7 @@
         .hero-seal {
             position: relative; display: grid; width: min(100%, 390px); aspect-ratio: 1;
             place-items: center; justify-self: center;
+            animation: seal-arrive .9s cubic-bezier(.2,.8,.2,1) both;
         }
         .hero-seal::before, .hero-seal::after {
             position: absolute; inset: 5%; border: 1px solid rgba(240,204,104,.48);
@@ -136,9 +137,13 @@
         }
         .hero-seal::after { inset: 11%; border-color: rgba(255,255,255,.22); }
         .hero-seal img {
-            position: relative; z-index: 1; width: 76%; aspect-ratio: 1;
+            position: relative; z-index: 1; width: 76%; height: 76%; aspect-ratio: 1;
             border: 8px solid rgba(255,255,255,.9); border-radius: 50%;
             object-fit: cover; box-shadow: 0 28px 70px rgba(0,0,0,.32);
+        }
+        @keyframes seal-arrive {
+            from { opacity: 0; transform: translateY(16px) scale(.82); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .seal-caption {
             position: absolute; z-index: 2; right: 0; bottom: 7%; max-width: 180px;
@@ -339,6 +344,7 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
             .reveal { opacity: 1; transform: none; }
+            .hero-seal { animation: none; }
         }
         @media (hover: none) {
             .practice-link:hover, .service-card:hover { transform: none; }
