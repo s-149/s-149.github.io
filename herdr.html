@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panduan Lengkap Herdr + Aider + Ollama (Offline)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #162032;
+      --surface-hover: #263449;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --green: #34d399;
+      --green-soft: rgba(16, 185, 129, 0.15);
+      --amber: #fbbf24;
+      --amber-soft: rgba(245, 158, 11, 0.15);
+      --purple: #c084fc;
+      --purple-soft: rgba(168, 85, 247, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .spec-pill {
+      display: inline-block;
+      margin-top: 0.9rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* Workflow Steps Section */
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .step-top {
+      margin-bottom: 1rem;
+    }
+
+    .step-number {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green);
+      margin-bottom: 0.65rem;
+    }
+
+    .step-card h3 {
+      font-size: 1.12rem;
+      color: #ffffff;
+      margin-bottom: 0.45rem;
+    }
+
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .code-block {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.9rem;
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+      font-size: 0.84rem;
+      color: var(--accent);
+      position: relative;
+      overflow-x: auto;
+      margin-top: 0.4rem;
+    }
+
+    .code-block .copy-mini {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.18rem 0.5rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .code-block .copy-mini:hover {
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .note-box {
+      margin-top: 0.65rem;
+      font-size: 0.82rem;
+      color: var(--amber);
+      background: var(--amber-soft);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+
+    /* Prefix Banner */
+    .prefix-banner {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.93rem;
+    }
+
+    .prefix-banner strong {
+      color: var(--accent);
+    }
+
+    /* Search & Filter */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .search-box {
+      flex: 1 1 280px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.6rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    /* Tables & Sections */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 1.75rem;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 1rem 1.25rem;
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      padding: 0.22rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-cli { background: var(--green-soft); color: var(--green); }
+    .badge-key { background: var(--amber-soft); color: var(--amber); }
+    .badge-nav { background: var(--purple-soft); color: var(--purple); }
+    .badge-ai  { background: var(--accent-soft); color: var(--accent); }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface-hover);
+    }
+
+    code, kbd {
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+      font-size: 0.85rem;
+      padding: 0.22rem 0.5rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    code {
+      background: #0b1120;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    kbd {
+      background: #334155;
+      color: #f8fafc;
+      border-bottom: 2px solid #0b1120;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      margin-left: 0.4rem;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.74rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .desc-title {
+      font-weight: 600;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .desc-detail {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Panduan Lengkap: Herdr + Aider + Ollama</h1>
+      <p>Alur kerja dari awal memanggil Herdr, menjalankan AI lokal secara offline tanpa kuota/API berbayar, hingga daftar lengkap perintah &amp; pintasannya.</p>
+      <span class="spec-pill">Dioptimalkan untuk Windows 11 &bull; Intel Core i3 &bull; RAM 8 GB (Model 1.5B)</span>
+    </header>
+
+    <!-- BAGIAN 1: ALUR MEMULAI DARI AWAL -->
+    <section class="workflow-grid">
+      <!-- Step 1 -->
+      <div class="step-card">
+        <div class="step-top">
+          <span class="step-number">Langkah 1 &bull; Buka Wadah</span>
+          <h3>Memanggil Aplikasi Herdr</h3>
+          <p>Buka <strong>PowerShell</strong> atau <strong>Windows Terminal</strong>, masuk ke folder proyek kamu, lalu jalankan Herdr.</p>
+          <div class="code-block">
+            <button class="copy-mini" onclick="copyText('herdr', this)">Salin</button>
+            cd D:\lokasi\proyek-kamu<br/>
+            herdr
+          </div>
+        </div>
+        <div class="note-box">
+          Jika muncul jendela <strong>Settings</strong> saat pertama dibuka, tekan <kbd>Esc</kbd> untuk menutupnya, lalu tekan <kbd>Ctrl</kbd>+<kbd>b</kbd> diikuti <kbd>c</kbd> (atau klik <strong>new</strong>) untuk membuka terminal.
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card">
+        <div class="step-top">
+          <span class="step-number">Langkah 2 &bull; Panggil Otak AI</span>
+          <h3>Menjalankan Aider + Ollama (Gratis)</h3>
+          <p>Di dalam terminal Herdr, panggil agen Aider dengan model lokal <code>qwen2.5-coder:1.5b</code> yang ringan di RAM 8GB.</p>
+          <div class="code-block">
+            <button class="copy-mini" onclick="copyText('aider --model ollama_chat/qwen2.5-coder:1.5b --no-auto-commits --map-tokens 0', this)">Salin</button>
+            aider --model ollama_chat/qwen2.5-coder:1.5b --no-auto-commits --map-tokens 0
+          </div>
+        </div>
+        <div class="note-box">
+          Flag <code>--no-auto-commits</code> mencegah error Git lama, dan <code>--map-tokens 0</code> membuat proses berpikir AI jauh lebih cepat di Intel i3.
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card">
+        <div class="step-top">
+          <span class="step-number">Langkah 3 &bull; Mulai Ngoding</span>
+          <h3>Memberi Tugas &amp; Tinggal Kerja</h3>
+          <p>Masukkan file yang ingin diedit ke ingatan AI (hanya file yang perlu saja agar hemat RAM), lalu ketik perintahmu.</p>
+          <div class="code-block">
+            <button class="copy-mini" onclick="copyText('/add index.html', this)">Salin</button>
+            /add index.html<br/>
+            Buatkan form login responsif Bootstrap 5
+          </div>
+        </div>
+        <div class="note-box">
+          Ingin menutup tampilan Herdr sementara AI bekerja di latar belakang? Tekan <kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>q</kbd> (Detach).
+        </div>
+      </div>
+    </section>
+
+    <div class="prefix-banner">
+      💡 <strong>Aturan Tombol Prefix Herdr:</strong> Tombol induk di dalam Herdr adalah <kbd>Ctrl</kbd> + <kbd>b</kbd>. Cara pakainya: tekan <kbd>Ctrl</kbd>+<kbd>b</kbd> bersamaan, <strong>lepas kedua tombol</strong>, lalu tekan tombol perintah berikutnya. Herdr juga mendukung klik mouse penuh pada tab &amp; panel.
+    </div>
+
+    <!-- KONTROL PENCARIAN & FILTER -->
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-box" placeholder="Cari perintah atau kegunaan (contoh: /add, split, detach, server, undo, tab)..." />
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">Semua</button>
+        <button class="filter-btn" data-filter="ai">Perintah AI (Aider)</button>
+        <button class="filter-btn" data-filter="cli">CLI Herdr</button>
+        <button class="filter-btn" data-filter="session">Sesi &amp; Bantuan</button>
+        <button class="filter-btn" data-filter="workspace">Workspace &amp; Tab</button>
+        <button class="filter-btn" data-filter="pane">Split Layar</button>
+        <button class="filter-btn" data-filter="navigator">Navigator Agen</button>
+      </div>
+    </div>
+
+    <!-- KATEGORI 1: PERINTAH AI DI DALAM AIDER -->
+    <section class="section-card" data-category="ai">
+      <div class="section-header">
+        <h2>1. Daftar Perintah di Dalam Agen AI (Aider)</h2>
+        <span class="badge badge-ai">Prompt &amp; Slash Commands</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Perintah</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>/add &lt;nama_file&gt;</code> <button class="copy-btn" onclick="copyText('/add ', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Menambahkan File ke Ingatan AI</span>
+                <span class="desc-detail">Wajib dilakukan sebelum menyuruh AI mengedit file yang sudah ada. Jika berada di subfolder repo Git, tulis path lengkapnya (contoh: <code>/add ZESEEN-LAW-OFFICE/index.html</code>).</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/drop &lt;nama_file&gt;</code> <button class="copy-btn" onclick="copyText('/drop', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Mengeluarkan File dari Ingatan AI</span>
+                <span class="desc-detail">Menghapus file dari konteks obrolan (ketik <code>/drop</code> saja untuk menghapus semua file). Sangat penting agar RAM 8GB tetap ringan saat berpindah file.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/ls</code> <button class="copy-btn" onclick="copyText('/ls', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Melihat File yang Sedang Dimuat</span>
+                <span class="desc-detail">Menampilkan daftar file apa saja yang saat ini sedang berada di dalam memori obrolan Aider.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/ask &lt;pertanyaan&gt;</code> <button class="copy-btn" onclick="copyText('/ask ', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Bertanya Tanpa Mengubah Kode</span>
+                <span class="desc-detail">Meminta AI menjelaskan isi file atau berdiskusi solusi tanpa menyentuh atau mengedit file proyekmu.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/undo</code> <button class="copy-btn" onclick="copyText('/undo', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Membatalkan Perubahan Terakhir</span>
+                <span class="desc-detail">Mengembalikan isi file ke kondisi sebelum editan terakhir dari AI jika hasilnya tidak sesuai keinginan.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/diff</code> <button class="copy-btn" onclick="copyText('/diff', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Melihat Perubahan Kode (Diff)</span>
+                <span class="desc-detail">Menampilkan baris kode mana saja yang baru saja ditambah atau dihapus oleh AI.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/run &lt;perintah_terminal&gt;</code> <button class="copy-btn" onclick="copyText('/run ', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Menjalankan Perintah PowerShell</span>
+                <span class="desc-detail">Menjalankan perintah terminal (seperti <code>/run dir</code> atau <code>/run php artisan test</code>) langsung dari dalam prompt Aider tanpa perlu keluar.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/clear</code> <button class="copy-btn" onclick="copyText('/clear', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Membersihkan Riwayat Chat</span>
+                <span class="desc-detail">Menghapus riwayat percakapan sebelumnya agar token tidak menumpuk dan respon AI kembali cepat.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/exit</code> <button class="copy-btn" onclick="copyText('/exit', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Keluar dari Aider</span>
+                <span class="desc-detail">Menutup sesi agen Aider dan kembali ke terminal PowerShell biasa di dalam Herdr.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KATEGORI 2: PERINTAH CLI HERDR -->
+    <section class="section-card" data-category="cli">
+      <div class="section-header">
+        <h2>2. Perintah CLI Herdr (Dijalankan di PowerShell)</h2>
+        <span class="badge badge-cli">Terminal CLI</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Perintah</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>herdr</code> <button class="copy-btn" onclick="copyText('herdr', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Membuka Herdr / Menyambungkan Ulang (Attach)</span>
+                <span class="desc-detail">Membuka antarmuka TUI Herdr dan otomatis menyambung kembali ke sesi latar belakang yang masih aktif.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr session list</code> <button class="copy-btn" onclick="copyText('herdr session list', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Melihat Daftar Sesi Aktif</span>
+                <span class="desc-detail">Menampilkan daftar semua sesi Herdr yang sedang berjalan di latar belakang komputer.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr session attach &lt;nama&gt;</code> <button class="copy-btn" onclick="copyText('herdr session attach ', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Masuk ke Sesi Tertentu</span>
+                <span class="desc-detail">Menyambungkan terminal ke sesi spesifik berdasarkan namanya.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr server reload-config</code> <button class="copy-btn" onclick="copyText('herdr server reload-config', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Memuat Ulang Konfigurasi</span>
+                <span class="desc-detail">Menerapkan perubahan pengaturan <code>config.toml</code> tanpa mematikan agen AI yang sedang berjalan.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr server stop</code> <button class="copy-btn" onclick="copyText('herdr server stop', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Mematikan Server Latar Belakang</span>
+                <span class="desc-detail">Menghentikan server <code>herdr-core</code> sepenuhnya. Semua terminal dan proses AI di dalamnya akan ikut berhenti.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr update</code> <button class="copy-btn" onclick="copyText('herdr update', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Update Aplikasi Herdr</span>
+                <span class="desc-detail">Mengecek dan memperbarui versi Herdr ke rilis terbaru (membutuhkan koneksi internet).</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr config reset-keys</code> <button class="copy-btn" onclick="copyText('herdr config reset-keys', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Reset Pintasan Keyboard</span>
+                <span class="desc-detail">Mengembalikan kombinasi tombol shortcut ke pengaturan awal bawaan Herdr.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><code>herdr --default-config</code> <button class="copy-btn" onclick="copyText('herdr --default-config', this)">Salin</button></td>
+              <td>
+                <span class="desc-title">Lihat Contoh Konfigurasi Bawaan</span>
+                <span class="desc-detail">Mencetak contoh file konfigurasi lengkap untuk referensi kustomisasi.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KATEGORI 3: SESI & BANTUAN -->
+    <section class="section-card" data-category="session">
+      <div class="section-header">
+        <h2>3. Pintasan Sesi, Pengaturan &amp; Bantuan</h2>
+        <span class="badge badge-key">Shortcut TUI</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Kombinasi Tombol</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>?</kbd></td>
+              <td>
+                <span class="desc-title">Buka Daftar Semua Shortcut</span>
+                <span class="desc-detail">Menampilkan seluruh pintasan tombol aktif di layar. Tekan <kbd>/</kbd> di dalamnya untuk mencari shortcut.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>q</kbd></td>
+              <td>
+                <span class="desc-title">Detach (Keluar Tanpa Mematikan AI)</span>
+                <span class="desc-detail">Menutup jendela tampilan Herdr sambil membiarkan Aider &amp; Ollama tetap bekerja di latar belakang.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>s</kbd></td>
+              <td>
+                <span class="desc-title">Buka Menu Settings</span>
+                <span class="desc-detail">Membuka jendela pengaturan dan daftar integrasi agen AI di Herdr. Tekan <kbd>Esc</kbd> untuk menutup.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>o</kbd></td>
+              <td>
+                <span class="desc-title">Lompat ke Notifikasi</span>
+                <span class="desc-detail">Langsung berpindah ke tab/panel agen AI yang baru saja selesai bekerja atau butuh konfirmasi.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>r</kbd></td>
+              <td>
+                <span class="desc-title">Reload Konfigurasi</span>
+                <span class="desc-detail">Memuat ulang pengaturan <code>config.toml</code> langsung dari dalam antarmuka Herdr.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KATEGORI 4: WORKSPACE & TAB -->
+    <section class="section-card" data-category="workspace">
+      <div class="section-header">
+        <h2>4. Manajemen Workspace (Proyek) &amp; Tab</h2>
+        <span class="badge badge-key">Shortcut TUI</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Kombinasi Tombol</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>n</kbd></td>
+              <td>
+                <span class="desc-title">Buat Workspace Baru</span>
+                <span class="desc-detail">Membuat ruang kerja proyek terpisah (misal: memisahkan proyek Laravel dan proyek HTML statis).</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>w</kbd></td>
+              <td>
+                <span class="desc-title">Pindah Workspace</span>
+                <span class="desc-detail">Membuka menu navigasi untuk berpindah antar proyek/workspace.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>w</kbd></td>
+              <td>
+                <span class="desc-title">Ubah Nama Workspace</span>
+                <span class="desc-detail">Mengganti label nama workspace yang sedang aktif.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>d</kbd></td>
+              <td>
+                <span class="desc-title">Tutup Workspace</span>
+                <span class="desc-detail">Menutup workspace beserta seluruh tab dan proses di dalamnya.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>b</kbd></td>
+              <td>
+                <span class="desc-title">Tampilkan / Sembunyikan Sidebar</span>
+                <span class="desc-detail">Membuka atau menutup panel samping kiri yang memuat daftar workspace dan indikator status agen AI.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>c</kbd></td>
+              <td>
+                <span class="desc-title">Buat Tab Baru</span>
+                <span class="desc-detail">Membuka tab terminal baru di dalam workspace aktif.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>n</kbd> / <kbd>p</kbd></td>
+              <td>
+                <span class="desc-title">Tab Berikutnya / Sebelumnya</span>
+                <span class="desc-detail"><code>n</code> (Next) untuk pindah ke tab kanan, <code>p</code> (Previous) untuk pindah ke tab kiri.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>1</kbd> sampai <kbd>9</kbd></td>
+              <td>
+                <span class="desc-title">Lompat ke Nomor Tab</span>
+                <span class="desc-detail">Langsung berpindah ke tab urutan ke-1 hingga ke-9.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>t</kbd></td>
+              <td>
+                <span class="desc-title">Ubah Nama Tab</span>
+                <span class="desc-detail">Memberi nama khusus pada tab (misal: "Aider AI" atau "Server PHP").</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>Shift</kbd>+<kbd>x</kbd></td>
+              <td>
+                <span class="desc-title">Tutup Tab</span>
+                <span class="desc-detail">Menutup tab yang sedang aktif beserta semua panel di dalamnya.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KATEGORI 5: SPLIT PANES -->
+    <section class="section-card" data-category="pane">
+      <div class="section-header">
+        <h2>5. Membagi Layar (Split Panes) &amp; Scroll</h2>
+        <span class="badge badge-key">Shortcut TUI</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Kombinasi Tombol</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>v</kbd></td>
+              <td>
+                <span class="desc-title">Split Layar ke Kanan (Berdampingan)</span>
+                <span class="desc-detail">Membagi layar jadi kiri dan kanan. Sangat praktis untuk menaruh Aider di kiri dan terminal biasa di kanan.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>-</kbd></td>
+              <td>
+                <span class="desc-title">Split Layar ke Bawah (Atas-Bawah)</span>
+                <span class="desc-detail">Membagi layar menjadi panel atas dan panel bawah.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>h</kbd>/<kbd>j</kbd>/<kbd>k</kbd>/<kbd>l</kbd></td>
+              <td>
+                <span class="desc-title">Pindah Fokus Antar Panel</span>
+                <span class="desc-detail">Memindahkan kursor antar panel split (<code>h</code>=kiri, <code>j</code>=bawah, <code>k</code>=atas, <code>l</code>=kanan). Bisa juga langsung klik dengan mouse.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>z</kbd></td>
+              <td>
+                <span class="desc-title">Zoom / Perbesar Panel Aktif</span>
+                <span class="desc-detail">Memperbesar satu panel menjadi layar penuh sementara. Tekan lagi untuk mengembalikan ke ukuran normal.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>r</kbd></td>
+              <td>
+                <span class="desc-title">Ubah Ukuran Panel (Resize Mode)</span>
+                <span class="desc-detail">Gunakan tombol panah atau <code>h/j/k/l</code> untuk mengatur lebar/tinggi panel, lalu tekan <kbd>Enter</kbd> atau <kbd>Esc</kbd>.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>[</kbd></td>
+              <td>
+                <span class="desc-title">Mode Scroll &amp; Copy (Copy Mode)</span>
+                <span class="desc-detail">Membekukan layar sementara agar kamu bisa menggulir (scroll) ke atas melihat kode atau log lama. Tekan <kbd>Esc</kbd> atau <kbd>q</kbd> untuk keluar.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>x</kbd></td>
+              <td>
+                <span class="desc-title">Tutup Panel Aktif</span>
+                <span class="desc-detail">Menutup panel terminal yang sedang dipilih dan menghentikan program di dalamnya.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KATEGORI 6: SESSION NAVIGATOR -->
+    <section class="section-card" data-category="navigator">
+      <div class="section-header">
+        <h2>6. Navigator &amp; Pemantau Status Agen AI</h2>
+        <span class="badge badge-nav">Session Navigator</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%;">Tombol</th>
+              <th>Kegunaan &amp; Penjelasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd>+<kbd>b</kbd> lalu <kbd>g</kbd></td>
+              <td>
+                <span class="desc-title">Buka Session Navigator</span>
+                <span class="desc-detail">Membuka jendela pemantau terpusat untuk melihat status semua agen AI di seluruh workspace sekaligus.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>b</kbd> / <kbd>w</kbd> / <kbd>i</kbd> / <kbd>d</kbd> / <kbd>a</kbd></td>
+              <td>
+                <span class="desc-title">Filter Status Agen (Di dalam Navigator)</span>
+                <span class="desc-detail"><code>b</code> = Blocked (butuh persetujuanmu), <code>w</code> = Working (sedang berpikir), <code>i</code> = Idle, <code>d</code> = Done (selesai), <code>a</code> = Tampilkan semua.</span>
+              </td>
+            </tr>
+            <tr>
+              <td><kbd>/</kbd> lalu ketik kata kunci</td>
+              <td>
+                <span class="desc-title">Cari Panel / Agen (Di dalam Navigator)</span>
+                <span class="desc-detail">Menyaring daftar panel berdasarkan nama proyek atau tugas, lalu tekan <kbd>Enter</kbd> untuk langsung lompat ke sana.</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="emptyState" class="empty-state">
+      Tidak ada perintah yang cocok dengan kata kunci pencarianmu.
+    </div>
+
+    <footer>
+      Panduan Lengkap Herdr + Aider + Ollama &bull; Berjalan 100% Offline di Windows 11
+    </footer>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    const sections = document.querySelectorAll(".section-card");
+    const emptyState = document.getElementById("emptyState");
+
+    let currentFilter = "all";
+
+    function filterTable() {
+      const query = searchInput.value.toLowerCase().trim();
+      let totalVisibleRows = 0;
+
+      sections.forEach((section) => {
+        const category = section.getAttribute("data-category");
+        const matchesCategory = currentFilter === "all" || category === currentFilter;
+        const rows = section.querySelectorAll("tbody tr");
+        let sectionVisibleRows = 0;
+
+        rows.forEach((row) => {
+          const text = row.innerText.toLowerCase();
+          const matchesQuery = text.includes(query);
+
+          if (matchesCategory && matchesQuery) {
+            row.style.display = "";
+            sectionVisibleRows++;
+            totalVisibleRows++;
+          } else {
+            row.style.display = "none";
+          }
+        });
+
+        section.style.display = sectionVisibleRows > 0 ? "" : "none";
+      });
+
+      emptyState.style.display = totalVisibleRows === 0 ? "block" : "none";
+    }
+
+    searchInput.addEventListener("input", filterTable);
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.getAttribute("data-filter");
+        filterTable();
+      });
+    });
+
+    function copyText(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btnElement.innerText;
+        btnElement.innerText = "Tersalin!";
+        setTimeout(() => (btnElement.innerText = original), 1200);
+      });
+    }
+  </script>
+</body>
+</html>
